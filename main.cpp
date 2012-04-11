@@ -24,7 +24,7 @@ struct varying {
 
 template<template <class, int, int...> class T, int L, int... M>
 struct vec3_t {
-    typename T<float, L, M>::type x, y, z;
+    typename T<float, L, M...>::type x, y, z;
 };
 
 typedef vec3_t<varying, 4, 8> vec3_4;
@@ -39,4 +39,3 @@ void test() {
 _vec<float, 4> fmad(_vec<float, 4> a, _vec<float, 4> b, _vec<float, 4> c) {
     return a * b + c;
 }
-
