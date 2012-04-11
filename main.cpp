@@ -50,9 +50,9 @@ struct vec3_t {
     typename T<float, L>::type x, y, z;
 };
 
-typedef vec3_t<varying, 1> vec3_4;
+typedef vec3_t<varying, 1> vec3;
 typedef vec3_t<varying, 4> vec3_4;
-typedef vec3_t<varying, 8> vec3_4;
+typedef vec3_t<varying, 8> vec3_8;
 
 // ------
 
