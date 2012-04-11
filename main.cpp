@@ -1,34 +1,58 @@
 #include <type_traits>
 
-// _vec<Type, Length>
-template<class T, int L> using _vec = T __attribute__((ext_vector_type(L)));
+namespace sierra {
 
-// transforms to pointer
-//template<class T> struct soa { typedef T* type; };
+/*
+ * primitive vector types
+ */
 
-
-// transforms to vector
-template<class T, int L, int... M> 
-struct varying { 
-    typedef _vec<T, L> type __attribute__ ((ext_vector_type(L)));
+// _sierra_vec<Type, Length>
+template<class T, int L> 
+struct internal_vec       
+{ 
+    typedef T __attribute__((ext_vector_type(L))) type; 
 };
 
 // uniform specialization
-//template<> 
-//struct vary<1> { 
-    //template<class T>
-    //struct ing {
-        //typedef T type;
-    //};
-//};
-
-template<template <class, int, int...> class T, int L, int... M>
-struct vec3_t {
-    typename T<float, L, M...>::type x, y, z;
+template<class T>        
+struct internal_vec<T, 1> 
+{ 
+    typedef T type; 
 };
 
-typedef vec3_t<varying, 4, 8> vec3_4;
-typedef vec3_t<varying, 4, 8> vec3_4;
+// alias for convenience
+template<class T, int L> 
+using vec = typename internal_vec<T, L>::type;
+
+/*
+ * varying SoF transformation
+ */
+
+// transforms to vector
+template<class T, int L> 
+struct varying { 
+    typedef vec<T, L> type;
+};
+
+
+} // namespace sierra
+
+
+//------------------------------------------------------------------------------
+
+
+using sierra::vec;
+using sierra::varying;
+
+
+template<template <class, int> class T, int L >
+struct vec3_t {
+    typename T<float, L>::type x, y, z;
+};
+
+typedef vec3_t<varying, 1> vec3_4;
+typedef vec3_t<varying, 4> vec3_4;
+typedef vec3_t<varying, 8> vec3_4;
 
 // ------
 
@@ -36,6 +60,12 @@ void test() {
 
 }
 
-_vec<float, 4> fmad(_vec<float, 4> a, _vec<float, 4> b, _vec<float, 4> c) {
+using sierra::vec;
+
+vec<int, 4> imad(vec<int, 4> a, vec<int, 4> b, vec<int, 4> c) {
+    return a * b + c;
+}
+
+vec<short, 8> smad(vec<short, 8> a, vec<short, 8> b, vec<short, 8> c) {
     return a * b + c;
 }
