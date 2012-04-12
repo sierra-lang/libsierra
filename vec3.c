@@ -1,3 +1,6 @@
+// expand with 
+// cpp vec3.c
+
 #define VEC3(L) \
     typedef struct { float vector[L] x, y, z; } vec3_ ## L;
 

@@ -67,5 +67,10 @@ vec<int, 4> imad(vec<int, 4> a, vec<int, 4> b, vec<int, 4> c) {
 }
 
 vec<short, 8> smad(vec<short, 8> a, vec<short, 8> b, vec<short, 8> c) {
+    vec<bool, 8> mask = true;
+
+    if (mask) {
+    }
+
     return a * b + c;
 }
