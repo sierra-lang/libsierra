@@ -3,6 +3,7 @@ template<class T, int L>
 struct internal_vec       
 { 
     typedef T __attribute__((sierra_vector (L))) type; 
+    //typedef T __attribute__((ext_vector_type (L))) type; 
 };
 
 // uniform specialization
