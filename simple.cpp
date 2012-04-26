@@ -5,7 +5,6 @@ struct internal_vec
     //typedef T __attribute__((ext_vector_type (L))) type; 
 };
 
-// uniform specialization
 template<class T>        
 struct internal_vec<T, 1> 
 { 
@@ -17,24 +16,11 @@ template<class T, int L>
 using vec = typename internal_vec<T, L>::type;
 
 
-vec<float, 4> fmad(vec<float, 4> a, vec<float, 4> b) {
-    return a * b;
-}
-
-//void test1() {
-    //vec<int, 4> i;
-    //vec<bool, 4> b = i;
+//vec<float, 4> fmad(vec<float, 4> a, vec<float, 4> b, vec<float, 4> c) {
+    //return a * b + c;
 //}
 
-void test() {
-    //vec<float, 4> a, b;
-    //vec<float, 8> c, d;
-    vec<int, 4> a;
-    vec<int, 8> b;
-    //if (a < 0) {}
-
-    if (a) {
-        if (b) {
-        }
-    }
+vec<bool, 4> test(vec<float, 4> a, vec<float, 4> b) {
+    vec<bool, 4> res = a < b;
+    return res;
 }
