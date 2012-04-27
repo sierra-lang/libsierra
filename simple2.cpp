@@ -1,34 +1,23 @@
-template<class T, int L> 
-struct internal_vec       
-{ 
-    typedef T __attribute__((sierra_vector (L))) type; 
-    //typedef T __attribute__((ext_vector_type (L))) type; 
-};
+#define spmd(n) __attribute__((sierra_spmd((n))))
+#define uniform __attribute__((sierra_vector(1)))
+#define varying(n) __attribute__((sierra_vector((n))))
 
-template<class T>        
-struct internal_vec<T, 1> 
-{ 
-    typedef T type; 
-};
-
-// alias for convenience
-template<class T, int L> 
-using vec = typename internal_vec<T, L>::type;
-
-
-//vec<float, 4> fmad(vec<float, 4> a, vec<float, 4> b, vec<float, 4> c) {
-    //return a * b + c;
-//}
-
-//__attribute__((sierra_spmd)) vec<float, 4> test(vec<float, 4> a, vec<float, 4> b) {
-    //return a + b;
-//}
-
-vec<float, 4> test(vec<float, 4> a, vec<float, 4> b) __attribute__((sierra_spmd((4)))) {
+spmd(4)
+float varying(4) test(float uniform a, float uniform b) {
     return a + b;
 }
 
-//template<int i>
-//vec<float, 4> test(vec<float, 4> a, vec<float, 4> b) __attribute__((sierra_spmd(i))) {
-    //return a + b;
-//}
+spmd(4)
+float varying(4) test(float varying(4) a, float uniform b) {
+    return a + b;
+}
+
+spmd(4)
+float varying(4) test(float uniform a, float varying(4) b) {
+    return a + b;
+}
+
+spmd(4)
+float varying(4) test(float varying(4) a, float varying(4) b) {
+    return a + b;
+}
