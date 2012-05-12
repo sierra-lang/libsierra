@@ -2,12 +2,27 @@
 #define uniform __attribute__((sierra_vector(1)))
 #define varying(n) __attribute__((sierra_vector((n))))
 
-spmd(256)
-int varying(8) test(short uniform a, double varying(2) b) {
-    int varying(8) i = a;
-    return i;
-    //return a + b;
+spmd(4)
+int varying(4) test(int uniform a, int varying(4) b) {
+    return test(a, b);
 }
+
+
+#if 0
+spmd(1)
+int varying(4) f(float varying(4) c) {
+    uniform int a = 23;
+    uniform int b = 42;
+
+    //varying(4) int res = test(a, b);
+    varying(4) int asdf;
+
+    //if (a < b) {}
+        if (asdf < asdf) {}
+
+    return asdf;
+}
+#endif
 
 //spmd(4)
 //short varying(8) test(int uniform a, unsigned varying(8) b) {
