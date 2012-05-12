@@ -3,8 +3,10 @@
 #define varying(n) __attribute__((sierra_vector((n))))
 
 
-spmd(4)
-float varying(4) foo(float varying(4) a, float varying(4) b) {
+#define L 8
+
+spmd(L)
+float varying(L) foo(float varying(L) a, float varying(L) b) {
     while (a < b)
         a *= b;
 
