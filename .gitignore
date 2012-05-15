@@ -3,3 +3,4 @@ a.out
 *.ll
 *.bc
 *.s
+*.ppm
