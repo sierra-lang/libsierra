@@ -5,8 +5,7 @@
 
 using namespace sierra;
 
-#define L 8
-#define sierra_program_index (size_t varying(L)){0, 1, 2, 3, 4, 5, 6, 7}
+#define L 4
 
 static inline int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
     float varying(L) z_re = c_re, z_im = c_im;
@@ -34,7 +33,7 @@ static void mandelbrot(float x0, float y0,
 
     for (int j = 0; j < height; ++j) {
         for (int ii = 0; ii < width; ii += L) {
-            int varying(L) i = ii + sierra_program_index;
+            int varying(L) i = ii + program_index(L);
             float varying(L) x = x0 + i * dx;
             float varying(L) y = y0 + j * dy;
 
