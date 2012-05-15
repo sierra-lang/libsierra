@@ -6,9 +6,7 @@
 using namespace sierra;
 
 #define L 8
-//#define sierra_program_index (size_t varying(L)){0, 1, 2, 3}
 #define sierra_program_index (size_t varying(L)){0, 1, 2, 3, 4, 5, 6, 7}
-//#define sierra_program_index (size_t varying(L)){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 
 static inline int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
     float varying(L) z_re = c_re, z_im = c_im;
@@ -42,10 +40,10 @@ static void mandelbrot(float x0, float y0,
 
             int varying(L) index = j * width + i;
             int varying(L) val = mandel(x, y, maxIterations);
-            output[extract(index, 0)] = extract(val, 0);
-            output[extract(index, 1)] = extract(val, 1);
-            output[extract(index, 2)] = extract(val, 2);
-            output[extract(index, 3)] = extract(val, 3);
+
+            // TODO this is slow
+            for (int x = 0; x < L; ++x)
+                output[extract(index, x)] = extract(val, x);
         }
     }
 }
