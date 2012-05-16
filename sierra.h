@@ -49,7 +49,7 @@ T varying(L) seq() {
     return res;
 }
 
-template<int step = 8, class B>
+template<int step, class B>
 void for_each(int begin, int end, B body) {
     int i = begin;
 
