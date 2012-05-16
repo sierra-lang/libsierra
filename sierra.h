@@ -49,6 +49,26 @@ T varying(L) seq() {
     return res;
 }
 
+template<int step = 8, class B>
+void for_each(int begin, int end, B body) {
+    int i = begin;
+
+    if (i % step != 0) {
+        i = nextpow2(i);
+        if (i - step + seq<step>() >= begin)
+            body();
+    }
+
+    while (i < end) {
+        body();
+        i += step;
+    }
+
+    if (i != end)
+        if (i - step + seq<step>() < end )
+            body();
+}
+
 template<class T, T step, class B>
 void for_each(T begin, T end, B body) {
     T i = begin;
