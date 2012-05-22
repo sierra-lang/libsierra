@@ -3,8 +3,6 @@
 #include "../sierra.h"
 #include "../timing.h"
 
-#define LENGTH 8
-
 using namespace sierra;
 
 template<int L>
