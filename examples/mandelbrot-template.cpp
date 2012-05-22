@@ -1,9 +1,22 @@
 #include <algorithm>
-#include <stdio.h>
+#include <limits>
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
 #include "../sierra.h"
 #include "../timing.h"
 
 using namespace sierra;
+
+static unsigned int width = 1024;
+static unsigned int height = 768;
+static float x0 = -2;
+static float x1 = 1;
+static float y0 = -1;
+static float y1 = 1;
+static int maxIterations = 256;
 
 template<int L>
 int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
@@ -41,11 +54,11 @@ void mandelbrot(float x0, float y0, float x1, float y1,
             int varying(L) val = mandel<L>(x, y, maxIterations);
 
             int index = (j * width + ii)/L;
-            //*(((int varying(L)*) &output[0]) + index) = val;
+            *(((int varying(L)*) &output[0]) + index) = val;
 
             // TODO this is slow
-            for (int x = 0; x < L; ++x)
-                output[extract(index, x)] = extract(val, x);
+            //for (int x = 0; x < L; ++x)
+                //output[extract(index, x)] = extract(val, x);
         }
     }
 }
@@ -68,52 +81,29 @@ writePPM(int *buf, int width, int height, const char *fn) {
     printf("Wrote image file %s\n", fn);
 }
 
-int main() {
-    unsigned int width = 768;
-    unsigned int height = 512;
-    float x0 = -2;
-    float x1 = 1;
-    float y0 = -1;
-    float y1 = 1;
+template<int L>
+void benchmark(int* buf) {
+    double min_l = std::numeric_limits<double>::infinity();
+    for (int i = 0; i < 3; ++i) {
+        reset_and_start_timer();
+        mandelbrot<L>(x0, y0, x1, y1, width, height, maxIterations, buf);
+        double dt = get_elapsed_mcycles();
+        min_l = std::min(min_l, dt);
+    }
+    std::cout << "[mandelbrot sierra " << L << "]:\t\t[" << std::setprecision(6) << min_l << "] million cycles" << std::endl;
+    std::ostringstream oss;
+    oss << "mandelbrot-" << L << ".ppm";
+    writePPM(buf, width, height, oss.str().c_str());
+}
 
-    int maxIterations = 256;
+int main() {
     int *buf = new int[width*height];
 
+    benchmark<1>(buf);
+    benchmark<4>(buf);
+    benchmark<8>(buf);
 
-#if 0
-    double min_serial = 1e30;
-    for (int i = 0; i < 3; ++i)
-    {
-        reset_and_start_timer();
-        mandelbrot<1>(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        min_serial = std::min(min_serial, dt);
-    }
-    printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", min_serial);
-    writePPM(buf, width, height, "mandelbrot-serial.ppm");
-
-    double min_sierra4 = 1e30;
-    for (int i = 0; i < 3; ++i)
-    {
-        reset_and_start_timer();
-        mandelbrot<4>(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        min_sierra4 = std::min(min_sierra4, dt);
-    }
-    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra4);
-    writePPM(buf, width, height, "mandelbrot-sierra.ppm");
-
-#endif
-    double min_sierra8 = 1e30;
-    for (int i = 0; i < 3; ++i)
-    {
-        reset_and_start_timer();
-        mandelbrot<8>(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        min_sierra8 = std::min(min_sierra8, dt);
-    }
-    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra8);
-    writePPM(buf, width, height, "mandelbrot-sierra.ppm");
+    delete[] buf;
 
     return 0;
 }
