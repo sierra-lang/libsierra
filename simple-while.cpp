@@ -1,4 +1,5 @@
-#include "sierra.h"
+#include "sierra_ostream.h"
+#include <iostream>
 
 int varying(4) f() {
     int varying(4) i = 0;
@@ -11,4 +12,8 @@ int varying(4) f() {
     }
 
     return res;
+}
+
+int main() {
+    std::cout << f() << std::endl;
 }

@@ -80,6 +80,7 @@ int main() {
     int *buf = new int[width*height];
 
 
+#if 0
     double min_serial = 1e30;
     for (int i = 0; i < 3; ++i)
     {
@@ -91,15 +92,27 @@ int main() {
     printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", min_serial);
     writePPM(buf, width, height, "mandelbrot-serial.ppm");
 
-    double min_sierra = 1e30;
+    double min_sierra4 = 1e30;
     for (int i = 0; i < 3; ++i)
     {
         reset_and_start_timer();
         mandelbrot<4>(x0, y0, x1, y1, width, height, maxIterations, buf);
         double dt = get_elapsed_mcycles();
-        min_sierra = std::min(min_sierra, dt);
+        min_sierra4 = std::min(min_sierra4, dt);
     }
-    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra);
+    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra4);
+    writePPM(buf, width, height, "mandelbrot-sierra.ppm");
+
+#endif
+    double min_sierra8 = 1e30;
+    for (int i = 0; i < 3; ++i)
+    {
+        reset_and_start_timer();
+        mandelbrot<8>(x0, y0, x1, y1, width, height, maxIterations, buf);
+        double dt = get_elapsed_mcycles();
+        min_sierra8 = std::min(min_sierra8, dt);
+    }
+    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra8);
     writePPM(buf, width, height, "mandelbrot-sierra.ppm");
 
     return 0;
