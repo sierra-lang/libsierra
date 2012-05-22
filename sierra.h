@@ -33,6 +33,20 @@ void insert(T varying(L)& vec, int i, T val) {
     p[i] = val;
 }
 
+/*
+ * make scalars behave as vectors
+ */
+
+template<class T>
+T extract(T scalar, int) { 
+    return scalar; 
+}
+
+template<class T>
+void insert(T& scalar, int i, T val) {
+    scalar = val;
+}
+
 template<int L>
 int varying(L) seq() {
     int varying(L) res;

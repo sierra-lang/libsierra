@@ -31,6 +31,8 @@ void mandelbrot(float x0, float y0, float x1, float y1,
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
 
+    int varying(L) test = 42;
+
     for (int j = 0; j < height; ++j) {
         for (int ii = 0; ii < width; ii += L) {
             int varying(L) i = ii + program_index(L);
@@ -41,11 +43,11 @@ void mandelbrot(float x0, float y0, float x1, float y1,
             int varying(L) val = mandel<L>(x, y, maxIterations);
 
             int index = (j * width + ii)/L;
-            *(((int varying(L)*) &output[0]) + index) = val;
+            //*(((int varying(L)*) &output[0]) + index) = val;
 
             // TODO this is slow
-            //for (int x = 0; x < L; ++x)
-                //output[extract(index, x)] = extract(val, x);
+            for (int x = 0; x < L; ++x)
+                output[extract(index, x)] = extract(val, x);
         }
     }
 }
@@ -81,30 +83,26 @@ int main() {
 
 
     double min_serial = 1e30;
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         reset_and_start_timer();
-        mandelbrot<16>(x0, y0, x1, y1, width, height, maxIterations, buf);
-        mandelbrot<8>(x0, y0, x1, y1, width, height, maxIterations, buf);
+        mandelbrot<1>(x0, y0, x1, y1, width, height, maxIterations, buf);
         double dt = get_elapsed_mcycles();
         min_serial = std::min(min_serial, dt);
     }
     printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", min_serial);
     writePPM(buf, width, height, "mandelbrot-serial.ppm");
 
-#if 0
     double min_sierra = 1e30;
     for (int i = 0; i < 3; ++i)
     {
         reset_and_start_timer();
-        mandelbrot<8>(x0, y0, x1, y1, width, height, maxIterations, buf);
-        //mandelbrot<8>(x0, y0, x1, y1, width, height, maxIterations, buf);
+        mandelbrot<4>(x0, y0, x1, y1, width, height, maxIterations, buf);
         double dt = get_elapsed_mcycles();
         min_sierra = std::min(min_sierra, dt);
     }
     printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra);
     writePPM(buf, width, height, "mandelbrot-sierra.ppm");
-#endif
 
     return 0;
 }
