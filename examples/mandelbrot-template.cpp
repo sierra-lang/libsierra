@@ -19,10 +19,11 @@ static float y1 = 1;
 static int maxIterations = 256;
 
 template<int L>
-int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
-    float varying(L) z_re = c_re, z_im = c_im;
-    int varying(L) i = 0;
+int varying(L) mandel(float varying(L) c_re, float c_im, int uniform count) {
+    float varying(L) z_re = c_re;
+    float varying(L) z_im = c_im;
 
+    int varying(L) i = 0;
     while ((i < count) & (z_re * z_re + z_im * z_im < 4.f)) {
         float varying(L) new_re = z_re*z_re - z_im*z_im;
         float varying(L) new_im = 2.f * z_re * z_im;
@@ -37,7 +38,7 @@ int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform 
 
 template<int L>
 void mandelbrot(float x0, float y0, float x1, float y1, 
-                int width, int height, int maxIterations, int output[]) 
+                int width, int height, int maxIterations, int varying(L)* output) 
 {
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
@@ -45,20 +46,11 @@ void mandelbrot(float x0, float y0, float x1, float y1,
     int varying(L) test = 42;
 
     for (int j = 0; j < height; ++j) {
-        for (int ii = 0; ii < width; ii += L) {
-            int varying(L) i = ii + program_index(L);
-            float varying(L) x = x0 + i * dx;
-            float varying(L) y = y0 + j * dy;
+        for (int i = 0; i < width; i += L) {
+            float varying(L) x = x0 + (i + program_index(L)) * dx;
+            float y = y0 + j * dy;
 
-            //int varying(L) index = j * width + i;
-            int varying(L) val = mandel<L>(x, y, maxIterations);
-
-            int index = (j * width + ii)/L;
-            *(((int varying(L)*) &output[0]) + index) = val;
-
-            // TODO this is slow
-            //for (int x = 0; x < L; ++x)
-                //output[extract(index, x)] = extract(val, x);
+            *output++ = mandel<L>(x, y, maxIterations);
         }
     }
 }
@@ -86,7 +78,7 @@ void benchmark(int* buf) {
     double min_l = std::numeric_limits<double>::infinity();
     for (int i = 0; i < 3; ++i) {
         reset_and_start_timer();
-        mandelbrot<L>(x0, y0, x1, y1, width, height, maxIterations, buf);
+        mandelbrot<L>(x0, y0, x1, y1, width, height, maxIterations, (int varying(L)*) buf);
         double dt = get_elapsed_mcycles();
         min_l = std::min(min_l, dt);
     }
