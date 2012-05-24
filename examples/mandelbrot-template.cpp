@@ -19,7 +19,7 @@ static float y1 = 1;
 static int maxIterations = 256;
 
 template<int L>
-int varying(L) mandel(float varying(L) c_re, float c_im, int uniform count) {
+int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int count) {
     float varying(L) z_re = c_re;
     float varying(L) z_im = c_im;
 
@@ -43,12 +43,10 @@ void mandelbrot(float x0, float y0, float x1, float y1,
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
 
-    int varying(L) test = 42;
-
     for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; i += L) {
             float varying(L) x = x0 + (i + program_index(L)) * dx;
-            float y = y0 + j * dy;
+            float varying(L) y = y0 + j * dy;
 
             *output++ = mandel<L>(x, y, maxIterations);
         }
