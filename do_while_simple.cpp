@@ -1,4 +1,4 @@
-#include "../libsierra/sierra.h"
+#include "sierra.h"
 
 int varying(4) f  ( int varying(4) a )
 {
