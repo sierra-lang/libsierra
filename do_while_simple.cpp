@@ -1,11 +1,12 @@
 #include "sierra.h"
 
-int varying(4) f  ( int varying(4) a )
+int main ( )
 {
+    int varying (4) a = 3;
     do
     {
         a = a + 1;
     }
     while( a < 4 );
-    return a;
+    return 0;
 }
