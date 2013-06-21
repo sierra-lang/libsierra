@@ -4,3 +4,4 @@ a.out
 *.bc
 *.s
 *.ppm
+.*.swp
