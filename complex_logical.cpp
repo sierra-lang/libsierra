@@ -5,12 +5,13 @@ int main()
   bool __attribute__((sierra_vector(4))) c = {true, false, true, true};
   bool __attribute__((sierra_vector(4))) d = {true, false, false, true};
 
-  int x = 0;
+  int __attribute__((sierra_vector(4))) x = 0;
 
   if ( ( a || b ) && ( c && d ) )
     x++;
   else
     x--;
 
-  return x;
+  return ((int*) &x)[0];
+  //return sierra::extract( x, 0 );
 }
