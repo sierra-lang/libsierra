@@ -8,8 +8,7 @@ int main(int argc, char** argv)
     for (int varying(4) i = seq<4>(); i < argc; i++)
     {
         if (i > 42) {
-            while (j != i)
-                ++j;
+          for (; j < i; ++j);
         }
     }
     return j;
