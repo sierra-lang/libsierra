@@ -5,7 +5,7 @@
 
 using namespace sierra;
 
-#define L 4
+#define L 8
 
 static inline int mandel_serial(float c_re, float c_im, int count) {
     float z_re = c_re, z_im = c_im;
@@ -115,7 +115,9 @@ int main() {
     float y1 = 1;
 
     int maxIterations = 256;
-    int *buf = new int[width*height];
+    //int *buf = new int[width*height];
+    int* buf;
+    posix_memalign((void**)&buf, 32, sizeof(int)*width*height);
 
 
     double min_serial = 1e30;

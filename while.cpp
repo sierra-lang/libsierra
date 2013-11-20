@@ -7,8 +7,9 @@
 
 spmd(L)
 float varying(L) foo(float varying(L) a, float varying(L) b) {
-    while (a < b)
+    while (a < b) {
         a *= b;
+    }
 
     return a;
 }
