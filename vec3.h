@@ -67,6 +67,12 @@ spmd(L) void div_assign(vec3 varying(L)& res, const vec3 varying(L)& v) {
     res.z /= v.z;
 }
 
+// other
+
+float varying(L) dot(const vec3 varying(4)& a, const vec3 varying(4)& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 }
 
 #endif
