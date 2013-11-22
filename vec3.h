@@ -9,23 +9,62 @@ struct vec3 {
     float x, y, z;
 };
 
-template<int L>
-spmd(L) 
-vec3 varying(L) add(vec3 varying(L) v, vec3 varying(L) w) {
-    vec3 varying(L) res;
-    res.x = v.x + v.x;
-    res.y = v.y + v.y;
-    res.z = v.z + v.z;
-    return res;
+spmd(L) void create(vec3 varying(L)& res, float varying(L) x, float varying(L) y, float varying(L) z) {
+    res.x = x;
+    res.y = y;
+    res.z = z;
 }
 
-spmd(4) 
-vec3 varying(4) add4(vec3 varying(4) v, vec3 varying(4) w) {
-    vec3 varying(4) res;
-    res.x = v.x + v.x;
-    res.y = v.y + v.y;
-    res.z = v.z + v.z;
-    return res;
+// binary operators
+
+spmd(L) void add(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
+    res.x = v.x + W.x;
+    res.y = v.y + W.y;
+    res.z = v.z + W.z;
+}
+
+spmd(L) void sub(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
+    res.x = v.x - W.x;
+    res.y = v.y - W.y;
+    res.z = v.z - W.z;
+}
+
+spmd(L) void mul(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
+    res.x = v.x * W.x;
+    res.y = v.y * W.y;
+    res.z = v.z * W.z;
+}
+
+spmd(L) void div(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
+    res.x = v.x / W.x;
+    res.y = v.y / W.y;
+    res.z = v.z / W.z;
+}
+
+// in-place binary operators
+
+spmd(L) void add_assign(vec3 varying(L)& res, const vec3 varying(L)& v) {
+    res.x += v.x;
+    res.y += v.y;
+    res.z += v.z;
+}
+
+spmd(L) void sub_assign(vec3 varying(L)& res, const vec3 varying(L)& v) {
+    res.x -= v.x;
+    res.y -= v.y;
+    res.z -= v.z;
+}
+
+spmd(L) void mul_assign(vec3 varying(L)& res, const vec3 varying(L)& v) {
+    res.x *= v.x;
+    res.y *= v.y;
+    res.z *= v.z;
+}
+
+spmd(L) void div_assign(vec3 varying(L)& res, const vec3 varying(L)& v) {
+    res.x /= v.x;
+    res.y /= v.y;
+    res.z /= v.z;
 }
 
 }
