@@ -18,27 +18,27 @@ spmd(L) void create(vec3 varying(L)& res, float varying(L) x, float varying(L) y
 // binary operators
 
 spmd(L) void add(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
-    res.x = v.x + W.x;
-    res.y = v.y + W.y;
-    res.z = v.z + W.z;
+    res.x = v.x + w.x;
+    res.y = v.y + w.y;
+    res.z = v.z + w.z;
 }
 
 spmd(L) void sub(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
-    res.x = v.x - W.x;
-    res.y = v.y - W.y;
-    res.z = v.z - W.z;
+    res.x = v.x - w.x;
+    res.y = v.y - w.y;
+    res.z = v.z - w.z;
 }
 
 spmd(L) void mul(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
-    res.x = v.x * W.x;
-    res.y = v.y * W.y;
-    res.z = v.z * W.z;
+    res.x = v.x * w.x;
+    res.y = v.y * w.y;
+    res.z = v.z * w.z;
 }
 
 spmd(L) void div(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 varying(L)& w) {
-    res.x = v.x / W.x;
-    res.y = v.y / W.y;
-    res.z = v.z / W.z;
+    res.x = v.x / w.x;
+    res.y = v.y / w.y;
+    res.z = v.z / w.z;
 }
 
 // in-place binary operators

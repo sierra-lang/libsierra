@@ -8,6 +8,8 @@
 #define varying(n) __attribute__((sierra_vector(n)))
 #define program_index(n) seq<n>()
 
+#define spmd_mode(L) if ((bool varying(L)) true)
+
 namespace sierra {
 
 template<class T>
