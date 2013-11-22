@@ -18,7 +18,7 @@ int main() {
     c.x = c.y = c.z = (float varying(4)){0, 0, 0, 0};
 
     if ((bool varying(4)){false, false, true, true})
-        c = add<4>(a, b);
+        c = add4(a, b);
 
     std::cout << c.x << std::endl;
 }
