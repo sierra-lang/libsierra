@@ -1,7 +1,9 @@
-#include "sierra_ostream.h"
+#include "sierra/sierra.h"
+#include "sierra/ostream.h"
 
 #define L 4
-#include "vec3.h"
+#include "sierra/vec3.h"
+
 #include <iostream>
 
 using namespace sierra;
