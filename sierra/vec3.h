@@ -2,6 +2,7 @@
 #define SIERRA_VEC3_H
 
 #include "sierra.h"
+#include "math.h"
 
 namespace sierra {
 
@@ -133,7 +134,7 @@ spmd(L) void cross(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 va
 
 spmd(L) void normalize(vec3 varying(L)& v) {
     float varying(L) len2 = dot(v, v);
-    float varying(L) invlen = 42.f; // TODO: rsqrt(len2);
+    float varying(L) invlen = 1.f / sqrt(len2);
     mul_assign(v, invlen);
 }
 
