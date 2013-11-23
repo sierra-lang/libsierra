@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 
-
 #ifdef WIN32
 #include <windows.h>
 #define rdtsc __rdtsc
