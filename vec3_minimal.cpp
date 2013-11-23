@@ -1,5 +1,5 @@
-#include "sierra.h"
-#include "sierra_ostream.h"
+#include "sierra/sierra.h"
+#include "sierra/ostream.h"
 
 #include <iostream>
 

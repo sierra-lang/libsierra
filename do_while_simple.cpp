@@ -1,4 +1,4 @@
-#include "sierra.h"
+#include "sierra/defines.h"
 
 int main ( )
 {

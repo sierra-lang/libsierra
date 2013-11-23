@@ -1,6 +1,4 @@
-#define spmd(n) __attribute__((sierra_spmd((n))))
-#define uniform __attribute__((sierra_vector(1)))
-#define varying(n) __attribute__((sierra_vector((n))))
+#include "sierra/defines.h"
 
 spmd(4)
 //bool varying(4) test(int uniform a, int varying(4) b) {
