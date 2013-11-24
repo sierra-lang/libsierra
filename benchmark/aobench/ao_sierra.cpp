@@ -38,8 +38,9 @@
 #define NAO_SAMPLES		8
 #define M_PI 3.1415926535f
 
-#include "sierra.h"
-#include "vec3.h"
+#define LENGTH 4
+#define L LENGTH
+#include "sierra/vec3.h"
 
 using namespace sierra;
 
@@ -65,39 +66,43 @@ struct Ray {
     vec3 dir;
 };
 
+static spmd(L)
+void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane uniform& plane) {
+    float varying(L) d = -uniform_dot(plane.p, plane.n);
+    vec3 varying(L) plane_n;
+    splat(plane_n, plane.n);
+    float varying(L) v = dot(ray.dir, plane_n);
 
-static void
-ray_plane_intersect(Isect &isect, Ray &ray, uniform Plane &plane) {
-    float d = -dot(plane.p, plane.n);
-    float v = dot(ray.dir, plane.n);
+    if (fabs(v) >= 1.0e-17f) {
+        float varying(L) t = -(dot(ray.org, plane_n) + d) / v;
 
-    cif (abs(v) < 1.0e-17) 
-        return;
-    else {
-        float t = -(dot(ray.org, plane.n) + d) / v;
-
-        cif ((t > 0.0) && (t < isect.t)) {
+        if ((t > 0.0f) && (t < isect.t)) {
             isect.t = t;
             isect.hit = 1;
-            isect.p = ray.org + ray.dir * t;
-            isect.n = plane.n;
+            //isect.p = ray.org + ray.dir * t;
+            mul(isect.p, ray.dir, t);
+            add_assign(isect.p, ray.org);
         }
     }
 }
 
+static spmd(L)
+void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere uniform& sphere) {
+    vec3 varying(L) sphere_center;
+    splat(sphere_center, sphere.center);
 
-static inline void
-ray_sphere_intersect(Isect &isect, Ray &ray, uniform Sphere &sphere) {
-    vec rs = ray.org - sphere.center;
+    //vec3 rs = ray.org - sphere.center;
+    vec3 varying(L) rs;
+    sub(rs, ray.org, sphere_center);
 
-    float B = dot(rs, ray.dir);
-    float C = dot(rs, rs) - sphere.radius * sphere.radius;
-    float D = B * B - C;
+    float varying(L) B = dot(rs, ray.dir);
+    float varying(L) C = dot(rs, rs) - sphere.radius * sphere.radius;
+    float varying(L) D = B * B - C;
 
-    cif (D > 0.) {
-        float t = -B - sqrt(D);
+    if (D > 0.) {
+        float varying(L) t = -B - sqrt(D);
 
-        cif ((t > 0.0) && (t < isect.t)) {
+        if ((t > 0.0) && (t < isect.t)) {
             isect.t = t;
             isect.hit = 1;
             isect.p = ray.org + t * ray.dir;
@@ -107,9 +112,8 @@ ray_sphere_intersect(Isect &isect, Ray &ray, uniform Sphere &sphere) {
     }
 }
 
-
 static void
-orthoBasis(vec basis[3], vec n) {
+orthoBasis(vec3 basis[3], vec3 n) {
     basis[2] = n;
     basis[1].x = 0.0; basis[1].y = 0.0; basis[1].z = 0.0;
 
@@ -135,8 +139,8 @@ static float
 ambient_occlusion(Isect &isect, uniform Plane &plane, uniform Sphere spheres[3],
                   RNGState &rngstate) {
     float eps = 0.0001f;
-    vec p, n;
-    vec basis[3];
+    vec3 p, n;
+    vec3 basis[3];
     float occlusion = 0.0;
 
     p = isect.p + eps * isect.n;

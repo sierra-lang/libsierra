@@ -1,7 +1,7 @@
 #ifndef SIERRA_VEC3_H
 #define SIERRA_VEC3_H
 
-#include "sierra.h"
+#include "defines.h"
 #include "math.h"
 
 namespace sierra {
@@ -9,6 +9,12 @@ namespace sierra {
 struct vec3 {
     float x, y, z;
 };
+
+spmd(L) void copy(vec3 varying(L)& res, const vec3 varying(L)& v) {
+    res.x = v.x;
+    res.y = v.y;
+    res.z = v.z;
+}
 
 spmd(L) void create(vec3 varying(L)& res, float varying(L) x, float varying(L) y, float varying(L) z) {
     res.x = x;
@@ -122,6 +128,10 @@ spmd(L) void div_assign(vec3 varying(L)& res, float varying(L) f) {
 
 // other
 
+float uniform_dot(const vec3& a, const vec3& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 spmd(L) float varying(L) dot(const vec3 varying(L)& a, const vec3 varying(L)& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -136,6 +146,12 @@ spmd(L) void normalize(vec3 varying(L)& v) {
     float varying(L) len2 = dot(v, v);
     float varying(L) invlen = 1.f / sqrt(len2);
     mul_assign(v, invlen);
+}
+
+spmd(L) void splat(vec3 varying(L)& res, const vec3& u) {
+    res.x = u.x;
+    res.y = u.y;
+    res.z = u.z;
 }
 
 }

@@ -1,6 +1,3 @@
-#ifndef SIERRA_MATH_H
-#define SIERRA_MATH_H
-
 #include "defines.h"
 
 namespace sierra {
@@ -24,5 +21,3 @@ static float varying(L) rint(float varying(L));
 static float varying(L) nearbyint(float varying(L));
 
 }
-
-#endif
