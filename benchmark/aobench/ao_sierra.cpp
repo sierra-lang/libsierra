@@ -143,11 +143,14 @@ static spmd(L)
 float ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], RNGState &rngstate) {
     // TODO
     float eps = 0.0001f;
-    vec3 p, n;
-    vec3 basis[3];
+    vec3 varying(L) p;
+    vec3 varying(L) n;
+    vec3 varying(L) basis[3];
     float occlusion = 0.0;
 
-    p = isect.p + eps * isect.n;
+    //p = isect.p + eps * isect.n;
+    mul(p, isect.n, eps);
+    add_assign(p, isect.p);
 
     orthoBasis(basis, isect.n);
 
