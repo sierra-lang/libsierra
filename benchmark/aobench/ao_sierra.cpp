@@ -105,15 +105,18 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere u
         if ((t > 0.0) && (t < isect.t)) {
             isect.t = t;
             isect.hit = 1;
-            isect.p = ray.org + t * ray.dir;
-            isect.n = isect.p - sphere.center;
-            vnormalize(isect.n);
+            //isect.p = ray.org + t * ray.dir;
+            fma(isect.p, t, ray.dir, ray.org);
+            //isect.n = isect.p - sphere.center;
+            sub(isect.n, isect.p, sphere_center);
+            normalize(isect.n);
         }
     }
 }
 
-static void
-orthoBasis(vec3 basis[3], vec3 n) {
+static spmd(L)
+void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
+    // TODO
     basis[2] = n;
     basis[1].x = 0.0; basis[1].y = 0.0; basis[1].z = 0.0;
 

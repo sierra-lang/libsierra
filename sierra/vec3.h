@@ -154,6 +154,12 @@ spmd(L) void splat(vec3 varying(L)& res, const vec3& u) {
     res.z = u.z;
 }
 
+spmd(L) void fma(vec3 varying(L)& res, float varying(L) a, const vec3 varying(L)& b, const vec3 varying(L)& c) {
+    res.x = fma(a, b.x, c.x);
+    res.y = fma(a, b.y, c.y);
+    res.z = fma(a, b.z, c.z);
+}
+
 }
 
 #endif
