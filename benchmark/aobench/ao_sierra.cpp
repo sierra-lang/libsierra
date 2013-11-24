@@ -116,31 +116,32 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere u
 
 static spmd(L)
 void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
-    // TODO
-    basis[2] = n;
-    basis[1].x = 0.0; basis[1].y = 0.0; basis[1].z = 0.0;
+    copy(basis[2], n);
+    basis[1].x = 0.0f; 
+    basis[1].y = 0.0f; 
+    basis[1].z = 0.0f;
 
-    if ((n.x < 0.6) && (n.x > -0.6)) {
-        basis[1].x = 1.0;
-    } else if ((n.y < 0.6) && (n.y > -0.6)) {
-        basis[1].y = 1.0;
-    } else if ((n.z < 0.6) && (n.z > -0.6)) {
-        basis[1].z = 1.0;
+    if ((n.x < 0.6f) && (n.x > -0.6f)) {
+        basis[1].x = 1.0f;
+    } else if ((n.y < 0.6f) && (n.y > -0.6f)) {
+        basis[1].y = 1.0f;
+    } else if ((n.z < 0.6f) && (n.z > -0.6f)) {
+        basis[1].z = 1.0f;
     } else {
-        basis[1].x = 1.0;
+        basis[1].x = 1.0f;
     }
 
-    basis[0] = vcross(basis[1], basis[2]);
-    vnormalize(basis[0]);
+    cross(basis[0], basis[1], basis[2]);
+    normalize(basis[0]);
 
-    basis[1] = vcross(basis[2], basis[0]);
-    vnormalize(basis[1]);
+    cross(basis[1], basis[2], basis[0]);
+    normalize(basis[1]);
 }
 
 
-static float
-ambient_occlusion(Isect &isect, uniform Plane &plane, uniform Sphere spheres[3],
-                  RNGState &rngstate) {
+static spmd(L)
+float ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], RNGState &rngstate) {
+    // TODO
     float eps = 0.0001f;
     vec3 p, n;
     vec3 basis[3];
