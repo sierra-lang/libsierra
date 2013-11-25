@@ -1,17 +1,19 @@
 #ifndef SIERRA_RANDOM_H
 #define SIERRA_RANDOM_H
 
+#include <stdint.h>
+
 #include "defines.h"
 
 namespace sierra {
 
 struct RNGState {
-    unsigned z1, z2, z3, z4;
+    uint32_t z1, z2, z3, z4;
 };
 
 spmd(L)
-unsigned varying(L) random(RNGState varying(L)& state) {
-    unsigned varying(L) b;
+uint32_t varying(L) random(RNGState varying(L)& state) {
+    uint32_t varying(L) b;
     b  = ((state.z1 << 6) ^ state.z1) >> 13;
     state.z1 = ((state.z1 & 4294967294U) << 18) ^ b;
     b  = ((state.z2 << 2) ^ state.z2) >> 27; 
@@ -23,8 +25,8 @@ unsigned varying(L) random(RNGState varying(L)& state) {
     return (state.z1 ^ state.z2 ^ state.z3 ^ state.z4);
 }
 
-unsigned uniform random(RNGState uniform& state) {
-    unsigned uniform b;
+uint32_t uniform random(RNGState uniform& state) {
+    uint32_t uniform b;
     b  = ((state.z1 << 6) ^ state.z1) >> 13;
     state.z1 = ((state.z1 & 4294967294U) << 18) ^ b;
     b  = ((state.z2 << 2) ^ state.z2) >> 27; 
@@ -38,19 +40,23 @@ unsigned uniform random(RNGState uniform& state) {
 
 spmd(L)
 float varying(L) frandom(RNGState varying(L)& state) {
-    unsigned varying(L) irand = random(state);
-    irand &= (1ul<<23)-1;
-    return floatbits(0x3F800000 | irand)-1.0f;
+    uint32_t varying(L) irand = random(state);
+    irand &= uint32_t((1ul<<23)-1);
+    uint32_t varying(L) i = 0x3F800000 | irand;
+    float varying(L) f = *((float varying(L)*) &i);
+    return f-1.0f;
 }
 
 float uniform frandom(RNGState uniform& uniform state) {
-    unsigned uniform irand = random(state);
+    uint32_t uniform irand = random(state);
     irand &= (1ul<<23)-1;
-    return floatbits(0x3F800000 | irand)-1.0f;
+    uint32_t i = 0x3F800000 | irand;
+    float f = *((float*) &i);
+    return f-1.0f;
 }
 
 spmd(L)
-void seed_rng(RNGState varying(L)& state, unsigned seed) {
+void seed_rng(RNGState varying(L)& state, uint32_t seed) {
     state.z1 = seed;
     state.z2 = seed ^ 0xbeeff00d;
     state.z3 = ((seed & 0xfffful) << 16) | (seed >> 16);
@@ -58,7 +64,7 @@ void seed_rng(RNGState varying(L)& state, unsigned seed) {
                  ((seed & 0xff0000ul) >> 8) | (seed & 0xff000000ul) >> 24);
 }
 
-void seed_rng(RNGState uniform& state, uniform unsigned seed) {
+void seed_rng(RNGState uniform& state, uniform uint32_t seed) {
     state.z1 = seed;
     state.z2 = seed ^ 0xbeeff00d;
     state.z3 = ((seed & 0xfffful) << 16) | (seed >> 16);
