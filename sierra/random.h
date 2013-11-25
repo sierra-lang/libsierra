@@ -25,7 +25,7 @@ uint32_t varying(L) random(RNGState varying(L)& state) {
     return (state.z1 ^ state.z2 ^ state.z3 ^ state.z4);
 }
 
-uint32_t uniform random(RNGState uniform& state) {
+uint32_t uniform uniform_random(RNGState uniform& state) {
     uint32_t uniform b;
     b  = ((state.z1 << 6) ^ state.z1) >> 13;
     state.z1 = ((state.z1 & 4294967294U) << 18) ^ b;
@@ -47,8 +47,8 @@ float varying(L) frandom(RNGState varying(L)& state) {
     return f-1.0f;
 }
 
-float uniform frandom(RNGState uniform& uniform state) {
-    uint32_t uniform irand = random(state);
+float uniform uniform_frandom(RNGState uniform& uniform state) {
+    uint32_t uniform irand = uniform_random(state);
     irand &= (1ul<<23)-1;
     uint32_t i = 0x3F800000 | irand;
     float f = *((float*) &i);
@@ -64,7 +64,7 @@ void seed_rng(RNGState varying(L)& state, uint32_t varying(L) seed) {
                  ((seed & 0xff0000ul) >> 8) | (seed & 0xff000000ul) >> 24);
 }
 
-void seed_rng(RNGState uniform& state, uniform uint32_t seed) {
+void uniform_seed_rng(RNGState uniform& state, uniform uint32_t seed) {
     state.z1 = seed;
     state.z2 = seed ^ 0xbeeff00d;
     state.z3 = ((seed & 0xfffful) << 16) | (seed >> 16);
