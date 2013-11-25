@@ -40,7 +40,7 @@
 
 #include "sierra/sierra.h"
 
-#define LENGTH 4
+//#define LENGTH 4
 #define L LENGTH
 #include "sierra/vec3.h"
 #include "sierra/random.h"
@@ -109,7 +109,8 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere u
             isect.t = t;
             isect.hit = 1;
             //isect.p = ray.org + t * ray.dir;
-            fma(isect.p, t, ray.dir, ray.org);
+            mul(isect.p, ray.dir, t);
+            add_assign(isect.p, ray.org);
             //isect.n = isect.p - sphere.center;
             sub(isect.n, isect.p, sphere_center);
             normalize(isect.n);
