@@ -51,14 +51,14 @@
 #include <algorithm>
 #include <sys/types.h>
 
-#include "ao_ispc.h"
-using namespace ispc;
+//#include "ao_ispc.h"
+//using namespace ispc;
 
-#include "../timing.h"
+#include "sierra/timing.h"
 
 #define NSUBSAMPLES        2
 
-extern void ao_serial(int w, int h, int nsubsamples, float image[]);
+void ao_sierra(int w, int h, int nsubsamples, float image[]);
 
 static unsigned int test_iterations;
 static unsigned int width, height;
@@ -122,6 +122,7 @@ int main(int argc, char **argv)
     img = new unsigned char[width * height * 3];
     fimg = new float[width * height * 3];
 
+#if 0
     //
     // Run the ispc path, test_iterations times, and report the minimum
     // time for any of them.
@@ -161,6 +162,7 @@ int main(int argc, char **argv)
     printf("[aobench ispc + tasks]:\t\t[%.3f] million cycles (%d x %d image)\n", 
            minTimeISPCTasks, width, height);
     savePPM("ao-ispc-tasks.ppm", width, height); 
+#endif
 
     //
     // Run the serial path, again test_iteration times, and report the
@@ -170,7 +172,7 @@ int main(int argc, char **argv)
     for (unsigned int i = 0; i < test_iterations; i++) {
         memset((void *)fimg, 0, sizeof(float) * width * height * 3);
         reset_and_start_timer();
-        ao_serial(width, height, NSUBSAMPLES, fimg);
+        ao_sierra(width, height, NSUBSAMPLES, fimg);
         double t = get_elapsed_mcycles();
         minTimeSerial = std::min(minTimeSerial, t);
     }
@@ -178,8 +180,8 @@ int main(int argc, char **argv)
     // Report more results, save another image...
     printf("[aobench serial]:\t\t[%.3f] million cycles (%d x %d image)\n", minTimeSerial, 
            width, height);
-    printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
-           minTimeSerial / minTimeISPC, minTimeSerial / minTimeISPCTasks);
+    //printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
+           //minTimeSerial / minTimeISPC, minTimeSerial / minTimeISPCTasks);
     savePPM("ao-serial.ppm", width, height); 
         
     return 0;

@@ -35,6 +35,11 @@
   Based on Syoyo Fujita's aobench: http://code.google.com/p/aobench
 */
 
+/*
+ * compile with:
+ * clang++ -fsierra ao_sierra.cpp -I../.. -DLENGTH=8 ao.cpp  -mavx -O3
+ */
+
 #define NAO_SAMPLES		8
 #define M_PI 3.1415926535f
 
@@ -209,7 +214,8 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
                                         {{ -0.5f, 0.0f, -3.0f }, 0.5f },
                                         {{  1.0f, 0.0f, -2.2f }, 0.5f }};
     RNGState varying(L) rngstate;
-    seed_rng(rngstate, seq<L>() + (y0 << (seq<L>() & 15)));
+    spmd_mode(L)
+        seed_rng(rngstate, seq<L>() + (y0 << (seq<L>() & 15)));
     float invSamples = 1.f / nsubsamples;
 
     //foreach_tiled(y = y0 ... y1, x = 0 ... w, 
@@ -217,6 +223,7 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
     for (int y = y0; y < y1; ++y) {
         for (int xx = 0; xx < w; xx += L) {
             int varying(L) x = seq<L>() + xx;
+            spmd_mode(L) {
             //for (int u = 0; u < nsubsamples; ++u)
                 //for (int v = 0; v < nsubsamples; ++v)
                 int u = 0;
@@ -249,15 +256,28 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
                         ret = ambient_occlusion(isect, plane, spheres, rngstate);
                         ret *= invSamples * invSamples;
 
-                        int varying(L) offset = 3 * (y * w + x);
+                        //int varying(L) offset = 3 * (y * w + x);
                         //atomic_add_local(&image[offset], ret);
                         //atomic_add_local(&image[offset+1], ret);
                         //atomic_add_local(&image[offset+2], ret);
+
+                        for (int uniform i = 0; i != LENGTH; ++i) {
+                            image[3 * (y * w + xx + i) + 0] = extract(ret, i);
+                            image[3 * (y * w + xx + i) + 1] = extract(ret, i);
+                            image[3 * (y * w + xx + i) + 2] = extract(ret, i);
+                        }
                     }
                 //}
             //}
+            }
         }
     }
+}
+
+
+void ao_sierra(uniform int w, uniform int h, uniform int nsubsamples, 
+                    uniform float image[]) {
+    ao_scanlines(0, h, w, h, nsubsamples, image);
 }
 
 #if 0
