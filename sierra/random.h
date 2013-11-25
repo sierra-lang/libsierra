@@ -56,7 +56,7 @@ float uniform frandom(RNGState uniform& uniform state) {
 }
 
 spmd(L)
-void seed_rng(RNGState varying(L)& state, uint32_t seed) {
+void seed_rng(RNGState varying(L)& state, uint32_t varying(L) seed) {
     state.z1 = seed;
     state.z2 = seed ^ 0xbeeff00d;
     state.z3 = ((seed & 0xfffful) << 16) | (seed >> 16);

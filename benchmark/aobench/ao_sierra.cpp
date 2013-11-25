@@ -38,6 +38,8 @@
 #define NAO_SAMPLES		8
 #define M_PI 3.1415926535f
 
+#include "sierra/sierra.h"
+
 #define LENGTH 4
 #define L LENGTH
 #include "sierra/vec3.h"
@@ -141,7 +143,8 @@ void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
 
 
 static spmd(L)
-float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], RNGState &rngstate) {
+float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], 
+                                   RNGState varying(L)& rngstate) {
     static float uniform const eps = 0.0001f;
     vec3 varying(L) p;
     vec3 varying(L) n;
@@ -162,7 +165,7 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
             Isect varying(L) occIsect;
 
             float varying(L) theta = sqrt(frandom(rngstate));
-            float phi   = 2.0f * M_PI * frandom(rngstate);
+            float varying(L) phi   = 2.0f * M_PI * frandom(rngstate);
             float varying(L) x = cos(phi) * theta;
             float varying(L) y = sin(phi) * theta;
             float varying(L) z = sqrt(1.0 - theta * theta);
@@ -197,59 +200,66 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
 /* Compute the image for the scanlines from [y0,y1), for an overall image
    of width w and height h.
  */
-static void ao_scanlines(uniform int y0, uniform int y1, uniform int w, 
-                         uniform int h,  uniform int nsubsamples, 
-                         uniform float image[]) {
-    static uniform Plane plane = { { 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f } };
-    static uniform Sphere spheres[3] = {
-        { { -2.0f, 0.0f, -3.5f }, 0.5f },
-        { { -0.5f, 0.0f, -3.0f }, 0.5f },
-        { { 1.0f, 0.0f, -2.2f }, 0.5f } };
-    RNGState rngstate;
-
-    seed_rng(&rngstate, programIndex + (y0 << (programIndex & 15)));
+static void ao_scanlines(int uniform y0, int uniform y1, int uniform w, 
+                         int uniform h,  int uniform nsubsamples, 
+                         float uniform image[]) {
+    static Plane uniform plane = {{ 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f }};
+    static Sphere uniform spheres[3] = {{{ -2.0f, 0.0f, -3.5f }, 0.5f },
+                                        {{ -0.5f, 0.0f, -3.0f }, 0.5f },
+                                        {{  1.0f, 0.0f, -2.2f }, 0.5f }};
+    RNGState varying(L) rngstate;
+    seed_rng(rngstate, seq<L>() + (y0 << (seq<L>() & 15)));
     float invSamples = 1.f / nsubsamples;
 
-    foreach_tiled(y = y0 ... y1, x = 0 ... w, 
-                  u = 0 ... nsubsamples, v = 0 ... nsubsamples) {
-        float du = (float)u * invSamples, dv = (float)v * invSamples;
+    //foreach_tiled(y = y0 ... y1, x = 0 ... w, 
+                  //u = 0 ... nsubsamples, v = 0 ... nsubsamples)
+    for (int y = y0; y < y1; ++y) {
+        for (int xx = 0; xx < w; xx += L) {
+            int varying(L) x = seq<L>() + xx;
+            //for (int u = 0; u < nsubsamples; ++u)
+                //for (int v = 0; v < nsubsamples; ++v)
+                int u = 0;
+                int v = 0;
+                    float du = (float)u * invSamples, dv = (float)v * invSamples;
 
-        // Figure out x,y pixel in NDC
-        float px =  (x + du - (w / 2.0f)) / (w / 2.0f);
-        float py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
-        float ret = 0.f;
-        Ray ray;
-        Isect isect;
+                    // Figure out x,y pixel in NDC
+                    float varying(L) px =  (x + du - (w / 2.0f)) / (w / 2.0f);
+                    float py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
+                    float varying(L) ret = 0.f;
+                    Ray varying(L) ray;
+                    Isect varying(L) isect;
 
-        ray.org = 0.f;
+                    create(ray.org, 0.f, 0.f, 0.f);
 
-        // Poor man's perspective projection
-        ray.dir.x = px;
-        ray.dir.y = py;
-        ray.dir.z = -1.0;
-        vnormalize(ray.dir);
+                    // Poor man's perspective projection
+                    ray.dir.x = px;
+                    ray.dir.y = py;
+                    ray.dir.z = -1.0f;
+                    normalize(ray.dir);
 
-        isect.t   = 1.0e+17;
-        isect.hit = 0;
+                    isect.t   = 1.0e+17;
+                    isect.hit = 0;
 
-        for (uniform int snum = 0; snum < 3; ++snum)
-            ray_sphere_intersect(isect, ray, spheres[snum]);
-        ray_plane_intersect(isect, ray, plane);
+                    for (int uniform snum = 0; snum < 3; ++snum)
+                        ray_sphere_intersect(isect, ray, spheres[snum]);
+                    ray_plane_intersect(isect, ray, plane);
 
-        // Note use of 'coherent' if statement; the set of rays we
-        // trace will often all hit or all miss the scene
-        cif (isect.hit) {
-            ret = ambient_occlusion(isect, plane, spheres, rngstate);
-            ret *= invSamples * invSamples;
+                    if (isect.hit) {
+                        ret = ambient_occlusion(isect, plane, spheres, rngstate);
+                        ret *= invSamples * invSamples;
 
-            int offset = 3 * (y * w + x);
-            atomic_add_local(&image[offset], ret);
-            atomic_add_local(&image[offset+1], ret);
-            atomic_add_local(&image[offset+2], ret);
+                        int varying(L) offset = 3 * (y * w + x);
+                        //atomic_add_local(&image[offset], ret);
+                        //atomic_add_local(&image[offset+1], ret);
+                        //atomic_add_local(&image[offset+2], ret);
+                    }
+                //}
+            //}
         }
     }
 }
 
+#if 0
 
 export void ao_ispc(uniform int w, uniform int h, uniform int nsubsamples, 
                     uniform float image[]) {
@@ -267,3 +277,5 @@ export void ao_ispc_tasks(uniform int w, uniform int h, uniform int nsubsamples,
                           uniform float image[]) {
     launch[h] ao_task(w, h, nsubsamples, image);
 }
+
+#endif
