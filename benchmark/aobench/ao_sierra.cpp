@@ -41,6 +41,7 @@
 #define LENGTH 4
 #define L LENGTH
 #include "sierra/vec3.h"
+#include "sierra/random.h"
 
 using namespace sierra;
 
@@ -140,13 +141,12 @@ void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
 
 
 static spmd(L)
-float ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], RNGState &rngstate) {
-    // TODO
-    float eps = 0.0001f;
+float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], RNGState &rngstate) {
+    static float uniform const eps = 0.0001f;
     vec3 varying(L) p;
     vec3 varying(L) n;
     vec3 varying(L) basis[3];
-    float occlusion = 0.0;
+    float varying(L) occlusion = 0.0;
 
     //p = isect.p + eps * isect.n;
     mul(p, isect.n, eps);
@@ -156,35 +156,36 @@ float ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere un
 
     static const uniform int ntheta = NAO_SAMPLES;
     static const uniform int nphi   = NAO_SAMPLES;
-    for (uniform int j = 0; j < ntheta; j++) {
-        for (uniform int i = 0; i < nphi; i++) {
-            Ray ray;
-            Isect occIsect;
+    for (int uniform j = 0; j < ntheta; j++) {
+        for (int uniform i = 0; i < nphi; i++) {
+            Ray varying(L) ray;
+            Isect varying(L) occIsect;
 
-            float theta = sqrt(frandom(&rngstate));
-            float phi   = 2.0f * M_PI * frandom(&rngstate);
-            float x = cos(phi) * theta;
-            float y = sin(phi) * theta;
-            float z = sqrt(1.0 - theta * theta);
+            float varying(L) theta = sqrt(frandom(rngstate));
+            float phi   = 2.0f * M_PI * frandom(rngstate);
+            float varying(L) x = cos(phi) * theta;
+            float varying(L) y = sin(phi) * theta;
+            float varying(L) z = sqrt(1.0 - theta * theta);
 
             // local . global
-            float rx = x * basis[0].x + y * basis[1].x + z * basis[2].x;
-            float ry = x * basis[0].y + y * basis[1].y + z * basis[2].y;
-            float rz = x * basis[0].z + y * basis[1].z + z * basis[2].z;
+            float varying(L) rx = x * basis[0].x + y * basis[1].x + z * basis[2].x;
+            float varying(L) ry = x * basis[0].y + y * basis[1].y + z * basis[2].y;
+            float varying(L) rz = x * basis[0].z + y * basis[1].z + z * basis[2].z;
 
-            ray.org = p;
+            copy(ray.org, p);
             ray.dir.x = rx;
             ray.dir.y = ry;
             ray.dir.z = rz;
 
-            occIsect.t   = 1.0e+17;
+            occIsect.t   = 1.0e+17f;
             occIsect.hit = 0;
 
             for (uniform int snum = 0; snum < 3; ++snum)
                 ray_sphere_intersect(occIsect, ray, spheres[snum]); 
             ray_plane_intersect (occIsect, ray, plane); 
 
-            if (occIsect.hit) occlusion += 1.0;
+            if (occIsect.hit) 
+                occlusion += 1.0f;
         }
     }
 
