@@ -107,10 +107,10 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere u
     float varying(L) C = dot(rs, rs) - sphere.radius * sphere.radius;
     float varying(L) D = B * B - C;
 
-    if (D > 0.) {
+    if (D > 0.f) {
         float varying(L) t = -B - sqrt(D);
 
-        if ((t > 0.0) && (t < isect.t)) {
+        if ((t > 0.0f) && (t < isect.t)) {
             isect.t = t;
             isect.hit = 1;
             //isect.p = ray.org + t * ray.dir;
@@ -140,9 +140,11 @@ void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
         basis[1].x = 1.0f;
     }
 
+    //basis[0] = vcross(basis[1], basis[2]);
     cross(basis[0], basis[1], basis[2]);
     normalize(basis[0]);
 
+    //basis[1] = vcross(basis[2], basis[0]);
     cross(basis[1], basis[2], basis[0]);
     normalize(basis[1]);
 }
@@ -155,7 +157,7 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
     vec3 varying(L) p;
     vec3 varying(L) n;
     vec3 varying(L) basis[3];
-    float varying(L) occlusion = 0.0;
+    float varying(L) occlusion = 0.0f;
 
     //p = isect.p + eps * isect.n;
     mul(p, isect.n, eps);
@@ -174,7 +176,7 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
             float varying(L) phi   = 2.0f * M_PI * frandom(rngstate);
             float varying(L) x = cos(phi) * theta;
             float varying(L) y = sin(phi) * theta;
-            float varying(L) z = sqrt(1.0 - theta * theta);
+            float varying(L) z = sqrt(1.0f - theta * theta);
 
             // local . global
             float varying(L) rx = x * basis[0].x + y * basis[1].x + z * basis[2].x;
@@ -191,7 +193,8 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
 
             for (uniform int snum = 0; snum < 3; ++snum)
                 ray_sphere_intersect(occIsect, ray, spheres[snum]); 
-            ray_plane_intersect (occIsect, ray, plane); 
+
+            ray_plane_intersect(occIsect, ray, plane); 
 
             if (occIsect.hit) 
                 occlusion += 1.0f;
@@ -228,11 +231,12 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
                 //for (int v = 0; v < nsubsamples; ++v)
                 int u = 0;
                 int v = 0;
-                    float du = (float)u * invSamples, dv = (float)v * invSamples;
+                    float du = (float)u * invSamples;
+                    float dv = (float)v * invSamples;
 
                     // Figure out x,y pixel in NDC
                     float varying(L) px =  (x + du - (w / 2.0f)) / (w / 2.0f);
-                    float py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
+                    float            py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
                     float varying(L) ret = 0.f;
                     Ray varying(L) ray;
                     Isect varying(L) isect;
@@ -245,7 +249,7 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
                     ray.dir.z = -1.0f;
                     normalize(ray.dir);
 
-                    isect.t   = 1.0e+17;
+                    isect.t   = 1.0e+17f;
                     isect.hit = 0;
 
                     for (int uniform snum = 0; snum < 3; ++snum)
