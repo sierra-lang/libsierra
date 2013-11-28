@@ -383,6 +383,27 @@ inline float varying(L) fast_pow(float varying(L) a, float varying(L) b) {
     return fast_exp(b * fast_log(a));
 }
 
+spmd(L)
+inline float varying(L) fmin(float varying(L) a, float varying(L) b) {
+    float varying(L) result;
+    if (a < b)
+        result = a;
+    else
+        result = b;
+    return result;
+}
+
+
+spmd(L)
+inline float varying(L) fmax(float varying(L) a, float varying(L) b) {
+    float varying(L) result;
+    if (a > b)
+        result = a;
+    else
+        result = b;
+    return result;
+}
+
 }
 
 #endif
