@@ -175,8 +175,14 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
 
             float varying(L) theta = sqrt(frandom(rngstate));
             float varying(L) phi   = 2.0f * M_PI * frandom(rngstate);
-            float varying(L) x = cos(phi) * theta;
-            float varying(L) y = sin(phi) * theta;
+            //float varying(L) x = fast_cos(phi) * theta;
+            //float varying(L) y = fast_sin(phi) * theta;
+            float varying(L) sin_phi;
+            float varying(L) cos_phi;
+            sincos(phi, sin_phi, cos_phi);
+            float varying(L) x = cos_phi * theta;
+            float varying(L) y = sin_phi * theta;
+
             float varying(L) z = sqrt(1.0f - theta * theta);
 
             // local . global
