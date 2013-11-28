@@ -5,6 +5,8 @@
 
 namespace sierra {
 
+#define floatbits(i) *(float varying(L)*) (&i)
+
 static float varying(L) exp(float varying(L));
 static float varying(L) exp2(float varying(L));
 static float varying(L) log(float varying(L));
@@ -224,6 +226,65 @@ inline void sincos(float varying(L) x_full, float varying(L)& uniform sin_result
 
     if (cos_flipsign)
         cos_result = -cos_result;
+}
+
+spmd(L)
+inline float varying(L) fast_exp(float varying(L) x_full) {
+    static const float ln2_part1 = 0.6931457519;
+    static const float ln2_part2 = 1.4286067653e-6;
+    static const float one_over_ln2 = 1.44269502162933349609375;
+
+    float varying(L) scaled = x_full * one_over_ln2;
+    float varying(L) k_real = floor(scaled);
+    int varying(L) k = (int varying(L)) k_real;
+
+    // Reduced range version of x
+    float varying(L) x = x_full - k_real * ln2_part1;
+    x -= k_real * ln2_part2;
+
+    // These coefficients are for e^x in [0, ln(2)]
+    static const float one = 1.;
+    static const float c2 = 0.4999999105930328369140625;
+    static const float c3 = 0.166668415069580078125;
+    static const float c4 = 4.16539050638675689697265625e-2;
+    static const float c5 = 8.378830738365650177001953125e-3;
+    static const float c6 = 1.304379315115511417388916015625e-3;
+    static const float c7 = 2.7555381529964506626129150390625e-4;
+
+    float varying(L) result = x * c7 + c6;
+    result = x * result + c5;
+    result = x * result + c4;
+    result = x * result + c3;
+    result = x * result + c2;
+    result = x * result + one;
+    result = x * result + one;
+
+    // Compute 2^k (should differ for float and double, but I'll avoid
+    // it for now and just do floats)
+    const int fpbias = 127;
+    int varying(L) biased_n = k + fpbias;
+    bool varying(L) overflow = k > fpbias;
+    // Minimum exponent is -126, so if k is <= -127 (k + 127 <= 0)
+    // we've got underflow. -127 * ln(2) -> -88.02. So the most
+    // negative float input that doesn't result in zero is like -88.
+    bool varying(L) underflow = (biased_n <= 0);
+    static const int InfBits = 0x7f800000;
+    biased_n <<= 23;
+    // Reinterpret this thing as float
+    float varying(L) two_to_the_n = floatbits(biased_n);
+    // Handle both doubles and floats (hopefully eliding the copy for float)
+    float varying(L) elemtype_2n = two_to_the_n;
+    result *= elemtype_2n;
+
+    //result = overflow ? floatbits(InfBits) : result;
+    if (overflow)
+        result = floatbits(InfBits);
+
+    //result = underflow ? 0. : result;
+    if (underflow)
+        result = 0.f;
+
+    return result;
 }
 
 }
