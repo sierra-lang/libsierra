@@ -51,10 +51,21 @@ struct LSQRT {};
 
 template<>
 struct LSQRT<4> {
-  static int const x = 2; }
+  static int const x = 2;
+  static int const y = 2;
+};
 
 template<>
-struct LSQRT<8> { static int const value = 2; }
+struct LSQRT<8> {
+  static int const x = 4;
+  static int const y = 2;
+};
+
+template<>
+struct LSQRT<16> {
+  static int const x = 4;
+  static int const y = 4;
+};
 
 struct Ray {
     vec3 origin, dir;
@@ -64,7 +75,9 @@ struct Ray {
 static void
 generateRay(const uniform float raster2camera[4][4],
             const uniform float camera2world[4][4],
-            int x, int y, int length, Ray varying(LENGTH)&ray) {
+            int const varying(LENGTH) x, int const varying(LENGTH) y,
+            Ray varying(LENGTH)& ray) {
+
     // transform raster coordinate (x, y, 0) to camera space
     float varying(LENGTH) camx = raster2camera[0][0] * x + raster2camera[0][1] * y + raster2camera[0][3];
     float varying(LENGTH) camy = raster2camera[1][0] * x + raster2camera[1][1] * y + raster2camera[1][3];
@@ -86,7 +99,9 @@ generateRay(const uniform float raster2camera[4][4],
 
 spmd(LENGTH)
 static inline bool varying(LENGTH)
-Inside(vec3 varying(LENGTH)& p, vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax) {
+Inside(vec3 const varying(LENGTH)& p,
+    vec3 const varying(LENGTH)& pMin,
+    vec3 const varying(LENGTH)& pMax) {
   bool varying(LENGTH) res = false;
   if (p.x >= pMin.x && p.x <= pMax.x &&
       p.y >= pMin.y && p.y <= pMax.y &&
@@ -98,8 +113,8 @@ Inside(vec3 varying(LENGTH)& p, vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)
 }
 
 spmd(LENGTH)
-static float varying(LENGTH) void max(float varying(LENGTH)& x,
-    float varying(LENGTH)& y)
+static float varying(LENGTH) void max(float const varying(LENGTH) x,
+    float const varying(LENGTH) y)
 {
   float varying(LENGTH)& res = 0;
   if ( x > y )
@@ -110,8 +125,8 @@ static float varying(LENGTH) void max(float varying(LENGTH)& x,
 }
 
 spmd(LENGTH)
-static float varying(LENGTH) void min(float varying(LENGTH)& x,
-    float varying(LENGTH)& y)
+static float varying(LENGTH) void min(float const varying(LENGTH) x,
+    float const varying(LENGTH) y)
 {
   float varying(LENGTH)& res = 0;
   if ( x < y )
@@ -121,10 +136,12 @@ static float varying(LENGTH) void min(float varying(LENGTH)& x,
   return res;
 }
 
+spmd(LENGTH)
 static bool varying(LENGTH)
-  IntersectP(const Ray &ray, vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
+  IntersectP(const Ray varying(LENGTH)& ray,
+      vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
       float varying(LENGTH) *hit0, float varying(LENGTH) *hit1) {
-    bool varying(LENGTH)& res = false;
+    bool varying(LENGTH) res = false;
 
     float varying(LENGTH) t0 = -1e30f;
     float varying(LENGTH) t1 = 1e30f;
@@ -175,151 +192,206 @@ static bool varying(LENGTH)
 }
 
 
-static inline float Lerp(float t, float a, float b) {
+spmd(LENGTH)
+static inline float varying(LENGTH)
+  Lerp(float varying(LENGTH) t, float varying(LENGTH) a,
+      float varying(LENGTH) b) {
     return (1.f - t) * a + t * b;
 }
 
 
-static inline int Clamp(int v, int low, int high) {
-    return std::min(std::max(v, low), high);
+spmd(LENGTH)
+static inline int varying(LENGTH)
+  Clamp(int varying(LENGTH) v, int varying(LENGTH) low,
+      int varying(LENGTH) high) {
+    return min(max(v, low), high);
 }
 
 
-static inline float D(int x, int y, int z, int nVoxels[3], float density[]) {
+spmd(LENGTH)
+static inline float varying(LENGTH)
+  D(int varying(lENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
+      int nVoxels[3], float density[]) {
     x = Clamp(x, 0, nVoxels[0]-1);
     y = Clamp(y, 0, nVoxels[1]-1);
     z = Clamp(z, 0, nVoxels[2]-1);
+
+    // Gather -.-
     return density[z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x];
 }
 
 
-static inline float3 Offset(float3 p, float3 pMin, float3 pMax) {
-    return float3((p.x - pMin.x) / (pMax.x - pMin.x),
-                  (p.y - pMin.y) / (pMax.y - pMin.y),
-                  (p.z - pMin.z) / (pMax.z - pMin.z));
+//static inline float3 Offset(float3 p, float3 pMin, float3 pMax) {
+    //return float3((p.x - pMin.x) / (pMax.x - pMin.x),
+                  //(p.y - pMin.y) / (pMax.y - pMin.y),
+                  //(p.z - pMin.z) / (pMax.z - pMin.z));
+//}
+
+spmd(LENGTH)
+static inline void Offset( vec3 varying(LENGTH)& res,
+    vec3 varying(LENGTH)& p,
+    vec3 varying(LENGTH)& pMin,
+    vec3 varying(LENGTH)& pMax )
+{
+  res.x = (p.x - pMin.x) / (pMax.x - pMin.x);
+  res.y = (p.y - pMin.y) / (pMax.y - pMin.y);
+  res.z = (p.z - pMin.z) / (pMax.z - pMin.z);
 }
 
+spmd(LENGTH)
+static inline float varying(LENGTH)
+  Density(float3 Pobj, float3 pMin, float3 pMax, 
+      float density[], int nVoxels[3]) {
+  float varying(LENGTH) res = 0;
 
-static inline float Density(float3 Pobj, float3 pMin, float3 pMax, 
-                            float density[], int nVoxels[3]) {
-    if (!Inside(Pobj, pMin, pMax)) 
-        return 0;
-    // Compute voxel coordinates and offsets for _Pobj_
-    float3 vox = Offset(Pobj, pMin, pMax);
-    vox.x = vox.x * nVoxels[0] - .5f;
-    vox.y = vox.y * nVoxels[1] - .5f;
-    vox.z = vox.z * nVoxels[2] - .5f;
-    int vx = (int)(vox.x), vy = (int)(vox.y), vz = (int)(vox.z);
-    float dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
+    if (Inside(Pobj, pMin, pMax)) 
+    {
+      // Compute voxel coordinates and offsets for _Pobj_
+      //float3 vox = Offset(Pobj, pMin, pMax);
+      vec3 varying(LENGTH) vox = Offset( Pobj, pMin, pMax ;
+      vox.x = vox.x * nVoxels[0] - .5f;
+      vox.y = vox.y * nVoxels[1] - .5f;
+      vox.z = vox.z * nVoxels[2] - .5f;
+      int varying(LENGTH) vx = (int varying(LENGTH))(vox.x);
+      int varying(LENGTH) vy = (int varying(LENGTH))(vox.y);
+      int varying(LENGTH) vz = (int varying(LENGTH))(vox.z);
+      float varying(LENGTH) dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
 
-    // Trilinearly interpolate density values to compute local density
-    float d00 = Lerp(dx, D(vx, vy, vz, nVoxels, density),     
-                         D(vx+1, vy, vz, nVoxels, density));
-    float d10 = Lerp(dx, D(vx, vy+1, vz, nVoxels, density),   
-                         D(vx+1, vy+1, vz, nVoxels, density));
-    float d01 = Lerp(dx, D(vx, vy, vz+1, nVoxels, density),   
-                         D(vx+1, vy, vz+1, nVoxels, density));
-    float d11 = Lerp(dx, D(vx, vy+1, vz+1, nVoxels, density), 
-                         D(vx+1, vy+1, vz+1, nVoxels, density));
-    float d0 = Lerp(dy, d00, d10);
-    float d1 = Lerp(dy, d01, d11);
-    return Lerp(dz, d0, d1);
+      // Trilinearly interpolate density values to compute local density
+      float varying(LENGTH) d00 = Lerp(dx, D(vx, vy, vz, nVoxels, density),     
+          D(vx+1, vy, vz, nVoxels, density));
+      float varying(LENGTH) d10 = Lerp(dx, D(vx, vy+1, vz, nVoxels, density),   
+          D(vx+1, vy+1, vz, nVoxels, density));
+      float varying(LENGTH) d01 = Lerp(dx, D(vx, vy, vz+1, nVoxels, density),   
+          D(vx+1, vy, vz+1, nVoxels, density));
+      float varying(LENGTH) d11 = Lerp(dx, D(vx, vy+1, vz+1, nVoxels, density), 
+          D(vx+1, vy+1, vz+1, nVoxels, density));
+      float varying(LENGTH) d0 = Lerp(dy, d00, d10);
+      float varying(LENGTH) d1 = Lerp(dy, d01, d11);
+      res = Lerp(dz, d0, d1);
+    }
+    return res;
 }
 
 
 
 static float
-transmittance(float3 p0, float3 p1, float3 pMin,
-              float3 pMax, float sigma_t, float density[], int nVoxels[3]) {
-    float rayT0, rayT1;
-    Ray ray;
-    ray.origin = p1;
-    ray.dir = p0 - p1;
+transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1,
+    vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
+    float const sigma_t, float density[], int nVoxels[3])
+{
+  float varying(LENGTH) rayT0 = 0f;
+  float varying(LENGTH) rayT1 = 0f;
+  Ray varying(LENGTH) ray;
+  ray.origin = p1;
+  //ray.dir = p0 - p1;
+  ray.dir = sub(p0, p1);
 
-    // Find the parametric t range along the ray that is inside the volume.
-    if (!IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
-        return 1.;
+  float varying(LENGTH) res = 1f;
 
-    rayT0 = std::max(rayT0, 0.f);
+  // Find the parametric t range along the ray that is inside the volume.
+  if (IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
+  {
+    rayT0 = max(rayT0, 0.f);
 
     // Accumulate beam transmittance in tau
-    float tau = 0;
-    float rayLength = sqrtf(ray.dir.x * ray.dir.x + ray.dir.y * ray.dir.y +
-                            ray.dir.z * ray.dir.z);
-    float stepDist = 0.2f;
-    float stepT = stepDist / rayLength;
+    float varying(LENGTH) tau = 0;
+    float varying(LENGTH) rayLength = sqrtf(ray.dir.x * ray.dir.x
+        + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
+    float const stepDist = 0.2f;
+    float varying(LENGTH) stepT = stepDist / rayLength;
 
-    float t = rayT0;
-    float3 pos = ray.origin + ray.dir * rayT0;
-    float3 dirStep = ray.dir * stepT;
+    float varying(LENGTH) t = rayT0;
+    //float3 pos = ray.origin + ray.dir * rayT0;
+    vec3 varying(FLOAT) pos = add(ray.origin, mul(ray.dir, tayT0));
+    //float3 dirStep = ray.dir * stepT;
+    vec3 varying(FLOAT) dirStep = mul(ray.dir, stepT);
     while (t < rayT1) {
-        tau += stepDist * sigma_t * Density(pos, pMin, pMax, density, nVoxels);
-        pos = pos + dirStep;
-        t += stepT;
+      tau += stepDist * sigma_t * Density(pos, pMin, pMax, density, nVoxels);
+      //pos = pos + dirStep;
+      add_assign( dirStep );
+      t += stepT;
     }
-
-    return expf(-tau);
+    res = expf(-tau);
+  }
+  return res;
 }
 
 
-static float
-distanceSquared(float3 a, float3 b) {
-    float3 d = a-b;
+spmd(LENGTH)
+static float varying(LENGTH)
+distanceSquared(vec3 varying(LENGTH)& a, vec3 varying(LENGTH)& b) {
+    vec3 varying(LENGTH) d = sub(a,b);
     return d.x*d.x + d.y*d.y + d.z*d.z;
 }
 
 
-static float 
-raymarch(float density[], int nVoxels[3], const Ray &ray) {
-    float rayT0, rayT1;
-    float3 pMin(.3f, -.2f, .3f), pMax(1.8f, 2.3f, 1.8f);
-    float3 lightPos(-1.f, 4.f, 1.5f);
+static float varying(LENGTH)
+raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
+  float varying(LENGTH) res = 0;
 
-    if (!IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
-        return 0.;
+    float varying(LENGTH) rayT0;
+    float varying(LENGTH) rayT1;
 
-    rayT0 = std::max(rayT0, 0.f);
+    //float3 pMin(.3f, -.2f, .3f), pMax(1.8f, 2.3f, 1.8f);
+    vec3 pMin = {.3f, -.2f, .3f};
+    vec3 pMax = {1.8f, 2.3f, 1.8f};
+    //float3 lightPos(-1.f, 4.f, 1.5f);
+    vec3 lightPos = {-1.f, 4.f, 1.5f};
 
-    // Parameters that define the volume scattering characteristics and
-    // sampling rate for raymarching
-    float Le = .25f;           // Emission coefficient
-    float sigma_a = 10;        // Absorption coefficient
-    float sigma_s = 10;        // Scattering coefficient
-    float stepDist = 0.025f;   // Ray step amount
-    float lightIntensity = 40; // Light source intensity
+    if (IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
+    {
+      float varying(LENGTH) L = 0f;      // radiance along the ray
+      rayT0 = max(rayT0, 0.f);
 
-    float tau = 0.f;  // accumulated beam transmittance
-    float L = 0;      // radiance along the ray
-    float rayLength = sqrtf(ray.dir.x * ray.dir.x + ray.dir.y * ray.dir.y +
-                            ray.dir.z * ray.dir.z);
-    float stepT = stepDist / rayLength;
+      // Parameters that define the volume scattering characteristics and
+      // sampling rate for raymarching
+      float const Le = .25f;           // Emission coefficient
+      float const sigma_a = 10;        // Absorption coefficient
+      float const sigma_s = 10;        // Scattering coefficient
+      float const stepDist = 0.025f;   // Ray step amount
+      float const lightIntensity = 40; // Light source intensity
 
-    float t = rayT0;
-    float3 pos = ray.origin + ray.dir * rayT0;
-    float3 dirStep = ray.dir * stepT;
-    while (t < rayT1) {
-        float d = Density(pos, pMin, pMax, density, nVoxels);
+      float varying(LENGTH) tau = 0.f;  // accumulated beam transmittance
+      float varying(LENGTH) rayLength = sqrtf(ray.dir.x * ray.dir.x
+          + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
+      float varying(LENGTH) stepT = stepDist / rayLength;
+
+      float varying(LENGTH) t = rayT0;
+
+      vec3 varying(LENGTH) pos = ray.origin + ray.dir * rayT0;
+      vec3 varying(LENGTH) dirStep = ray.dir * stepT;
+
+      bool varying(LENGTH) attenMask = true;
+      while (attenMask && t < rayT1) {
+        float varying(LENGTH) d = Density(pos, pMin, pMax, density, nVoxels);
 
         // terminate once attenuation is high
-        float atten = expf(-tau);
+        float varying(LENGTH) atten = expf(-tau);
         if (atten < .005f)
-            break;
+        {
+          attenMask = false;
+        }
+        else
+        {
 
-        // direct lighting
-        float Li = lightIntensity / distanceSquared(lightPos, pos) * 
+          // direct lighting
+          float varying(LENGTH) Li = lightIntensity / distanceSquared(lightPos, pos) * 
             transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s,
-                          density, nVoxels);
-        L += stepDist * atten * d * sigma_s * (Li + Le);
+                density, nVoxels);
+          L += stepDist * atten * d * sigma_s * (Li + Le);
 
-        // update beam transmittance
-        tau += stepDist * (sigma_a + sigma_s) * d;
+          // update beam transmittance
+          tau += stepDist * (sigma_a + sigma_s) * d;
 
-        pos = pos + dirStep;
-        t += stepT;
-    }
-
-    // Gamma correction
-    return powf(L, 1.f / 2.2f);
+          pos = pos + dirStep;
+          t += stepT;
+        } // end if atten
+      } // end while
+      // Gamma correction
+      res = powf(L, 1.f / 2.2f);
+    } // end if intersectP
+    return res;
 }
 
 
@@ -328,20 +400,27 @@ volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4],
               const float camera2world[4][4], 
               int width, int height, float image[]) {
     int offset = 0;
-    int length = std::sqrt( LENGTH );
     int index = 0;
-    const uniform int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
-      0, 1, 0, 1, 2, 3, 2, 3 };
-    const uniform int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1,
-      2, 2, 3, 3, 2, 2, 3, 3 };
+    const uniform float xoffsets[16] = { 0f, 1f, 0f, 1f, 2f, 3f, 2f, 3f,
+      0f, 1f, 0f, 1f, 2f, 3f, 2f, 3f };
+    const uniform float yoffsets[16] = { 0f, 0f, 1f, 1f, 0f, 0f, 1f, 1f,
+      2f, 2f, 3f, 3f, 2f, 2f, 3f, 3f };
 
-    for (int y = 0; y < height; y += length) {
-        for (int x = 0; x < width; x += length) {
+    float varying(LENGTH) *offsetPtr;
+
+    for (int y = 0; y < height; y += LSQRT<LENGTH>.y) {
+        for (int x = 0; x < width; x += LSQRT<LENGTH>.x) {
           Ray varying(LENGTH) ray;
-          generateRay(raster2camera, camera2world, x, y, length, ray);
+          
+          offsetPtr = xoffsets;
+          float varying(LENGTH) xo = (float) x + *offsetPtr;
+          offsetPtr = yoffsets;
+          float varying(LENGTH) yo = (float) y + *offsetPtr;
+
+          generateRay(raster2camera, camera2world, xo, yo, ray);
+          raymarch(density, nVoxels, ray);
           // TODO extract vector generated by raymarch, and write it to the
           // image buffer
-          raymarch(density, nVoxels, ray);
         }
     }
 }
