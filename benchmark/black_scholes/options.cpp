@@ -65,12 +65,26 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    float *S = new float[nOptions];
-    float *X = new float[nOptions];
-    float *T = new float[nOptions];
-    float *r = new float[nOptions];
-    float *v = new float[nOptions];
-    float *result = new float[nOptions];
+    //float *S = new float[nOptions];
+    //float *X = new float[nOptions];
+    //float *T = new float[nOptions];
+    //float *r = new float[nOptions];
+    //float *v = new float[nOptions];
+    //float *result = new float[nOptions];
+
+    float *S;
+    float *X;
+    float *T;
+    float *r;
+    float *v;
+    float *result;
+
+    posix_memalign((void**) &S, 32, sizeof(float)*nOptions);
+    posix_memalign((void**) &X, 32, sizeof(float)*nOptions);
+    posix_memalign((void**) &T, 32, sizeof(float)*nOptions);
+    posix_memalign((void**) &r, 32, sizeof(float)*nOptions);
+    posix_memalign((void**) &v, 32, sizeof(float)*nOptions);
+    posix_memalign((void**) &result, 32, sizeof(float)*nOptions);
 
     for (int i = 0; i < nOptions; ++i) {
         S[i] = 100;  // stock price

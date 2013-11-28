@@ -95,19 +95,26 @@ void black_scholes_sierra(float Sa[], float Xa[], float Ta[],
     }
 }
 
-#if 0
 inline float varying(L) binomial_put(float varying(L) S, float varying(L) X, float varying(L) T, float varying(L) r, float varying(L) v) {
     float varying(L) V[BINOMIAL_NUM];
 
     float varying(L) dt = T / BINOMIAL_NUM;
-    float varying(L) u = fast_exp(v * sqrt(dt));
+    //float varying(L) u = fast_exp(v * sqrt(dt));
+    float varying(L) u;
+    spmd_mode(L)
+        u = fast_exp(v * sqrt(dt));
     float varying(L) d = 1. / u;
-    float varying(L) disc = fast_exp(r * dt);
+    float varying(L) disc;
+    spmd_mode(L)
+        disc = fast_exp(r * dt);
     float varying(L) Pu = (disc - d) / (u - d);
 
     for (uniform int j = 0; j < BINOMIAL_NUM; ++j) {
-        float varying(L) upow = fast_pow(u, (float varying(L))(2*j-BINOMIAL_NUM));
-        V[j] = fmax(0., X - S * upow);
+        float varying(L) upow;
+        spmd_mode(L) {
+            upow= fast_pow(u, (float varying(L))(2*j-BINOMIAL_NUM));
+            V[j] = fmax(0., X - S * upow);
+        }
     }
 
     for (uniform int j = BINOMIAL_NUM-1; j >= 0; --j)
@@ -116,9 +123,9 @@ inline float varying(L) binomial_put(float varying(L) S, float varying(L) X, flo
     return V[0];
 }
 
-void binomial_put_sierra(uniform float Sa[], uniform float Xa[], uniform float Ta[], 
-                  uniform float ra[], uniform float va[], 
-                  uniform float result[], uniform int count) {
+void binomial_put_sierra(float Sa[], float Xa[], float Ta[], 
+                  float ra[], float va[], 
+                  float result[], int count) {
     float varying(L)* pS = (float varying(L)*) Sa;
     float varying(L)* pX = (float varying(L)*) Xa;
     float varying(L)* pT = (float varying(L)*) Ta;
@@ -134,5 +141,3 @@ void binomial_put_sierra(uniform float Sa[], uniform float Xa[], uniform float T
         *(pres++) = binomial_put(S, X, T, r, v);
     }
 }
-
-#endif

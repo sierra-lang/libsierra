@@ -2,6 +2,7 @@
 #define SIERRA_H
 
 #include <stdint.h>
+//#include <cstdlib>
 #include "defines.h"
 
 namespace sierra {
@@ -72,6 +73,13 @@ void for_each(int begin, int end, B body) {
 }
 
 } // namespace sierra
+
+#if 0
+inline void* operator new     ( size_t size ) { void* p; posix_memalign(&p, 32, size); return p; }
+inline void* operator new[]   ( size_t size ) { void* p; posix_memalign(&p, 32, size); return p; }
+inline void  operator delete  ( void* ptr   ) { free(ptr); }
+inline void  operator delete[]( void* ptr   ) { free(ptr); }
+#endif
 
 #endif // SIERRA_H
 
