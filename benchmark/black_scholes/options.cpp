@@ -42,18 +42,10 @@
 using std::max;
 
 #include "options_defs.h"
-#include "../timing.h"
+#include "sierra/timing.h"
 
-#include "options_ispc.h"
-using namespace ispc;
-
-extern void black_scholes_serial(float Sa[], float Xa[], float Ta[], 
-                                 float ra[], float va[], 
-                                 float result[], int count);
-
-extern void binomial_put_serial(float Sa[], float Xa[], float Ta[], 
-                                float ra[], float va[], 
-                                float result[], int count);
+void black_scholes_sierra(float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count);
+void binomial_put_sierra (float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count);
 
 static void usage() {
     printf("usage: options [--count=<num options>]\n");
@@ -90,21 +82,22 @@ int main(int argc, char *argv[]) {
 
     double sum;
 
+#if 0
     //
     // Binomial options pricing model, ispc implementation
     //
-    double binomial_ispc = 1e30;
+    double binomial_sierra = 1e30;
     for (int i = 0; i < 3; ++i) {
         reset_and_start_timer();
-        binomial_put_ispc(S, X, T, r, v, result, nOptions);
+        binomial_put_sierra(S, X, T, r, v, result, nOptions);
         double dt = get_elapsed_mcycles();
         sum = 0.;
         for (int i = 0; i < nOptions; ++i)
             sum += result[i];
-        binomial_ispc = std::min(binomial_ispc, dt);
+        binomial_sierra = std::min(binomial_sierra, dt);
     }
     printf("[binomial ispc, 1 thread]:\t[%.3f] million cycles (avg %f)\n", 
-           binomial_ispc, sum / nOptions);
+           binomial_sierra, sum / nOptions);
 
     //
     // Binomial options pricing model, ispc implementation, tasks
@@ -125,21 +118,21 @@ int main(int argc, char *argv[]) {
     //
     // Binomial options, serial implementation
     //
-    double binomial_serial = 1e30;
+#endif
+    double binomial_sierra = 1e30;
     for (int i = 0; i < 3; ++i) {
         reset_and_start_timer();
-        binomial_put_serial(S, X, T, r, v, result, nOptions);
+        binomial_put_sierra(S, X, T, r, v, result, nOptions);
         double dt = get_elapsed_mcycles();
         sum = 0.;
         for (int i = 0; i < nOptions; ++i)
             sum += result[i];
-        binomial_serial = std::min(binomial_serial, dt);
+        binomial_sierra = std::min(binomial_sierra, dt);
     }
     printf("[binomial serial]:\t\t[%.3f] million cycles (avg %f)\n", 
-           binomial_serial, sum / nOptions);
+           binomial_sierra, sum / nOptions);
 
-    printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n",
-           binomial_serial / binomial_ispc, binomial_serial / binomial_tasks);
+#if 0
 
     //
     // Black-Scholes options pricing model, ispc implementation, 1 thread
@@ -176,21 +169,24 @@ int main(int argc, char *argv[]) {
     //
     // Black-Scholes options pricing model, serial implementation
     //
-    double bs_serial = 1e30;
+#endif
+    double bs_sierra = 1e30;
     for (int i = 0; i < 3; ++i) {
         reset_and_start_timer();
-        black_scholes_serial(S, X, T, r, v, result, nOptions);
+        black_scholes_sierra(S, X, T, r, v, result, nOptions);
         double dt = get_elapsed_mcycles();
         sum = 0.;
         for (int i = 0; i < nOptions; ++i)
             sum += result[i];
-        bs_serial = std::min(bs_serial, dt);
+        bs_sierra = std::min(bs_sierra, dt);
     }
-    printf("[black-scholes serial]:\t\t[%.3f] million cycles (avg %f)\n", bs_serial, 
+    printf("[black-scholes serial]:\t\t[%.3f] million cycles (avg %f)\n", bs_sierra, 
            sum / nOptions);
 
+#if 0
     printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
            bs_serial / bs_ispc, bs_serial / bs_ispc_tasks);
 
+#endif
     return 0;
 }

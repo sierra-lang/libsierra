@@ -15,7 +15,7 @@ static float varying(L) log2(float varying(L));
 static float varying(L) log10(float varying(L));
 static float varying(L) pow(float varying(L), float varying(L));
 static float varying(L) powi(float varying(L), int varying(L));
-float varying(L) sqrt(float varying(L)) { return 0.f; }
+static float varying(L) sqrt(float varying(L));
 static float varying(L) sin(float varying(L));
 static float varying(L) cos(float varying(L));
 static float varying(L) fma(float varying(L), float varying(L), float varying(L)); // fused mutpliy-add
