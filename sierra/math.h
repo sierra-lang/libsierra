@@ -6,6 +6,7 @@
 namespace sierra {
 
 #define floatbits(i) *(float varying(L)*) (&i)
+#define   intbits(f) *(int   varying(L)*) (&f)
 
 static float varying(L) exp(float varying(L));
 static float varying(L) exp2(float varying(L));
@@ -27,8 +28,8 @@ static float varying(L) nearbyint(float varying(L));
 
 spmd(L)
 inline float varying(L) fast_sin(float varying(L) x_full) {
-    static const float pi_over_two_vec = 1.57079637050628662109375;
-    static const float two_over_pi_vec = 0.636619746685028076171875;
+    static const float pi_over_two_vec = 1.57079637050628662109375f;
+    static const float two_over_pi_vec = 0.636619746685028076171875f;
     float varying(L) scaled = x_full * two_over_pi_vec;
     float varying(L) k_real = floor(scaled);
     int varying(L) k = (int varying(L))k_real;
@@ -41,19 +42,19 @@ inline float varying(L) fast_sin(float varying(L) x_full) {
 
     // These coefficients are from sollya with fpminimax(sin(x)/x, [|0, 2,
     // 4, 6, 8, 10|], [|single...|], [0;Pi/2]);
-    static const float sin_c2 = -0.16666667163372039794921875;
-    static const float sin_c4 = 8.333347737789154052734375e-3;
-    static const float sin_c6 = -1.9842604524455964565277099609375e-4;
-    static const float sin_c8 = 2.760012648650445044040679931640625e-6;
-    static const float sin_c10 = -2.50293279435709337121807038784027099609375e-8;
+    static const float sin_c2 = -0.16666667163372039794921875f;
+    static const float sin_c4 = 8.333347737789154052734375e-3f;
+    static const float sin_c6 = -1.9842604524455964565277099609375e-4f;
+    static const float sin_c8 = 2.760012648650445044040679931640625e-6f;
+    static const float sin_c10 = -2.50293279435709337121807038784027099609375e-8f;
 
-    static const float cos_c2 = -0.5;
-    static const float cos_c4 = 4.166664183139801025390625e-2;
-    static const float cos_c6 = -1.388833043165504932403564453125e-3;
-    static const float cos_c8 = 2.47562347794882953166961669921875e-5;
-    static const float cos_c10 = -2.59630184018533327616751194000244140625e-7;
+    static const float cos_c2 = -0.5f;
+    static const float cos_c4 = 4.166664183139801025390625e-2f;
+    static const float cos_c6 = -1.388833043165504932403564453125e-3f;
+    static const float cos_c8 = 2.47562347794882953166961669921875e-5f;
+    static const float cos_c10 = -2.59630184018533327616751194000244140625e-7f;
 
-    float varying(L) outside = sin_usecos ? 1 : x;
+    float varying(L) outside = sin_usecos ? 1.f : x;
     //float varying(L)  c2 = sin_usecos ? cos_c2 : sin_c2;
     //float varying(L)  c4 = sin_usecos ? cos_c4 : sin_c4;
     //float varying(L)  c6 = sin_usecos ? cos_c6 : sin_c6;
@@ -84,7 +85,7 @@ inline float varying(L) fast_sin(float varying(L) x_full) {
     formula = x2 * formula + c6;
     formula = x2 * formula + c4;
     formula = x2 * formula + c2;
-    formula = x2 * formula + 1;
+    formula = x2 * formula + 1.f;
     formula *= outside;
 
     if (flip_sign)
@@ -95,8 +96,8 @@ inline float varying(L) fast_sin(float varying(L) x_full) {
 
 spmd(L)
 inline float varying(L) fast_cos(float varying(L) x_full) {
-    static const float pi_over_two_vec = 1.57079637050628662109375;
-    static const float two_over_pi_vec = 0.636619746685028076171875;
+    static const float pi_over_two_vec = 1.57079637050628662109375f;
+    static const float two_over_pi_vec = 0.636619746685028076171875f;
     float varying(L) scaled = x_full * two_over_pi_vec;
     float varying(L) k_real = floor(scaled);
     int varying(L) k = (int varying(L)) k_real;
@@ -108,17 +109,17 @@ inline float varying(L) fast_cos(float varying(L) x_full) {
     bool varying(L) cos_usecos = (k_mod4 == 0 || k_mod4 == 2);
     bool varying(L) flip_sign = (k_mod4 == 1 || k_mod4 == 2);
 
-    const float sin_c2 = -0.16666667163372039794921875;
-    const float sin_c4 = 8.333347737789154052734375e-3;
-    const float sin_c6 = -1.9842604524455964565277099609375e-4;
-    const float sin_c8 = 2.760012648650445044040679931640625e-6;
-    const float sin_c10 = -2.50293279435709337121807038784027099609375e-8;
+    const float sin_c2 = -0.16666667163372039794921875f;
+    const float sin_c4 = 8.333347737789154052734375e-3f;
+    const float sin_c6 = -1.9842604524455964565277099609375e-4f;
+    const float sin_c8 = 2.760012648650445044040679931640625e-6f;
+    const float sin_c10 = -2.50293279435709337121807038784027099609375e-8f;
 
     const float cos_c2 = -0.5;
-    const float cos_c4 = 4.166664183139801025390625e-2;
-    const float cos_c6 = -1.388833043165504932403564453125e-3;
-    const float cos_c8 = 2.47562347794882953166961669921875e-5;
-    const float cos_c10 = -2.59630184018533327616751194000244140625e-7;
+    const float cos_c4 = 4.166664183139801025390625e-2f;
+    const float cos_c6 = -1.388833043165504932403564453125e-3f;
+    const float cos_c8 = 2.47562347794882953166961669921875e-5f;
+    const float cos_c10 = -2.59630184018533327616751194000244140625e-7f;
 
     float varying(L) outside;
     float varying(L) c2;
@@ -148,7 +149,7 @@ inline float varying(L) fast_cos(float varying(L) x_full) {
     formula = x2 * formula + c6;
     formula = x2 * formula + c4;
     formula = x2 * formula + c2;
-    formula = x2 * formula + 1.;
+    formula = x2 * formula + 1.f;
     formula *= outside;
 
     //formula = flip_sign ? -formula : formula;
@@ -160,8 +161,8 @@ inline float varying(L) fast_cos(float varying(L) x_full) {
 
 spmd(L)
 inline void sincos(float varying(L) x_full, float varying(L)& uniform sin_result, float varying(L)& uniform cos_result) {
-    const float pi_over_two_vec = 1.57079637050628662109375;
-    const float two_over_pi_vec = 0.636619746685028076171875;
+    const float pi_over_two_vec = 1.57079637050628662109375f;
+    const float two_over_pi_vec = 0.636619746685028076171875f;
     float varying(L) scaled = x_full * two_over_pi_vec;
     float varying(L) k_real = floor(scaled);
     int varying(L) k = (int varying(L))k_real;
@@ -174,18 +175,18 @@ inline void sincos(float varying(L) x_full, float varying(L)& uniform sin_result
     bool varying(L) sin_flipsign = (k_mod4 > 1);
     bool varying(L) cos_flipsign = (k_mod4 == 1 || k_mod4 == 2);
 
-    const float one_vec = 1.;
-    const float sin_c2 = -0.16666667163372039794921875;
-    const float sin_c4 = 8.333347737789154052734375e-3;
-    const float sin_c6 = -1.9842604524455964565277099609375e-4;
-    const float sin_c8 = 2.760012648650445044040679931640625e-6;
-    const float sin_c10 = -2.50293279435709337121807038784027099609375e-8;
+    const float one_vec = 1.f;
+    const float sin_c2 = -0.16666667163372039794921875f;
+    const float sin_c4 = 8.333347737789154052734375e-3f;
+    const float sin_c6 = -1.9842604524455964565277099609375e-4f;
+    const float sin_c8 = 2.760012648650445044040679931640625e-6f;
+    const float sin_c10 = -2.50293279435709337121807038784027099609375e-8f;
 
     const float cos_c2 = -0.5;
-    const float cos_c4 = 4.166664183139801025390625e-2;
-    const float cos_c6 = -1.388833043165504932403564453125e-3;
-    const float cos_c8 = 2.47562347794882953166961669921875e-5;
-    const float cos_c10 = -2.59630184018533327616751194000244140625e-7;
+    const float cos_c4 = 4.166664183139801025390625e-2f;
+    const float cos_c6 = -1.388833043165504932403564453125e-3f;
+    const float cos_c8 = 2.47562347794882953166961669921875e-5f;
+    const float cos_c10 = -2.59630184018533327616751194000244140625e-7f;
 
     float varying(L) x2 = x * x;
 
@@ -230,9 +231,9 @@ inline void sincos(float varying(L) x_full, float varying(L)& uniform sin_result
 
 spmd(L)
 inline float varying(L) fast_exp(float varying(L) x_full) {
-    static const float ln2_part1 = 0.6931457519;
-    static const float ln2_part2 = 1.4286067653e-6;
-    static const float one_over_ln2 = 1.44269502162933349609375;
+    static const float ln2_part1 = 0.6931457519f;
+    static const float ln2_part2 = 1.4286067653e-6f;
+    static const float one_over_ln2 = 1.44269502162933349609375f;
 
     float varying(L) scaled = x_full * one_over_ln2;
     float varying(L) k_real = floor(scaled);
@@ -243,13 +244,13 @@ inline float varying(L) fast_exp(float varying(L) x_full) {
     x -= k_real * ln2_part2;
 
     // These coefficients are for e^x in [0, ln(2)]
-    static const float one = 1.;
-    static const float c2 = 0.4999999105930328369140625;
-    static const float c3 = 0.166668415069580078125;
-    static const float c4 = 4.16539050638675689697265625e-2;
-    static const float c5 = 8.378830738365650177001953125e-3;
-    static const float c6 = 1.304379315115511417388916015625e-3;
-    static const float c7 = 2.7555381529964506626129150390625e-4;
+    static const float one = 1.f;
+    static const float c2 = 0.4999999105930328369140625f;
+    static const float c3 = 0.166668415069580078125f;
+    static const float c4 = 4.16539050638675689697265625e-2f;
+    static const float c5 = 8.378830738365650177001953125e-3f;
+    static const float c6 = 1.304379315115511417388916015625e-3f;
+    static const float c7 = 2.7555381529964506626129150390625e-4f;
 
     float varying(L) result = x * c7 + c6;
     result = x * result + c5;
@@ -285,6 +286,101 @@ inline float varying(L) fast_exp(float varying(L) x_full) {
         result = 0.f;
 
     return result;
+}
+
+// Range reduction for logarithms takes log(x) -> log(2^n * y) -> n
+// * log(2) + log(y) where y is the reduced range (usually in [1/2,
+// 1)).
+spmd(L)
+inline void range_reduce_log(float varying(L) input, float varying(L)& reduced, int varying(L)& exponent) {
+    int varying(L) int_version = intbits(input);
+    // single precision = SEEE EEEE EMMM MMMM MMMM MMMM MMMM MMMM
+    // exponent mask    = 0111 1111 1000 0000 0000 0000 0000 0000
+    //                    0x7  0xF  0x8  0x0  0x0  0x0  0x0  0x0
+    // non-exponent     = 1000 0000 0111 1111 1111 1111 1111 1111
+    //                  = 0x8  0x0  0x7  0xF  0xF  0xF  0xF  0xF
+
+    //const int exponent_mask(0x7F800000)
+    static const int nonexponent_mask = 0x807FFFFF;
+
+    // We want the reduced version to have an exponent of -1 which is -1 + 127 after biasing or 126
+    static const int exponent_neg1 = (126l << 23);
+    // NOTE(boulos): We don't need to mask anything out since we know
+    // the sign bit has to be 0. If it's 1, we need to return infinity/nan
+    // anyway (log(x), x = +-0 -> infinity, x < 0 -> NaN).
+    int varying(L) biased_exponent = int_version >> 23; // This number is [0, 255] but it means [-127, 128]
+
+    int varying(L) offset_exponent = biased_exponent + 1; // Treat the number as if it were 2^{e+1} * (1.m)/2
+    exponent = offset_exponent - 127; // get the real value
+
+    // Blend the offset_exponent with the original input (do this in
+    // int for now, until I decide if float can have & and &not)
+    int varying(L) blended = (int_version & nonexponent_mask) | (exponent_neg1);
+    reduced = floatbits(blended);
+}
+
+spmd(L)
+inline float varying(L) fast_log(float varying(L) x_full) {
+    static const int NaN_bits = 0x7fc00000;
+    static const int Neg_Inf_bits = 0xFF800000;
+    static const float NaN = *((float*) &NaN_bits);
+    static const float neg_inf = *((float*) &Neg_Inf_bits);
+    bool varying(L) use_nan = x_full < 0.f;
+    bool varying(L) use_inf = x_full == 0.f;
+    bool varying(L) exceptional = use_nan | use_inf;
+    static const float one = 1.0f;
+
+    //float varying(L) patched = exceptional ? one : x_full;
+    float varying(L) patched;
+    if (exceptional)
+        patched = one;
+    else
+        patched = x_full;
+
+    float varying(L) reduced;
+    int varying(L) exponent;
+    range_reduce_log(patched, reduced, exponent);
+
+    static const float ln2 = 0.693147182464599609375f;
+
+    float varying(L) x1 = one - reduced;
+    static const float c1 = 0.50000095367431640625f;
+    static const float c2 = 0.33326041698455810546875f;
+    static const float c3 = 0.2519190013408660888671875f;
+    static const float c4 = 0.17541764676570892333984375f;
+    static const float c5 = 0.3424419462680816650390625f;
+    static const float c6 = -0.599632322788238525390625f;
+    static const float c7 = +1.98442304134368896484375f;
+    static const float c8 = -2.4899270534515380859375f;
+    static const float c9 = +1.7491014003753662109375f;
+
+    float varying(L) result = x1 * c9 + c8;
+    result = x1 * result + c7;
+    result = x1 * result + c6;
+    result = x1 * result + c5;
+    result = x1 * result + c4;
+    result = x1 * result + c3;
+    result = x1 * result + c2;
+    result = x1 * result + c1;
+    result = x1 * result + one;
+
+    // Equation was for -(ln(red)/(1-red))
+    result *= -x1;
+    result += (float varying(L))(exponent) * ln2;
+
+    if (exceptional) {
+        if (use_nan)
+            result = NaN;
+        else
+            result = neg_inf;
+    }
+
+    return result;
+}
+
+spmd(L)
+inline float varying(L) fast_pow(float varying(L) a, float varying(L) b) {
+    return fast_exp(b * fast_log(a));
 }
 
 }
