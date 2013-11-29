@@ -202,7 +202,7 @@ static inline int varying(LENGTH)
   }
 
 
-  //spmd(LENGTH)
+  spmd(LENGTH)
 static inline float varying(LENGTH)
   D(int varying(LENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
       int nVoxels[3], float density[]) {
