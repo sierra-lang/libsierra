@@ -31,15 +31,13 @@ met:
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  */
 
-#include <assert.h>
-#include <math.h>
+#include <cassert>
 #include <cmath>
 #include <algorithm>
-#include "../../sierra/sierra.h"
-#include "../../sierra/ostream.h"
-
 #include <iostream>
+#include <math.h>
 
+#include "../../sierra/sierra.h"
 #define L LENGTH
 #include "../../sierra/math.h"
 #include "../../sierra/vec3.h"
@@ -86,8 +84,8 @@ struct Ray {
 
 
 static void
-generateRay(const uniform float raster2camera[4][4],
-    const uniform float camera2world[4][4],
+generateRay(const float raster2camera[4][4],
+    const float camera2world[4][4],
     int const varying(LENGTH) x, int const varying(LENGTH) y,
     Ray varying(LENGTH)& ray) {
 
@@ -204,7 +202,7 @@ static inline int varying(LENGTH)
   }
 
 
-  spmd(LENGTH)
+  //spmd(LENGTH)
 static inline float varying(LENGTH)
   D(int varying(LENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
       int nVoxels[3], float density[]) {
@@ -216,10 +214,10 @@ static inline float varying(LENGTH)
     //return density[z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x];
     float varying(LENGTH) res;
     for ( int i = 0; i < LENGTH; ++i )
-      sierra::insert< float, LENGTH >( res, i, density[
-          sierra::extract< int, LENGTH >( z, i ) * nVoxels[0] * nVoxels[1]
-          + sierra::extract< int, LENGTH >( y, i ) * nVoxels[0]
-          + sierra::extract< int, LENGTH >( x, i ) ] );
+      sierra::insert( res, i, density[
+          sierra::extract( z, i ) * nVoxels[0] * nVoxels[1]
+          + sierra::extract( y, i ) * nVoxels[0]
+          + sierra::extract( x, i ) ] );
     return res;
   }
 
@@ -441,9 +439,9 @@ volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4],
     int width, int height, float image[]) {
   int offset = 0;
   int index = 0;
-  const uniform float xoffsets[16] = { 0.f, 1.f, 0.f, 1.f, 2.f, 3.f, 2.f, 3.f,
+  const float xoffsets[16] = { 0.f, 1.f, 0.f, 1.f, 2.f, 3.f, 2.f, 3.f,
     0.f, 1.f, 0.f, 1.f, 2.f, 3.f, 2.f, 3.f };
-  const uniform float yoffsets[16] = { 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f,
+  const float yoffsets[16] = { 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f,
     2.f, 2.f, 3.f, 3.f, 2.f, 2.f, 3.f, 3.f };
 
   float const varying(LENGTH) *offsetPtr;
