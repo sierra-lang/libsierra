@@ -1,60 +1,23 @@
 #include <algorithm>
-#include <stdio.h>
-#include "../sierra.h"
-#include "../timing.h"
+#include <iostream>
+#include <cstdio>
+
+#include "sierra/sierra.h"
+#include "sierra/timing.h"
 
 using namespace sierra;
 
-#define L 8
+#define L LENGTH
 
-static inline int mandel_serial(float c_re, float c_im, int count) {
-    float z_re = c_re, z_im = c_im;
-    int i = 0;
-
-    while ((i < count) & (z_re * z_re + z_im * z_im < 4.f)) {
-        float new_re = z_re*z_re - z_im*z_im;
-        float new_im = 2.f * z_re * z_im;
-        z_re = c_re + new_re;
-        z_im = c_im + new_im;
-
-        i = i + 1;
-    }
-
-    return i;
-}
-
-static void mandelbrot_serial(float x0, float y0, 
-                       float x1, float y1,
-                       int width, int height, 
-                       int maxIterations, int output[])
-{
-    float dx = (x1 - x0) / width;
-    float dy = (y1 - y0) / height;
-
-    for (int j = 0; j < height; ++j) {
-        for (int i = 0; i < width; ++i) {
-            float x = x0 + i * dx;
-            float y = y0 + j * dy;
-
-            int index = j * width + i;
-            int val = mandel_serial(x, y, maxIterations);
-
-            output[index] = val;
-        }
-    }
-}
-
-static inline int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
-    float varying(L) z_re = c_re, z_im = c_im;
+static inline int varying(L) mandel(float varying(L) c_re, float uniform c_im, int uniform count) {
+    float varying(L) z_re = c_re;
+    float varying(L) z_im = c_im;
     int varying(L) i = 0;
-
-    while ((i < count) & (z_re * z_re + z_im * z_im < 4.f)) {
+    for (; (i < count) & (z_re * z_re + z_im * z_im < 4.f); ++i) {
         float varying(L) new_re = z_re*z_re - z_im*z_im;
         float varying(L) new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
-
-        i = i + 1;
     }
 
     return i;
@@ -68,25 +31,16 @@ static void mandelbrot(float x0, float y0,
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
 
+    int varying(L)* p = (int varying(L)*) output;
     for (int j = 0; j < height; ++j) {
         for (int ii = 0; ii < width; ii += L) {
             int varying(L) i = ii + program_index(L);
             float varying(L) x = x0 + i * dx;
-            float varying(L) y = y0 + j * dy;
-
-            //int varying(L) index = j * width + i;
-            int varying(L) val = mandel(x, y, maxIterations);
-
-            int index = (j * width + ii)/L;
-            *(((int varying(L)*) &output[0]) + index) = val;
-
-            // TODO this is slow
-            //for (int x = 0; x < L; ++x)
-                //output[extract(index, x)] = extract(val, x);
+            float uniform y = y0 + j * dy;
+            *p++ = mandel(x, y, maxIterations);
         }
     }
 }
-
 
 /* Write a PPM image file with the image of the Mandelbrot set */
 static void
@@ -107,8 +61,8 @@ writePPM(int *buf, int width, int height, const char *fn) {
 }
 
 int main() {
-    unsigned int width = 768;
-    unsigned int height = 512;
+    unsigned int width = 1920;
+    unsigned int height = 1200;
     float x0 = -2;
     float x1 = 1;
     float y0 = -1;
@@ -120,26 +74,15 @@ int main() {
     posix_memalign((void**)&buf, 32, sizeof(int)*width*height);
 
 
-    double min_serial = 1e30;
-    for (int i = 0; i < 3; ++i)
-    {
-        reset_and_start_timer();
-        mandelbrot_serial(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        min_serial = std::min(min_serial, dt);
-    }
-    printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", min_serial);
-    writePPM(buf, width, height, "mandelbrot-serial.ppm");
-
-    double min_sierra = 1e30;
-    for (int i = 0; i < 3; ++i)
-    {
+#define NUM_ITER 7
+    double times[NUM_ITER];
+    for (int i = 0; i < NUM_ITER; ++i) {
         reset_and_start_timer();
         mandelbrot(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        min_sierra = std::min(min_sierra, dt);
+        times[i] = get_elapsed_mcycles();
     }
-    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra);
+    std::sort(times, times + NUM_ITER);
+    std::cout << times[NUM_ITER/2] << std::endl;
     writePPM(buf, width, height, "mandelbrot-sierra.ppm");
 
     return 0;
