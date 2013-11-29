@@ -1,52 +1,92 @@
-/*
-  Copyright (c) 2010-2011, Intel Corporation
-  All rights reserved.
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are
-  met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-
-    * Neither the name of Intel Corporation nor the names of its
-      contributors may be used to endorse or promote products derived from
-      this software without specific prior written permission.
-
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-   TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-   PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
-   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-*/
-
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#define NOMINMAX
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4305)
-#endif
-
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
+#include "../sierra.h"
 #include "../timing.h"
-#include "mandelbrot_ispc.h"
-using namespace ispc;
 
-extern void mandelbrot_serial(float x0, float y0, float x1, float y1,
-                              int width, int height, int maxIterations,
-                              int output[]);
+using namespace sierra;
+
+#define L 8
+
+static inline int mandel_serial(float c_re, float c_im, int count) {
+    float z_re = c_re, z_im = c_im;
+    int i = 0;
+
+    while ((i < count) & (z_re * z_re + z_im * z_im < 4.f)) {
+        float new_re = z_re*z_re - z_im*z_im;
+        float new_im = 2.f * z_re * z_im;
+        z_re = c_re + new_re;
+        z_im = c_im + new_im;
+
+        i = i + 1;
+    }
+
+    return i;
+}
+
+static void mandelbrot_serial(float x0, float y0, 
+                       float x1, float y1,
+                       int width, int height, 
+                       int maxIterations, int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    for (int j = 0; j < height; ++j) {
+        for (int i = 0; i < width; ++i) {
+            float x = x0 + i * dx;
+            float y = y0 + j * dy;
+
+            int index = j * width + i;
+            int val = mandel_serial(x, y, maxIterations);
+
+            output[index] = val;
+        }
+    }
+}
+
+static inline int varying(L) mandel(float varying(L) c_re, float varying(L) c_im, int uniform count) {
+    float varying(L) z_re = c_re, z_im = c_im;
+    int varying(L) i = 0;
+
+    while ((i < count) & (z_re * z_re + z_im * z_im < 4.f)) {
+        float varying(L) new_re = z_re*z_re - z_im*z_im;
+        float varying(L) new_im = 2.f * z_re * z_im;
+        z_re = c_re + new_re;
+        z_im = c_im + new_im;
+
+        i = i + 1;
+    }
+
+    return i;
+}
+
+static void mandelbrot(float x0, float y0, 
+                       float x1, float y1,
+                       int width, int height, 
+                       int maxIterations, int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    for (int j = 0; j < height; ++j) {
+        for (int ii = 0; ii < width; ii += L) {
+            int varying(L) i = ii + program_index(L);
+            float varying(L) x = x0 + i * dx;
+            float varying(L) y = y0 + j * dy;
+
+            //int varying(L) index = j * width + i;
+            int varying(L) val = mandel(x, y, maxIterations);
+
+            int index = (j * width + ii)/L;
+            *(((int varying(L)*) &output[0]) + index) = val;
+
+            // TODO this is slow
+            //for (int x = 0; x < L; ++x)
+                //output[extract(index, x)] = extract(val, x);
+        }
+    }
+}
+
 
 /* Write a PPM image file with the image of the Mandelbrot set */
 static void
@@ -66,7 +106,6 @@ writePPM(int *buf, int width, int height, const char *fn) {
     printf("Wrote image file %s\n", fn);
 }
 
-
 int main() {
     unsigned int width = 768;
     unsigned int height = 512;
@@ -76,43 +115,32 @@ int main() {
     float y1 = 1;
 
     int maxIterations = 256;
-    int *buf = new int[width*height];
+    //int *buf = new int[width*height];
+    int* buf;
+    posix_memalign((void**)&buf, 32, sizeof(int)*width*height);
 
-    //
-    // Compute the image using the ispc implementation; report the minimum
-    // time of three runs.
-    //
-    double minISPC = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        mandelbrot_ispc(x0, y0, x1, y1, width, height, maxIterations, buf);
-        double dt = get_elapsed_mcycles();
-        minISPC = std::min(minISPC, dt);
-    }
 
-    printf("[mandelbrot ispc]:\t\t[%.3f] million cycles\n", minISPC);
-    writePPM(buf, width, height, "mandelbrot-ispc.ppm");
-
-    // Clear out the buffer
-    for (unsigned int i = 0; i < width * height; ++i)
-        buf[i] = 0;
-
-    // 
-    // And run the serial implementation 3 times, again reporting the
-    // minimum time.
-    //
-    double minSerial = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    double min_serial = 1e30;
+    for (int i = 0; i < 3; ++i)
+    {
         reset_and_start_timer();
         mandelbrot_serial(x0, y0, x1, y1, width, height, maxIterations, buf);
         double dt = get_elapsed_mcycles();
-        minSerial = std::min(minSerial, dt);
+        min_serial = std::min(min_serial, dt);
     }
-
-    printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", minSerial);
+    printf("[mandelbrot serial]:\t\t[%.3f] million cycles\n", min_serial);
     writePPM(buf, width, height, "mandelbrot-serial.ppm");
 
-    printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
+    double min_sierra = 1e30;
+    for (int i = 0; i < 3; ++i)
+    {
+        reset_and_start_timer();
+        mandelbrot(x0, y0, x1, y1, width, height, maxIterations, buf);
+        double dt = get_elapsed_mcycles();
+        min_sierra = std::min(min_sierra, dt);
+    }
+    printf("[mandelbrot sierra]:\t\t[%.3f] million cycles\n", min_sierra);
+    writePPM(buf, width, height, "mandelbrot-sierra.ppm");
 
     return 0;
 }

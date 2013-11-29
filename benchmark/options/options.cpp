@@ -33,6 +33,7 @@
 
 #define NOMINMAX
 
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +54,8 @@ static void usage() {
 
 
 int main(int argc, char *argv[]) {
-    int nOptions = 128*1024;
+    //int nOptions = 128*1024;
+    int nOptions = 1024*1024;
 
     for (int i = 1; i < argc; ++i) {
         if (strncmp(argv[i], "--count=", 8) == 0) {
@@ -133,18 +135,22 @@ int main(int argc, char *argv[]) {
     // Binomial options, serial implementation
     //
 #endif
-    double binomial_sierra = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        binomial_put_sierra(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        binomial_sierra = std::min(binomial_sierra, dt);
+    {
+        double times[7];
+        for (int i = 0; i < 7; ++i) {
+            reset_and_start_timer();
+            binomial_put_sierra(S, X, T, r, v, result, nOptions);
+            times[i] = get_elapsed_mcycles();
+            sum = 0.;
+            for (int i = 0; i < nOptions; ++i)
+                sum += result[i];
+            //binomial_sierra = std::min(binomial_sierra, dt);
+        }
+        //printf("[binomial serial]:\t\t[%.3f] million cycles (avg %f)\n", 
+            //binomial_sierra, sum / nOptions);
+        std::cout << "binomial" << std::endl;
+        std::cout << times[3] << std::endl;
     }
-    printf("[binomial serial]:\t\t[%.3f] million cycles (avg %f)\n", 
-           binomial_sierra, sum / nOptions);
 
 #if 0
 
@@ -184,18 +190,23 @@ int main(int argc, char *argv[]) {
     // Black-Scholes options pricing model, serial implementation
     //
 #endif
-    double bs_sierra = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    {
+    double times[7];
+    for (int i = 0; i < 7; ++i) {
         reset_and_start_timer();
         black_scholes_sierra(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
+        times[i] = get_elapsed_mcycles();
         sum = 0.;
         for (int i = 0; i < nOptions; ++i)
             sum += result[i];
-        bs_sierra = std::min(bs_sierra, dt);
+        //bs_sierra = std::min(bs_sierra, dt);
     }
-    printf("[black-scholes serial]:\t\t[%.3f] million cycles (avg %f)\n", bs_sierra, 
-           sum / nOptions);
+    std::sort(times, times + 7);
+    //printf("[black-scholes serial]:\t\t[%.3f] million cycles (avg %f)\n", bs_sierra, 
+           //sum / nOptions);
+    std::cout << "black scholes" << std::endl;
+    std::cout << times[3] << std::endl; // median
+    }
 
 #if 0
     printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
