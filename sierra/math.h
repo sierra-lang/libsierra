@@ -404,6 +404,27 @@ inline float varying(L) fmax(float varying(L) a, float varying(L) b) {
     return result;
 }
 
+spmd(L)
+inline int varying(L) imin(int varying(L) a, int varying(L) b) {
+    int varying(L) result;
+    if (a < b)
+        result = a;
+    else
+        result = b;
+    return result;
+}
+
+
+spmd(L)
+inline int varying(L) imax(int varying(L) a, int varying(L) b) {
+    int varying(L) result;
+    if (a > b)
+        result = a;
+    else
+        result = b;
+    return result;
+}
+
 }
 
 #endif
