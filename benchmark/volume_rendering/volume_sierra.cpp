@@ -38,6 +38,7 @@ met:
 #include <math.h>
 
 #include "../../sierra/sierra.h"
+#include "../../sierra/ostream.h"
 #define L LENGTH
 #include "../../sierra/math.h"
 #include "../../sierra/vec3.h"
@@ -331,133 +332,131 @@ transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1,
 }
 
 
-  spmd(LENGTH)
+spmd(LENGTH)
 static float varying(LENGTH)
-  distanceSquared(vec3 varying(LENGTH)& a, vec3 varying(LENGTH)& b) {
+distanceSquared(vec3 varying(LENGTH)& a, vec3 varying(LENGTH)& b) {
     //float3 d = a-b;
     //return d.x*d.x + d.y*d.y + d.z*d.z;
     vec3 varying(LENGTH) d;
     sierra::copy( d, a );
     sierra::sub_assign( d, b );
     return d.x*d.x + d.y*d.y + d.z*d.z;
-  }
+}
 
 
 static float varying(LENGTH)
-  raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
-    float varying(LENGTH) res = 0;
-
+raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
+    float varying(LENGTH) res =  0.f;
     float varying(LENGTH) rayT0;
     float varying(LENGTH) rayT1;
 
     //float3 pMin(.3f, -.2f, .3f), pMax(1.8f, 2.3f, 1.8f);
     vec3 varying(LENGTH) pMin;
-    pMin.x = .3f;
-    pMin.y = -.2f;
-    pMin.z = .3f;
+    create(pMin, .3f, -.2f, .3f);
 
     vec3 varying(LENGTH) pMax;
-    pMax.x = 1.8f;
-    pMax.y = 2.3f;
-    pMax.z = 1.8f;
+    create(pMax, 1.8f, 2.3f, 1.8f);
 
     //float3 lightPos(-1.f, 4.f, 1.5f);
     vec3 varying(LENGTH) lightPos;
-    lightPos.x = -1.f;
-    lightPos.y = 4.f;
-    lightPos.z = 1.5f;
+    create(lightPos, -1.f, 4.f, 1.5f);
 
     spmd_mode(LENGTH)
     {
-      if (IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
-      {
-        rayT0 = sierra::fmax(rayT0, 0.f);
+        if (IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
+        {
+            rayT0 = sierra::fmax(rayT0, 0.f);
 
-        // Parameters that define the volume scattering characteristics and
-        // sampling rate for raymarching
-        float const Le = .25f;           // Emission coefficient
-        float const sigma_a = 10;        // Absorption coefficient
-        float const sigma_s = 10;        // Scattering coefficient
-        float const stepDist = 0.025f;   // Ray step amount
-        float const lightIntensity = 40; // Light source intensity
+            // Parameters that define the volume scattering characteristics and
+            // sampling rate for raymarching
+            float const Le = .25f;           // Emission coefficient
+            float const sigma_a = 10;        // Absorption coefficient
+            float const sigma_s = 10;        // Scattering coefficient
+            float const stepDist = 0.025f;   // Ray step amount
+            float const lightIntensity = 40; // Light source intensity
 
-        float varying(LENGTH) tau = 0.f;  // accumulated beam transmittance
-        float varying(LENGTH) L = 0.f;      // radiance along the ray
-        float varying(LENGTH) rayLength = sierra::sqrt(ray.dir.x * ray.dir.x
-            + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
-        float varying(LENGTH) stepT = stepDist / rayLength;
+            float varying(LENGTH) tau = 0.f;  // accumulated beam transmittance
+            float varying(LENGTH) L = 0.f;      // radiance along the ray
+            float varying(LENGTH) rayLength = sierra::sqrt(ray.dir.x * ray.dir.x
+                    + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
+            float varying(LENGTH) stepT = stepDist / rayLength;
 
-        float varying(LENGTH) t = rayT0;
+            float varying(LENGTH) t = rayT0;
 
-        //float3 pos = ray.dir * rayT0 + ray.origin;
-        vec3 varying(LENGTH) pos;
-        sierra::copy( pos, ray.dir );
-        sierra::mul_assign( pos, rayT0 );
-        sierra::add_assign( pos, ray.origin );
-        //float3 dirStep = ray.dir * stepT;
-        vec3 varying(LENGTH) dirStep;
-        sierra::copy( pos, ray.dir );
-        sierra::mul_assign( pos, stepT );
+            //float3 pos = ray.dir * rayT0 + ray.origin;
+            vec3 varying(LENGTH) pos;
+            sierra::copy( pos, ray.dir );
+            sierra::mul_assign( pos, rayT0 );
+            sierra::add_assign( pos, ray.origin );
+            //float3 dirStep = ray.dir * stepT;
+            vec3 varying(LENGTH) dirStep;
+            sierra::copy( dirStep, ray.dir );
+            sierra::mul_assign( dirStep, stepT );
 
-        bool varying(LENGTH) attenMask = true;
-        while (attenMask && t < rayT1) {
-          float varying(LENGTH) d = Density(pos, pMin, pMax, density, nVoxels);
+            bool varying(LENGTH) attenMask = true;
+            while (attenMask && t < rayT1) {
+                float varying(LENGTH) d = Density(pos, pMin, pMax, density, nVoxels);
 
-          // terminate once attenuation is high
-          float varying(LENGTH) atten = sierra::exp(-tau);
-          if (atten < .005f)
-          {
-            attenMask = false;
-          }
-          else
-          {
+                // terminate once attenuation is high
+                float varying(LENGTH) atten = sierra::exp(-tau);
+                if (atten < .005f)
+                {
+                    attenMask = false;
+                }
+                else
+                {
+                    // direct lighting
+                    float varying(LENGTH) Li = lightIntensity / distanceSquared(lightPos, pos) * 
+                        transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s,
+                                density, nVoxels);
+                    L += stepDist * atten * d * sigma_s * (Li + Le);
 
-            // direct lighting
-            float varying(LENGTH) Li = lightIntensity / distanceSquared(lightPos, pos) * 
-              transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s,
-                  density, nVoxels);
-            L += stepDist * atten * d * sigma_s * (Li + Le);
+                    // update beam transmittance
+                    tau += stepDist * (sigma_a + sigma_s) * d;
 
-            // update beam transmittance
-            tau += stepDist * (sigma_a + sigma_s) * d;
-
-            //pos = pos + dirStep;
-            sierra::add_assign( pos, dirStep );
-            t += stepT;
-          } // end if atten
-        } // end while
-        // Gamma correction
-        res = sierra::pow(L, 1.f / 2.2f);
-      } // end if intersectP
+                    //pos = pos + dirStep;
+                    sierra::add_assign( pos, dirStep );
+                    t += stepT;
+                } // end if atten
+            } // end while
+            // Gamma correction
+            res = sierra::pow(L, 1.f / 2.2f);
+        } // end if intersectP
     }
     return res;
-  }
+}
 
 
 void
 volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4],
     const float camera2world[4][4], 
     int width, int height, float image[]) {
-  int offset = 0;
-  int index = 0;
   const int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
-    0, 1, 0, 1, 2, 3, 2, 3 };
-  const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1,
-    2, 2, 3, 3, 2, 2, 3, 3 };
+                             0, 1, 0, 1, 2, 3, 2, 3 };
+  const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1, 
+                             2, 2, 3, 3, 2, 2, 3, 3 };
 
-  int const varying(LENGTH) *offsetPtr;
+  int const varying(LENGTH) *xOffsetPtr = (int varying(LENGTH)*) xoffsets;
+  int const varying(LENGTH) *yOffsetPtr = (int varying(LENGTH)*) yoffsets;
 
   for (int y = 0; y < height; y += LSQRT<LENGTH>::y) {
     for (int x = 0; x < width; x += LSQRT<LENGTH>::x) {
       Ray varying(LENGTH) ray;
 
-      offsetPtr = (int varying(LENGTH) *) xoffsets;
-      float const varying(LENGTH) xo = (float) x + *offsetPtr;
-      offsetPtr = (int varying(LENGTH) *) yoffsets;
-      float const varying(LENGTH) yo = (float) y + *offsetPtr;
+      float const varying(LENGTH) xo = (float varying(LENGTH)) (x + *xOffsetPtr);
+      float const varying(LENGTH) yo = (float varying(LENGTH)) (y + *yOffsetPtr);
 
       generateRay(raster2camera, camera2world, xo, yo, ray);
       float varying(LENGTH) res = raymarch(density, nVoxels, ray);
+
+      //if (extract(res, 0) != 0.f)
+          //std::cout << extract(res, 0) << std::endl;
+      //if (extract(res, 1) != 0.f)
+          //std::cout << extract(res, 1) << std::endl;
+      //if (extract(res, 2) != 0.f)
+          //std::cout << extract(res, 2) << std::endl;
+      //if (extract(res, 3) != 0.f)
+          //std::cout << extract(res, 3) << std::endl;
 
       int offset = y * width + x;
       // extract vector generated by raymarch, and write it to the
