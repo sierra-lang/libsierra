@@ -40,14 +40,13 @@
 
 #include <stdio.h>
 #include <algorithm>
-#include "../timing.h"
-#include "volume_ispc.h"
-using namespace ispc;
+#include "../../sierra/timing.h"
+//#include "volume_ispc.h"
+//using namespace ispc;
 
-extern void volume_serial(float density[], int nVoxels[3], 
-                          const float raster2camera[4][4],
-                          const float camera2world[4][4], 
-                          int width, int height, float image[]);
+extern void volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4],
+    const float camera2world[4][4], 
+    int width, int height, float image[]);
 
 /* Write a PPM image file with the image */
 static void
@@ -155,60 +154,58 @@ int main(int argc, char *argv[]) {
     // Compute the image using the ispc implementation; report the minimum
     // time of three runs.
     //
-    double minISPC = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        volume_ispc(density, n, raster2camera, camera2world,
-                    width, height, image);
-        double dt = get_elapsed_mcycles();
-        minISPC = std::min(minISPC, dt);
-    }
+    //double minISPC = 1e30;
+    //for (int i = 0; i < 3; ++i) {
+        //reset_and_start_timer();
+        //volume_ispc(density, n, raster2camera, camera2world,
+                    //width, height, image);
+        //double dt = get_elapsed_mcycles();
+        //minISPC = std::min(minISPC, dt);
+    //}
 
-    printf("[volume ispc 1 core]:\t\t[%.3f] million cycles\n", minISPC);
-    writePPM(image, width, height, "volume-ispc-1core.ppm");
+    //printf("[volume ispc 1 core]:\t\t[%.3f] million cycles\n", minISPC);
+    //writePPM(image, width, height, "volume-ispc-1core.ppm");
 
     // Clear out the buffer
-    for (int i = 0; i < width * height; ++i)
-        image[i] = 0.;
+    //for (int i = 0; i < width * height; ++i)
+        //image[i] = 0.;
 
     //
     // Compute the image using the ispc implementation that also uses
     // tasks; report the minimum time of three runs.
     //
-    double minISPCtasks = 1e30;
+    //double minISPCtasks = 1e30;
+    //for (int i = 0; i < 3; ++i) {
+        //reset_and_start_timer();
+        //volume_ispc_tasks(density, n, raster2camera, camera2world,
+                          //width, height, image);
+        //double dt = get_elapsed_mcycles();
+        //minISPCtasks = std::min(minISPCtasks, dt);
+    //}
+
+    //printf("[volume ispc + tasks]:\t\t[%.3f] million cycles\n", minISPCtasks);
+    //writePPM(image, width, height, "volume-ispc-tasks.ppm");
+
+    // Clear out the buffer
+    //for (int i = 0; i < width * height; ++i)
+        //image[i] = 0.;
+
+
+    // Compute the image using the sierra implementation.
+    double minSierra = 1e30;
     for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        volume_ispc_tasks(density, n, raster2camera, camera2world,
-                          width, height, image);
-        double dt = get_elapsed_mcycles();
-        minISPCtasks = std::min(minISPCtasks, dt);
+      reset_and_start_timer();
+      volume_sierra(density, n, raster2camera, camera2world, width, height, image);
+      double dt = get_elapsed_mcycles();
+      minSierra = std::min(minSierra, dt);
     }
 
-    printf("[volume ispc + tasks]:\t\t[%.3f] million cycles\n", minISPCtasks);
-    writePPM(image, width, height, "volume-ispc-tasks.ppm");
+    printf("[volume sierra]:\t\t[%.3f] million cycles\n", minSierra);
+    writePPM(image, width, height, "volume-sierra.ppm");
 
     // Clear out the buffer
     for (int i = 0; i < width * height; ++i)
-        image[i] = 0.;
-
-    // 
-    // And run the serial implementation 3 times, again reporting the
-    // minimum time.
-    //
-    double minSerial = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        volume_serial(density, n, raster2camera, camera2world,
-                      width, height, image);
-        double dt = get_elapsed_mcycles();
-        minSerial = std::min(minSerial, dt);
-    }
-
-    printf("[volume serial]:\t\t[%.3f] million cycles\n", minSerial);
-    writePPM(image, width, height, "volume-serial.ppm");
-
-    printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
-           minSerial/minISPC, minSerial / minISPCtasks);
+      image[i] = 0.;
 
     return 0;
 }
