@@ -67,10 +67,16 @@ struct LSQRT<4> {
   static int const y = 2;
 };
 
+//template<>
+//struct LSQRT<8> {
+  //static int const x = 4;
+  //static int const y = 2;
+//};
+
 template<>
 struct LSQRT<8> {
-  static int const x = 4;
-  static int const y = 2;
+  static int const x = 8;
+  static int const y = 1;
 };
 
 template<>
@@ -80,11 +86,16 @@ struct LSQRT<16> {
 };
 
 struct Ray {
-  vec3 origin, dir;
+  Ray() {}
+  vec3 origin;
+  vec3 dir;
+private:
+  Ray(const Ray&);
+  Ray& operator = (const Ray&);
 };
 
 
-static void
+inline void
 generateRay(const float raster2camera[4][4],
     const float camera2world[4][4],
     int const varying(LENGTH) x, int const varying(LENGTH) y,
@@ -106,30 +117,29 @@ generateRay(const float raster2camera[4][4],
   ray.origin.x = camera2world[0][3] / camera2world[3][3];
   ray.origin.y = camera2world[1][3] / camera2world[3][3];
   ray.origin.z = camera2world[2][3] / camera2world[3][3];
+
 }
 
 
-  spmd(LENGTH)
-static inline bool varying(LENGTH)
-  Inside(vec3 const varying(LENGTH)& p,
+spmd(LENGTH)
+inline int varying(LENGTH) Inside(vec3 const varying(LENGTH)& p,
       vec3 const varying(LENGTH)& pMin,
       vec3 const varying(LENGTH)& pMax) {
-    bool varying(LENGTH) res = false;
+    int varying(LENGTH) res = false;
 
     if (p.x >= pMin.x && p.x <= pMax.x &&
-        p.y >= pMin.y && p.y <= pMax.y &&
-        p.z >= pMin.z && p.z <= pMax.z)
-      res = true;
+            p.y >= pMin.y && p.y <= pMax.y &&
+            p.z >= pMin.z && p.z <= pMax.z)
+        res = true;
 
     return res;
-  }
+}
 
-  spmd(LENGTH)
-static bool varying(LENGTH)
-  IntersectP(const Ray varying(LENGTH)& ray,
-      vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
-      float varying(LENGTH) *hit0, float varying(LENGTH) *hit1) {
-    bool varying(LENGTH) res = false;
+spmd(LENGTH)
+inline int varying(LENGTH) IntersectP(Ray varying(LENGTH)& ray,
+                                       vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
+                                       float varying(LENGTH) *hit0, float varying(LENGTH) *hit1) {
+    int varying(LENGTH) res = false;
 
     float varying(LENGTH) t0 = -1e30f;
     float varying(LENGTH) t1 = 1e30f;
@@ -137,6 +147,7 @@ static bool varying(LENGTH)
     //float3 tNear = (pMin - ray.origin) / ray.dir;
     vec3 varying(LENGTH) tNear;
     sierra::copy( tNear, pMin );
+
     sierra::sub_assign( tNear, ray.origin );
     sierra::div_assign( tNear, ray.dir );
     //float3 tFar  = (pMax - ray.origin) / ray.dir;
@@ -146,9 +157,9 @@ static bool varying(LENGTH)
     sierra::div_assign( tFar, ray.dir );
 
     if (tNear.x > tFar.x) {
-      float const varying(LENGTH) tmp = tNear.x;
-      tNear.x = tFar.x;
-      tFar.x = tmp;
+        float const varying(LENGTH) tmp = tNear.x;
+        tNear.x = tFar.x;
+        tFar.x = tmp;
     }
     //t0 = max(tNear.x, t0);
     t0 = sierra::fmax( tNear.x, t0 );
@@ -156,9 +167,9 @@ static bool varying(LENGTH)
     t1 = sierra::fmin( tFar.x, t1 );
 
     if (tNear.y > tFar.y) {
-      float const varying(LENGTH) tmp = tNear.y;
-      tNear.y = tFar.y;
-      tFar.y = tmp;
+        float const varying(LENGTH) tmp = tNear.y;
+        tNear.y = tFar.y;
+        tFar.y = tmp;
     }
     //t0 = max(tNear.y, t0);
     t0 = sierra::fmax( tNear.y, t0 );
@@ -166,25 +177,24 @@ static bool varying(LENGTH)
     t1 = sierra::fmin( tFar.y, t1 );
 
     if (tNear.z > tFar.z) {
-      float const varying(LENGTH) tmp = tNear.z;
-      tNear.z = tFar.z;
-      tFar.z = tmp;
+        float const varying(LENGTH) tmp = tNear.z;
+        tNear.z = tFar.z;
+        tFar.z = tmp;
     }
+
     //t0 = max(tNear.z, t0);
     t0 = sierra::fmax( tNear.z, t0 );
     //t1 = min(tFar.z, t1);
     t1 = sierra::fmin( tFar.z, t1 );
 
     if (t0 <= t1) {
-      *hit0 = t0;
-      *hit1 = t1;
-      res = true;
+        *hit0 = t0;
+        *hit1 = t1;
+        res = true;
     }
-    else
-      res = false;
 
     return res;
-  }
+}
 
 
   spmd(LENGTH)
@@ -279,10 +289,9 @@ static inline float varying(LENGTH)
   }
 
 
-  spmd(LENGTH)
-  static float varying(LENGTH)
-transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1,
-    vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
+spmd(LENGTH)
+static float varying(LENGTH)
+transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1, vec3 varying(LENGTH)& pMin, vec3 varying(LENGTH)& pMax,
     float const sigma_t, float density[], int nVoxels[3])
 {
   float varying(LENGTH) rayT0;
@@ -325,7 +334,7 @@ transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1,
       sierra::add_assign( pos, dirStep );
       t += stepT;
     }
-    res = sierra::exp(-tau);
+    res = sierra::fast_exp(-tau);
   }
 
   return res;
@@ -345,26 +354,28 @@ distanceSquared(vec3 varying(LENGTH)& a, vec3 varying(LENGTH)& b) {
 
 
 static float varying(LENGTH)
-raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
+raymarch(float density[], int nVoxels[3], Ray varying(LENGTH)& ray) {
     float varying(LENGTH) res =  0.f;
     float varying(LENGTH) rayT0;
     float varying(LENGTH) rayT1;
 
-    //float3 pMin(.3f, -.2f, .3f), pMax(1.8f, 2.3f, 1.8f);
-    vec3 varying(LENGTH) pMin;
-    create(pMin, .3f, -.2f, .3f);
-
-    vec3 varying(LENGTH) pMax;
-    create(pMax, 1.8f, 2.3f, 1.8f);
-
-    //float3 lightPos(-1.f, 4.f, 1.5f);
-    vec3 varying(LENGTH) lightPos;
-    create(lightPos, -1.f, 4.f, 1.5f);
-
     spmd_mode(LENGTH)
     {
+        //float3 pMin(.3f, -.2f, .3f), pMax(1.8f, 2.3f, 1.8f);
+        vec3 varying(LENGTH) pMin;
+        create(pMin, .3f, -.2f, .3f);
+
+        vec3 varying(LENGTH) pMax;
+        create(pMax, 1.8f, 2.3f, 1.8f);
+
+        //float3 lightPos(-1.f, 4.f, 1.5f);
+        vec3 varying(LENGTH) lightPos;
+        create(lightPos, -1.f, 4.f, 1.5f);
+    
         if (IntersectP(ray, pMin, pMax, &rayT0, &rayT1))
         {
+            //print_mask(b);
+
             rayT0 = sierra::fmax(rayT0, 0.f);
 
             // Parameters that define the volume scattering characteristics and
@@ -393,12 +404,12 @@ raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
             sierra::copy( dirStep, ray.dir );
             sierra::mul_assign( dirStep, stepT );
 
-            bool varying(LENGTH) attenMask = true;
+            int varying(LENGTH) attenMask = true;
             while (attenMask && t < rayT1) {
                 float varying(LENGTH) d = Density(pos, pMin, pMax, density, nVoxels);
 
                 // terminate once attenuation is high
-                float varying(LENGTH) atten = sierra::exp(-tau);
+                float varying(LENGTH) atten = sierra::fast_exp(-tau);
                 if (atten < .005f)
                 {
                     attenMask = false;
@@ -420,8 +431,10 @@ raymarch(float density[], int nVoxels[3], const Ray varying(LENGTH)& ray) {
                 } // end if atten
             } // end while
             // Gamma correction
-            res = sierra::pow(L, 1.f / 2.2f);
+            res = sierra::fast_pow(L, 1.f / 2.2f);
         } // end if intersectP
+        //else
+            //res = 1.f;
     }
     return res;
 }
@@ -449,19 +462,11 @@ volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4],
       generateRay(raster2camera, camera2world, xo, yo, ray);
       float varying(LENGTH) res = raymarch(density, nVoxels, ray);
 
-      //if (extract(res, 0) != 0.f)
-          //std::cout << extract(res, 0) << std::endl;
-      //if (extract(res, 1) != 0.f)
-          //std::cout << extract(res, 1) << std::endl;
-      //if (extract(res, 2) != 0.f)
-          //std::cout << extract(res, 2) << std::endl;
-      //if (extract(res, 3) != 0.f)
-          //std::cout << extract(res, 3) << std::endl;
-
-      int offset = y * width + x;
+      //int offset = y * width + x;
       // extract vector generated by raymarch, and write it to the
       for ( int off = 0; off < LENGTH; ++off )
-        image[offset + yoffsets[off] * width + xoffsets[off]]
+        //image[offset + yoffsets[off] * width + xoffsets[off]]
+        image[(y + yoffsets[off]) * width + x + xoffsets[off]]
           = sierra::extract( res, off );
     }
   }

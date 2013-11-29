@@ -38,6 +38,7 @@
 #pragma warning (disable: 4305)
 #endif
 
+#include <iostream>
 #include <stdio.h>
 #include <algorithm>
 #include "../../sierra/timing.h"
@@ -190,17 +191,20 @@ int main(int argc, char *argv[]) {
     //for (int i = 0; i < width * height; ++i)
         //image[i] = 0.;
 
+#define NUM 5
 
     // Compute the image using the sierra implementation.
-    double minSierra = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    double times[NUM];
+    for (int i = 0; i < NUM; ++i) {
       reset_and_start_timer();
       volume_sierra(density, n, raster2camera, camera2world, width, height, image);
-      double dt = get_elapsed_mcycles();
-      minSierra = std::min(minSierra, dt);
+      times[i] = get_elapsed_mcycles();
+      std::cout << times[i] << std::endl;
     }
 
-    printf("[volume sierra]:\t\t[%.3f] million cycles\n", minSierra);
+    std::sort(times, times+NUM);
+    std::cout << "median: " << times[NUM/2] << std::endl;
+
     writePPM(image, width, height, "volume-sierra.ppm");
 
     // Clear out the buffer
