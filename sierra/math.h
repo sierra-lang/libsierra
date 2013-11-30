@@ -383,47 +383,88 @@ inline float varying(L) fast_pow(float varying(L) a, float varying(L) b) {
     return fast_exp(b * fast_log(a));
 }
 
-spmd(L)
-inline float varying(L) fmin(float varying(L) a, float varying(L) b) {
-    float varying(L) result;
+inline float varying(L) fmin_l(float varying(L) a, float varying(L) b) { 
+    float varying(L) res;
     if (a < b)
-        result = a;
+        res = a;
     else
-        result = b;
-    return result;
+        res = b;
+    return res;
 }
 
-
-spmd(L)
-inline float varying(L) fmax(float varying(L) a, float varying(L) b) {
-    float varying(L) result;
+inline float varying(L) fmax_l(float varying(L) a, float varying(L) b) { 
+    float varying(L) res;
     if (a > b)
-        result = a;
+        res = a;
     else
-        result = b;
-    return result;
+        res = b;
+    return res;
 }
 
-spmd(L)
-inline int varying(L) imin(int varying(L) a, int varying(L) b) {
-    int varying(L) result;
-    if (a < b)
-        result = a;
-    else
-        result = b;
-    return result;
-}
+float varying(4)  fmin1x4(float varying(4),  float varying(4)) { return 0.f; }
+//float varying(8)  fmin2x4(float varying(8),  float varying(8)) { return 0.f; }
+float varying(8)  fmin1x8(float varying(8),  float varying(8)) { return 0.f; }
+//float varying(16) fmin2x8(float varying(16), float varying(16)) { return 0.f; }
 
+float varying(4)  fmax1x4(float varying(4),  float varying(4)) { return 0.f; }
+//float varying(8)  fmax2x4(float varying(8),  float varying(8)) { return 0.f; }
+float varying(8)  fmax1x8(float varying(8),  float varying(8)) { return 0.f; }
+//float varying(16) fmax2x8(float varying(16), float varying(16)) { return 0.f; }
 
-spmd(L)
-inline int varying(L) imax(int varying(L) a, int varying(L) b) {
-    int varying(L) result;
-    if (a > b)
-        result = a;
-    else
-        result = b;
-    return result;
-}
+int varying(4)  imin1x4(int varying(4), int varying(4)) { return 0; }
+int varying(8)  imin2x4(int varying(8), int varying(8)) { return 0; }
+int varying(8)  imin1x8(int varying(8), int varying(8)) { return 0; }
+int varying(16) imin2x8(int varying(16), int varying(16)) { return 0; }
+
+int varying(4)  imax1x4(int varying(4), int varying(4)) { return 0; }
+int varying(8)  imax2x4(int varying(8), int varying(8)) { return 0; }
+int varying(8)  imax1x8(int varying(8), int varying(8)) { return 0; }
+int varying(16) imax2x8(int varying(16), int varying(16)) { return 0; }
+
+#if (L == 1)
+    inline int varying(L) imin(int varying(L) a, int varying(L) b) { 
+        int varying(L) res;
+        if (a < b)
+            res = a;
+        else
+            res = b;
+        return res;
+    }
+    inline int varying(L) imax(int varying(L) a, int varying(L) b) { 
+        int varying(L) res;
+        if (a > b)
+            res = a;
+        else
+            res = b;
+        return res;
+    }
+    float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin_l(a, b); }
+    float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax_l(a, b); }
+#elif (L == 4)
+    inline int varying(L) imin(int varying(L) a, int varying(L) b) { return imin1x4(a, b); }
+    inline int varying(L) imax(int varying(L) a, int varying(L) b) { return imax1x4(a, b); }
+    float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin1x4(a, b); }
+    float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax1x4(a, b); }
+#elif (L == 8)
+    inline int varying(L) imin(int varying(L) a, int varying(L) b) { return imin1x8(a, b); }
+    inline int varying(L) imax(int varying(L) a, int varying(L) b) { return imax1x8(a, b); }
+#ifdef AVX
+    float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin1x8(a, b); }
+    float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax1x8(a, b); }
+#else
+    float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin_l(a, b); }
+    float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax_l(a, b); }
+#endif
+#elif (L == 16)
+    inline int varying(L) imin(int varying(L) a, int varying(L) b) { return imin2x8(a, b); }
+    inline int varying(L) imax(int varying(L) a, int varying(L) b) { return imax2x8(a, b); }
+    float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin_l(a, b); }
+    float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax_l(a, b); }
+#else
+    #error ("unsupported vector length")
+#endif
+
+float varying(L) fgather(float*, int varying(L)) { return 0.f; }
 
 }
 

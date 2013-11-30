@@ -67,16 +67,10 @@ struct LSQRT<4> {
   static int const y = 2;
 };
 
-//template<>
-//struct LSQRT<8> {
-  //static int const x = 4;
-  //static int const y = 2;
-//};
-
 template<>
 struct LSQRT<8> {
-  static int const x = 8;
-  static int const y = 1;
+  static int const x = 4;
+  static int const y = 2;
 };
 
 template<>
@@ -210,15 +204,21 @@ static inline int varying(LENGTH)
       int varying(LENGTH) high) {
     return sierra::imin(sierra::imax(v, low), high);
   }
+#if 0
+
+inline int varying(LENGTH) nospmd_clamp(int varying(LENGTH) v, int varying(LENGTH) low, int varying(LENGTH) high) {
+    int varying(LENGTH) i;
+    //spmd_mode(LENGTH)
+        i = sierra::imin(sierra::imax(v, low), high);
+    return i;
+}
 
 
-  spmd(LENGTH)
-static inline float varying(LENGTH)
-  D(int varying(LENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
+float varying(LENGTH) foobar(int varying(LENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
       int nVoxels[3], float density[]) {
-    x = Clamp(x, 0, nVoxels[0]-1);
-    y = Clamp(y, 0, nVoxels[1]-1);
-    z = Clamp(z, 0, nVoxels[2]-1);
+    x = nospmd_clamp(x, 0, nVoxels[0]-1);
+    y = nospmd_clamp(y, 0, nVoxels[1]-1);
+    z = nospmd_clamp(z, 0, nVoxels[2]-1);
 
     // Gather
     //return density[z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x];
@@ -229,7 +229,21 @@ static inline float varying(LENGTH)
           + sierra::extract( y, i ) * nVoxels[0]
           + sierra::extract( x, i ) ] );
     return res;
-  }
+}
+
+#endif
+
+  spmd(LENGTH)
+static inline float varying(LENGTH)
+  D(int varying(LENGTH) x, int varying(LENGTH) y, int varying(LENGTH) z,
+      int nVoxels[3], float density[]) {
+    x = Clamp(x, 0, nVoxels[0]-1);
+    y = Clamp(y, 0, nVoxels[1]-1);
+    z = Clamp(z, 0, nVoxels[2]-1);
+    int varying(LENGTH) pos = z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x;
+
+    return fgather(density, pos);
+}
 
 
 //static inline float3 Offset(float3 p, float3 pMin, float3 pMax) {

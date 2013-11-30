@@ -1,7 +1,4 @@
-#include <iostream>
-
-#include "sierra.h"
-#include "sierra_ostream.h"
+#include "sierra/defines.h"
 
 int main() {
     int varying(4) a = {0, 1, 2, 3};
@@ -11,6 +8,4 @@ int main() {
         a = a - 1;
     else
         a = a + 1;
-
-    std::cout << a << std::endl;
 }
