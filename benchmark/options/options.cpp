@@ -40,9 +40,8 @@
 #include <assert.h>
 #include <math.h>
 #include <algorithm>
-using std::max;
 
-#include "options_defs.h"
+//#include "options_defs.h"
 #include "sierra/timing.h"
 
 void black_scholes_sierra(float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count);
