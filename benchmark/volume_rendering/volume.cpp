@@ -339,13 +339,13 @@ static void writePPM(float *buf, int width, int height, const char *fn) {
     printf("Wrote image file %s\n", fn);
 }
 
-static void loadCamera(const char *fn, int *width, int *height, float raster2camera[4][4], float camera2world[4][4]) {
+static void loadCamera(const char *fn, int& width, int& height, float raster2camera[4][4], float camera2world[4][4]) {
     FILE *f = fopen(fn, "r");
     if (!f) {
         perror(fn);
         exit(1);
     }
-    if (fscanf(f, "%d %d", width, height) != 2) {
+    if (fscanf(f, "%d %d", &width, &height) != 2) {
         fprintf(stderr, "Unexpected end of file in camera file\n");
         exit(1);
     }
@@ -394,21 +394,26 @@ static float* loadVolume(const char *fn, int n[3]) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "usage: volume <camera.dat> <volume_density.vol>\n");
-        return 1;
+    int width, height, num_iters = 1;
+    float raster2camera[4][4], camera2world[4][4];
+    float* volume;
+    int n[3];
+    const char* exe = argc > 0 ? argv[0] : "volume";
+
+    if (argc >= 2)
+        loadCamera(argv[1], width, height, raster2camera, camera2world);
+    if (argc >= 3)
+        volume = loadVolume(argv[2], n);
+
+    if (argc >= 4)
+        num_iters = atoi(argv[3]);
+
+    if (argc < 1 || argc >= 5) {
+        std::cout << "Usage: " << exe << " <camara.dat> <volume.vol> [number of test iterations]" << std::endl;
+        return -1;
     }
 
-    //
-    // Load viewing data and the volume density data
-    //
-    int width, height;
-    float raster2camera[4][4], camera2world[4][4];
-    loadCamera(argv[1], &width, &height, raster2camera, camera2world);
     float *image = new float[width*height];
-
-    int n[3];
-    float *volume = loadVolume(argv[2], n);
 
 #define NUM 1
 

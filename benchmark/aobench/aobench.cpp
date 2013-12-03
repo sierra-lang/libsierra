@@ -288,7 +288,7 @@ int main(int argc, char **argv)
         height    = atoi(argv[3]);
     } else if (argc != 1) {
         const char* exe = argc > 0 ? argv[0] : "aobench";
-        std::cout << "Usage: " << exe << " [num test iterations] [width] [height] " << std::endl;
+        std::cout << "Usage: " << exe << " [number of test iterations] [width] [height] " << std::endl;
         return -1;
     }
 
