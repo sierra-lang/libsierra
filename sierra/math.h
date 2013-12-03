@@ -8,16 +8,20 @@ namespace sierra {
 #define floatbits(i) *(float varying(L)*) (&i)
 #define   intbits(f) *(int   varying(L)*) (&f)
 
-//static float varying(L) exp(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) exp2(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) log(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) log2(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) log10(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) pow(float varying(L), float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) powi(float varying(L), int varying(L)) { [> dummy <] return 0.f; }
+namespace exact {
+    // TODO triger them in the Sierra compiler
+    static float varying(L) exp(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) exp2(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) log(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) log2(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) log10(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) pow(float varying(L), float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) powi(float varying(L), int varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) sin(float varying(L)) { /* dummy */ return 0.f; }
+    static float varying(L) cos(float varying(L)) { /* dummy */ return 0.f; }
+}
+
 static float varying(L) sqrt(float varying(L)) { /* dummy */ return 0.f; }
-//static float varying(L) sin(float varying(L)) { [> dummy <] return 0.f; }
-//static float varying(L) cos(float varying(L)) { [> dummy <] return 0.f; }
 static float varying(L) fma(float varying(L), float varying(L), float varying(L)) { /* dummy */ return 0.f; }
 static float varying(L) fabs(float varying(L)) { /* dummy */ return 0.f; }
 static float varying(L) floor(float varying(L)) { /* dummy */ return 0.f; }
