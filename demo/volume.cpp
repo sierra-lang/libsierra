@@ -325,11 +325,13 @@ static void render(float volume[], int nVoxels[3], const float raster2camera[4][
             float varying(L) res = raymarch(volume, nVoxels, ray);
 
             for ( int off = 0; off < L; ++off ) {
+                int i = (y + yoffsets[off]) * width + x + xoffsets[off];
                 float val = extract( res, off );
-                image[(y + yoffsets[off]) * width + x + xoffsets[off]] = val;
-                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 0] = val*255.f;
-                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 1] = val*255.f;
-                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 2] = val*255.f;
+                image[i] = val;
+                val *= 255.f;
+                ((uint8_t*) surface->pixels)[4*i+0] = val;
+                ((uint8_t*) surface->pixels)[4*i+1] = val;
+                ((uint8_t*) surface->pixels)[4*i+2] = val;
             }
         }
         SDL_UpdateWindowSurface(window);
