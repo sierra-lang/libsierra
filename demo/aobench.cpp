@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
     }
 
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Ambient Occlusion", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
     SDL_DisplayMode mode;
     mode.w = width;
     mode.h = height;
@@ -323,5 +323,6 @@ int main(int argc, char **argv) {
     SDL_Delay(2000);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
     return 0;
 }

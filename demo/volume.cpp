@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <SDL2/SDL.h>
+
 #include "sierra/sierra.h"
 #include "sierra/ostream.h"
 #include "sierra/timing.h"
@@ -15,6 +17,9 @@
 #endif
 #include "sierra/math.h"
 #include "sierra/vec3.h"
+
+SDL_Surface* surface;
+SDL_Window* window;
 
 using namespace sierra;
 
@@ -319,9 +324,15 @@ static void render(float volume[], int nVoxels[3], const float raster2camera[4][
             generateRay(raster2camera, camera2world, xo, yo, ray);
             float varying(L) res = raymarch(volume, nVoxels, ray);
 
-            for ( int off = 0; off < L; ++off )
-                image[(y + yoffsets[off]) * width + x + xoffsets[off]] = extract( res, off );
+            for ( int off = 0; off < L; ++off ) {
+                float val = extract( res, off );
+                image[(y + yoffsets[off]) * width + x + xoffsets[off]] = val;
+                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 0] = val*255.f;
+                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 1] = val*255.f;
+                ((uint8_t*) surface->pixels)[4 * ((y + yoffsets[off]) * width + x + xoffsets[off]) + 2] = val*255.f;
+            }
         }
+        SDL_UpdateWindowSurface(window);
     }
 }
 
@@ -411,10 +422,21 @@ int main(int argc, char *argv[]) {
     if (argc >= 4)
         num_iters = atoi(argv[3]);
 
-    if (argc < 1 || argc >= 5) {
+    if (argc <= 1 || argc >= 5) {
         std::cout << "Usage: " << exe << " <camara.dat> <volume.vol> [number of test iterations]" << std::endl;
         return -1;
     }
+
+    SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow("Ambient Occlusion", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+    SDL_DisplayMode mode;
+    mode.w = width;
+    mode.h = height;
+    mode.refresh_rate = 0;
+    mode.format = SDL_PIXELFORMAT_RGB24;
+    mode.driverdata = 0;
+    SDL_SetWindowDisplayMode(window, &mode);
+    surface = SDL_GetWindowSurface(window);
 
     float *image = new float[width*height];
     // Clear out the buffer
@@ -426,6 +448,10 @@ int main(int argc, char *argv[]) {
     std::cout << get_elapsed_mcycles() << std::endl;
 
     writePPM(image, width, height, "out.ppm");
+
+    SDL_Delay(2000);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
