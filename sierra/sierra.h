@@ -72,6 +72,38 @@ void for_each(int begin, int end, B body) {
             body();
 }
 
+template<int> struct Tile {};
+
+template<>
+struct Tile<1> {
+    static int const x = 1;
+    static int const y = 1;
+};
+
+template<>
+struct Tile<2> {
+    static int const x = 2;
+    static int const y = 1;
+};
+
+template<>
+struct Tile<4> {
+    static int const x = 2;
+    static int const y = 2;
+};
+
+template<>
+struct Tile<8> {
+    static int const x = 4;
+    static int const y = 2;
+};
+
+template<>
+struct Tile<16> {
+    static int const x = 4;
+    static int const y = 4;
+};
+
 } // namespace sierra
 
 #if 0

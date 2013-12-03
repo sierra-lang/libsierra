@@ -15,39 +15,6 @@
 
 using namespace sierra;
 
-template<int>
-struct LSQRT {};
-
-template<>
-struct LSQRT<1> {
-    static int const x = 1;
-    static int const y = 1;
-};
-
-template<>
-struct LSQRT<2> {
-    static int const x = 2;
-    static int const y = 1;
-};
-
-template<>
-struct LSQRT<4> {
-    static int const x = 2;
-    static int const y = 2;
-};
-
-template<>
-struct LSQRT<8> {
-    static int const x = 4;
-    static int const y = 2;
-};
-
-template<>
-struct LSQRT<16> {
-    static int const x = 4;
-    static int const y = 4;
-};
-
 struct Ray {
     vec3 origin;
     vec3 dir;
@@ -341,8 +308,8 @@ static void render(float volume[], int nVoxels[3], const float raster2camera[4][
     int const varying(L) *xOffsetPtr = (int varying(L)*) xoffsets;
     int const varying(L) *yOffsetPtr = (int varying(L)*) yoffsets;
 
-    for (int y = 0; y < height; y += LSQRT<L>::y) {
-        for (int x = 0; x < width; x += LSQRT<L>::x) {
+    for (int y = 0; y < height; y += Tile<L>::y) {
+        for (int x = 0; x < width; x += Tile<L>::x) {
             Ray varying(L) ray;
 
             float const varying(L) xo = (float varying(L)) (x + *xOffsetPtr);
