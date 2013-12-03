@@ -143,9 +143,7 @@ spmd(L) void cross(vec3 varying(L)& res, const vec3 varying(L)& v, const vec3 va
 }
 
 spmd(L) void normalize(vec3 varying(L)& v) {
-    float varying(L) len2 = dot(v, v);
-    float varying(L) invlen = 1.f / sqrt(len2);
-    mul_assign(v, invlen);
+    div_assign(v, sqrt(dot(v, v)));
 }
 
 spmd(L) void splat(vec3 varying(L)& res, const vec3& u) {

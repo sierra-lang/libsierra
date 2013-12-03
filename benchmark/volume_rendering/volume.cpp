@@ -44,9 +44,7 @@ static spmd(L)
 int varying(L) Inside(vec3 const varying(L)& p, vec3 const varying(L)& pMin, vec3 const varying(L)& pMax) {
     int varying(L) res = false;
 
-    if (p.x >= pMin.x && p.x <= pMax.x &&
-            p.y >= pMin.y && p.y <= pMax.y &&
-            p.z >= pMin.z && p.z <= pMax.z)
+    if (p.x >= pMin.x && p.x <= pMax.x && p.y >= pMin.y && p.y <= pMax.y && p.z >= pMin.z && p.z <= pMax.z)
         res = true;
 
     return res;
@@ -113,7 +111,7 @@ int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varyin
 static spmd(L)
 float varying(L) lerp(float varying(L) t, float varying(L) a, float varying(L) b) {
     return (1.f - t) * a + t * b;
-  }
+}
 
 
 static spmd(L)
@@ -138,7 +136,7 @@ void offset(vec3 varying(L)& res, vec3 const varying(L)& p, vec3 const varying(L
   sub_assign( tmp, pMin ); // pMax - pMin
   copy( res, p );
   sub_assign( res, pMin ); // p - pMin
-  div_assign( res, tmp ); // (p - pMin) / (pMax - pMin)
+  div_assign( res, tmp );  //(p - pMin) / (pMax - pMin)
 }
 
 static spmd(L)
@@ -193,7 +191,7 @@ float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 va
         float varying(L) tau = 0;
         float varying(L) rayLength = sqrt(ray.dir.x * ray.dir.x
                 + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
-        float const stepDist = 0.2f;
+        static float const stepDist = 0.2f;
         float varying(L) stepT = stepDist / rayLength;
 
         float varying(L) t = rayT0;
@@ -249,11 +247,11 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
 
         // Parameters that define the volume scattering characteristics and
         // sampling rate for raymarching
-        float const Le = .25f;           // Emission coefficient
-        float const sigma_a = 10;        // Absorption coefficient
-        float const sigma_s = 10;        // Scattering coefficient
-        float const stepDist = 0.025f;   // Ray step amount
-        float const lightIntensity = 40; // Light source intensity
+        static float const Le = .25f;           // Emission coefficient
+        static float const sigma_a = 10;        // Absorption coefficient
+        static float const sigma_s = 10;        // Scattering coefficient
+        static float const stepDist = 0.025f;   // Ray step amount
+        static float const lightIntensity = 40; // Light source intensity
 
         float varying(L) tau = 0.f;  // accumulated beam transmittance
         float varying(L) rayLength = sqrt(dot(ray.dir, ray.dir));
@@ -300,10 +298,10 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
 }
 
 static void render(float volume[], int nVoxels[3], const float raster2camera[4][4], const float camera2world[4][4], int width, int height, float image[]) {
-    const int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
-                                0, 1, 0, 1, 2, 3, 2, 3 };
-    const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1, 
-                                2, 2, 3, 3, 2, 2, 3, 3 };
+    static const int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
+                                      0, 1, 0, 1, 2, 3, 2, 3 };
+    static const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1, 
+                                      2, 2, 3, 3, 2, 2, 3, 3 };
 
     int const varying(L) *xOffsetPtr = (int varying(L)*) xoffsets;
     int const varying(L) *yOffsetPtr = (int varying(L)*) yoffsets;
