@@ -8,16 +8,16 @@ namespace sierra {
 #define floatbits(i) *(float varying(L)*) (&i)
 #define   intbits(f) *(int   varying(L)*) (&f)
 
-static float varying(L) exp(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) exp2(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) log(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) log2(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) log10(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) pow(float varying(L), float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) powi(float varying(L), int varying(L)) { /* dummy */ return 0.f; }
+//static float varying(L) exp(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) exp2(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) log(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) log2(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) log10(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) pow(float varying(L), float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) powi(float varying(L), int varying(L)) { [> dummy <] return 0.f; }
 static float varying(L) sqrt(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) sin(float varying(L)) { /* dummy */ return 0.f; }
-static float varying(L) cos(float varying(L)) { /* dummy */ return 0.f; }
+//static float varying(L) sin(float varying(L)) { [> dummy <] return 0.f; }
+//static float varying(L) cos(float varying(L)) { [> dummy <] return 0.f; }
 static float varying(L) fma(float varying(L), float varying(L), float varying(L)) { /* dummy */ return 0.f; }
 static float varying(L) fabs(float varying(L)) { /* dummy */ return 0.f; }
 static float varying(L) floor(float varying(L)) { /* dummy */ return 0.f; }
@@ -27,7 +27,7 @@ static float varying(L) rint(float varying(L)) { /* dummy */ return 0.f; }
 static float varying(L) nearbyint(float varying(L)) { /* dummy */ return 0.f; }
 
 spmd(L)
-inline float varying(L) fast_sin(float varying(L) x_full) {
+inline float varying(L) sin(float varying(L) x_full) {
     static const float pi_over_two_vec = 1.57079637050628662109375f;
     static const float two_over_pi_vec = 0.636619746685028076171875f;
     float varying(L) scaled = x_full * two_over_pi_vec;
@@ -95,7 +95,7 @@ inline float varying(L) fast_sin(float varying(L) x_full) {
 }
 
 spmd(L)
-inline float varying(L) fast_cos(float varying(L) x_full) {
+inline float varying(L) cos(float varying(L) x_full) {
     static const float pi_over_two_vec = 1.57079637050628662109375f;
     static const float two_over_pi_vec = 0.636619746685028076171875f;
     float varying(L) scaled = x_full * two_over_pi_vec;
@@ -230,7 +230,7 @@ inline void sincos(float varying(L) x_full, float varying(L)& uniform sin_result
 }
 
 spmd(L)
-inline float varying(L) fast_exp(float varying(L) x_full) {
+inline float varying(L) exp(float varying(L) x_full) {
     static const float ln2_part1 = 0.6931457519f;
     static const float ln2_part2 = 1.4286067653e-6f;
     static const float one_over_ln2 = 1.44269502162933349609375f;
@@ -320,7 +320,7 @@ inline void range_reduce_log(float varying(L) input, float varying(L)& reduced, 
 }
 
 spmd(L)
-inline float varying(L) fast_log(float varying(L) x_full) {
+inline float varying(L) log(float varying(L) x_full) {
     static const int NaN_bits = 0x7fc00000;
     static const int Neg_Inf_bits = 0xFF800000;
     static const float NaN = *((float*) &NaN_bits);
@@ -379,8 +379,8 @@ inline float varying(L) fast_log(float varying(L) x_full) {
 }
 
 spmd(L)
-inline float varying(L) fast_pow(float varying(L) a, float varying(L) b) {
-    return fast_exp(b * fast_log(a));
+inline float varying(L) pow(float varying(L) a, float varying(L) b) {
+    return exp(b * log(a));
 }
 
 inline float varying(L) fmin_l(float varying(L) a, float varying(L) b) { 
