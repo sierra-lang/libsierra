@@ -155,7 +155,7 @@ int varying(L) clamp(int varying(L) v, int varying(L) low, int varying(L) high) 
 }
 
 static spmd(L)
-float varying(L) D(int varying(L) x, int varying(L) y, int varying(L) z, int nVoxels[3], float volume[]) {
+float varying(L) lookup(int varying(L) x, int varying(L) y, int varying(L) z, int nVoxels[3], float volume[]) {
     x = clamp(x, 0, nVoxels[0]-1);
     y = clamp(y, 0, nVoxels[1]-1);
     z = clamp(z, 0, nVoxels[2]-1);
@@ -192,14 +192,10 @@ float varying(L) density(vec3 varying(L)& Pobj, vec3 varying(L)& pMin, vec3 vary
         float varying(L) dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
 
         // Trilinearly interpolate volume values to compute local density
-        float varying(L) d00 = lerp(dx, D(vx, vy, vz, nVoxels, volume),     
-                D(vx+1, vy, vz, nVoxels, volume));
-        float varying(L) d10 = lerp(dx, D(vx, vy+1, vz, nVoxels, volume),   
-                D(vx+1, vy+1, vz, nVoxels, volume));
-        float varying(L) d01 = lerp(dx, D(vx, vy, vz+1, nVoxels, volume),   
-                D(vx+1, vy, vz+1, nVoxels, volume));
-        float varying(L) d11 = lerp(dx, D(vx, vy+1, vz+1, nVoxels, volume), 
-                D(vx+1, vy+1, vz+1, nVoxels, volume));
+        float varying(L) d00 = lerp(dx, lookup(vx, vy+0, vz+0, nVoxels, volume), lookup(vx+1, vy+0, vz+0, nVoxels, volume));
+        float varying(L) d10 = lerp(dx, lookup(vx, vy+1, vz+0, nVoxels, volume), lookup(vx+1, vy+1, vz+0, nVoxels, volume));
+        float varying(L) d01 = lerp(dx, lookup(vx, vy+0, vz+1, nVoxels, volume), lookup(vx+1, vy+0, vz+1, nVoxels, volume));
+        float varying(L) d11 = lerp(dx, lookup(vx, vy+1, vz+1, nVoxels, volume), lookup(vx+1, vy+1, vz+1, nVoxels, volume));
         float varying(L) d0 = lerp(dy, d00, d10);
         float varying(L) d1 = lerp(dy, d01, d11);
         res = lerp(dz, d0, d1);
@@ -254,7 +250,6 @@ float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 va
 
     return res;
 }
-
 
 static spmd(L)
 float varying(L) distanceSquared(vec3 varying(L)& a, vec3 varying(L)& b) {
