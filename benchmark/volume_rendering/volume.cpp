@@ -85,7 +85,8 @@ int varying(L) Inside(vec3 const varying(L)& p, vec3 const varying(L)& pMin, vec
     return res;
 }
 
-static spmd(L) int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float varying(L)& hit0, float varying(L)& hit1) {
+static spmd(L) 
+int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float varying(L)& hit0, float varying(L)& hit1) {
     int varying(L) res = false;
     float varying(L) t0 = -1e30f;
     float varying(L) t1 = 1e30f;
@@ -142,28 +143,26 @@ static spmd(L) int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pM
     return res;
 }
 
-  spmd(L)
-static float varying(L)
-  Lerp(float varying(L) t, float varying(L) a, float varying(L) b) {
+static spmd(L)
+float varying(L) lerp(float varying(L) t, float varying(L) a, float varying(L) b) {
     return (1.f - t) * a + t * b;
   }
 
 
 static spmd(L)
-int varying(L) Clamp(int varying(L) v, int varying(L) low, int varying(L) high) {
+int varying(L) clamp(int varying(L) v, int varying(L) low, int varying(L) high) {
     return imin(imax(v, low), high);
 }
 
 static spmd(L)
-float varying(L) D(int varying(L) x, int varying(L) y, int varying(L) z, int nVoxels[3], float density[]) {
-    x = Clamp(x, 0, nVoxels[0]-1);
-    y = Clamp(y, 0, nVoxels[1]-1);
-    z = Clamp(z, 0, nVoxels[2]-1);
+float varying(L) D(int varying(L) x, int varying(L) y, int varying(L) z, int nVoxels[3], float volume[]) {
+    x = clamp(x, 0, nVoxels[0]-1);
+    y = clamp(y, 0, nVoxels[1]-1);
+    z = clamp(z, 0, nVoxels[2]-1);
     int varying(L) pos = z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x;
 
-    return fgather(density, pos);
+    return fgather(volume, pos);
 }
-
 
 static spmd(L)
 void offset(vec3 varying(L)& res, vec3 const varying(L)& p, vec3 const varying(L)& pMin, vec3 const varying(L)& pMax) {
@@ -175,45 +174,42 @@ void offset(vec3 varying(L)& res, vec3 const varying(L)& p, vec3 const varying(L
   div_assign( res, tmp ); // (p - pMin) / (pMax - pMin)
 }
 
-  spmd(L)
-static inline float varying(L)
-  Density(vec3 varying(L)& Pobj, vec3 varying(L)& pMin,
-      vec3 varying(L)& pMax, float density[], int nVoxels[3]) {
+static spmd(L)
+float varying(L) density(vec3 varying(L)& Pobj, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float volume[], int nVoxels[3]) {
     float varying(L) res = 0;
 
-    if (Inside(Pobj, pMin, pMax)) 
-    {
-      // Compute voxel coordinates and offsets for _Pobj_
-      //float3 vox = Offset(Pobj, pMin, pMax);
-      vec3 varying(L) vox;
-      offset( vox, Pobj, pMin, pMax ); // init vox
-      vox.x = vox.x * nVoxels[0] - .5f;
-      vox.y = vox.y * nVoxels[1] - .5f;
-      vox.z = vox.z * nVoxels[2] - .5f;
-      int varying(L) vx = (int varying(L))(vox.x);
-      int varying(L) vy = (int varying(L))(vox.y);
-      int varying(L) vz = (int varying(L))(vox.z);
-      float varying(L) dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
+    if (Inside(Pobj, pMin, pMax)) {
+        // Compute voxel coordinates and offsets for _Pobj_
+        //float3 vox = Offset(Pobj, pMin, pMax);
+        vec3 varying(L) vox;
+        offset( vox, Pobj, pMin, pMax ); // init vox
+        vox.x = vox.x * nVoxels[0] - .5f;
+        vox.y = vox.y * nVoxels[1] - .5f;
+        vox.z = vox.z * nVoxels[2] - .5f;
+        int varying(L) vx = (int varying(L))(vox.x);
+        int varying(L) vy = (int varying(L))(vox.y);
+        int varying(L) vz = (int varying(L))(vox.z);
+        float varying(L) dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
 
-      // Trilinearly interpolate density values to compute local density
-      float varying(L) d00 = Lerp(dx, D(vx, vy, vz, nVoxels, density),     
-          D(vx+1, vy, vz, nVoxels, density));
-      float varying(L) d10 = Lerp(dx, D(vx, vy+1, vz, nVoxels, density),   
-          D(vx+1, vy+1, vz, nVoxels, density));
-      float varying(L) d01 = Lerp(dx, D(vx, vy, vz+1, nVoxels, density),   
-          D(vx+1, vy, vz+1, nVoxels, density));
-      float varying(L) d11 = Lerp(dx, D(vx, vy+1, vz+1, nVoxels, density), 
-          D(vx+1, vy+1, vz+1, nVoxels, density));
-      float varying(L) d0 = Lerp(dy, d00, d10);
-      float varying(L) d1 = Lerp(dy, d01, d11);
-      res = Lerp(dz, d0, d1);
+        // Trilinearly interpolate volume values to compute local density
+        float varying(L) d00 = lerp(dx, D(vx, vy, vz, nVoxels, volume),     
+                D(vx+1, vy, vz, nVoxels, volume));
+        float varying(L) d10 = lerp(dx, D(vx, vy+1, vz, nVoxels, volume),   
+                D(vx+1, vy+1, vz, nVoxels, volume));
+        float varying(L) d01 = lerp(dx, D(vx, vy, vz+1, nVoxels, volume),   
+                D(vx+1, vy, vz+1, nVoxels, volume));
+        float varying(L) d11 = lerp(dx, D(vx, vy+1, vz+1, nVoxels, volume), 
+                D(vx+1, vy+1, vz+1, nVoxels, volume));
+        float varying(L) d0 = lerp(dy, d00, d10);
+        float varying(L) d1 = lerp(dy, d01, d11);
+        res = lerp(dz, d0, d1);
     }
-    return res;
-  }
 
+    return res;
+}
 
 static spmd(L)
-float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float sigma_t, float density[], int nVoxels[3]) {
+float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float sigma_t, float volume[], int nVoxels[3]) {
     float varying(L) rayT0;
     float varying(L) rayT1;
 
@@ -248,7 +244,7 @@ float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 va
         copy( dirStep, ray.dir );
         mul_assign( dirStep, stepT );
         while (t < rayT1) {
-            tau += stepDist * sigma_t * Density(pos, pMin, pMax, density, nVoxels);
+            tau += stepDist * sigma_t * density(pos, pMin, pMax, volume, nVoxels);
             //pos = pos + dirStep;
             add_assign( pos, dirStep );
             t += stepT;
@@ -260,9 +256,8 @@ float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 va
 }
 
 
-spmd(L)
-static float varying(L)
-distanceSquared(vec3 varying(L)& a, vec3 varying(L)& b) {
+static spmd(L)
+float varying(L) distanceSquared(vec3 varying(L)& a, vec3 varying(L)& b) {
     //float3 d = a-b;
     //return d.x*d.x + d.y*d.y + d.z*d.z;
     vec3 varying(L) d;
@@ -271,9 +266,7 @@ distanceSquared(vec3 varying(L)& a, vec3 varying(L)& b) {
     return d.x*d.x + d.y*d.y + d.z*d.z;
 }
 
-
-static float varying(L)
-raymarch(float density[], int nVoxels[3], Ray varying(L)& ray) {
+static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)& ray) {
     float varying(L) result = 0.f; // radiance along the ray
     float varying(L) rayT0;
     float varying(L) rayT1;
@@ -303,7 +296,6 @@ raymarch(float density[], int nVoxels[3], Ray varying(L)& ray) {
         float varying(L) tau = 0.f;  // accumulated beam transmittance
         float varying(L) rayLength = sqrt(dot(ray.dir, ray.dir));
         float varying(L) stepT = stepDist / rayLength;
-
         float varying(L) t = rayT0;
 
         //float3 pos = ray.dir * rayT0 + ray.origin;
@@ -318,7 +310,7 @@ raymarch(float density[], int nVoxels[3], Ray varying(L)& ray) {
 
         int varying(L) attenMask = true;
         while (attenMask && t < rayT1) {
-            float varying(L) d = Density(pos, pMin, pMax, density, nVoxels);
+            float varying(L) d = density(pos, pMin, pMax, volume, nVoxels);
 
             // terminate once attenuation is high
             float varying(L) atten = exp(-tau);
@@ -327,8 +319,7 @@ raymarch(float density[], int nVoxels[3], Ray varying(L)& ray) {
             else {
                 // direct lighting
                 float varying(L) Li = lightIntensity / distanceSquared(lightPos, pos) * 
-                    transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s,
-                            density, nVoxels);
+                    transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
                 result += stepDist * atten * d * sigma_s * (Li + Le);
 
                 // update beam transmittance
@@ -346,8 +337,7 @@ raymarch(float density[], int nVoxels[3], Ray varying(L)& ray) {
     return result;
 }
 
-
-void volume_sierra(float density[], int nVoxels[3], const float raster2camera[4][4], const float camera2world[4][4], int width, int height, float image[]) {
+static void render(float volume[], int nVoxels[3], const float raster2camera[4][4], const float camera2world[4][4], int width, int height, float image[]) {
     const int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
                                 0, 1, 0, 1, 2, 3, 2, 3 };
     const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1, 
@@ -364,7 +354,7 @@ void volume_sierra(float density[], int nVoxels[3], const float raster2camera[4]
             float const varying(L) yo = (float varying(L)) (y + *yOffsetPtr);
 
             generateRay(raster2camera, camera2world, xo, yo, ray);
-            float varying(L) res = raymarch(density, nVoxels, ray);
+            float varying(L) res = raymarch(volume, nVoxels, ray);
 
             for ( int off = 0; off < L; ++off )
                 image[(y + yoffsets[off]) * width + x + xoffsets[off]] = extract( res, off );
@@ -388,7 +378,6 @@ static void writePPM(float *buf, int width, int height, const char *fn) {
     fclose(fp);
     printf("Wrote image file %s\n", fn);
 }
-
 
 static void loadCamera(const char *fn, int *width, int *height, float raster2camera[4][4], float camera2world[4][4]) {
     FILE *f = fopen(fn, "r");
@@ -459,7 +448,7 @@ int main(int argc, char *argv[]) {
     float *image = new float[width*height];
 
     int n[3];
-    float *density = loadVolume(argv[2], n);
+    float *volume = loadVolume(argv[2], n);
 
 #define NUM 1
 
@@ -467,7 +456,7 @@ int main(int argc, char *argv[]) {
     double times[NUM];
     for (int i = 0; i < NUM; ++i) {
       reset_and_start_timer();
-      volume_sierra(density, n, raster2camera, camera2world, width, height, image);
+      render(volume, n, raster2camera, camera2world, width, height, image);
       times[i] = get_elapsed_mcycles();
       std::cout << times[i] << std::endl;
     }
