@@ -13,9 +13,9 @@
 #include "sierra/vec3.h"
 #include "sierra/random.h"
 
-#define NAO_SAMPLES	8
-#define NSUBSAMPLES 16
-#define NSUBSAMPLES 16
+#define NAO_SAMPLES	2
+#define NSUBSAMPLES 8
+#define NSUBSAMPLES 8
 
 using namespace sierra;
 
@@ -240,9 +240,7 @@ static void ao(int w, int h, float image[]) {
 static unsigned char *img;
 static float *fimg;
 
-static unsigned char
-clamp(float f)
-{
+static unsigned char clamp(float f) {
     int i = (int)(f * 255.5);
 
     if (i < 0) i = 0;
@@ -250,9 +248,8 @@ clamp(float f)
 
     return (unsigned char)i;
 }
-static void
-savePPM(const char *fname, int w, int h)
-{
+
+static void savePPM(const char *fname, int w, int h) {
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++)  {
             img[3 * (y * w + x) + 0] = clamp(fimg[3 *(y * w + x) + 0]);
@@ -275,12 +272,10 @@ savePPM(const char *fname, int w, int h)
     printf("Wrote image file %s\n", fname);
 }
 
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int num_iters = 1;
-    int width = 256;
-    int height = 256;
+    int width = 640;
+    int height = 480;
 
     if (argc == 4) {
         num_iters = atoi(argv[1]);
@@ -295,22 +290,12 @@ int main(int argc, char **argv)
     // Allocate space for output images
     img = new unsigned char[width * height * 3];
     fimg = new float[width * height * 3];
+    memset((void *)fimg, 0, sizeof(float) * width * height * 3);
 
-    double minTimeSerial = 1e30;
-    for (unsigned int i = 0; i < num_iters; i++) {
-        memset((void *)fimg, 0, sizeof(float) * width * height * 3);
-        reset_and_start_timer();
-        ao(width, height, fimg);
-        double t = get_elapsed_mcycles();
-        minTimeSerial = std::min(minTimeSerial, t);
-    }
+    reset_and_start_timer();
+    ao(width, height, fimg);
+    std::cout << get_elapsed_mcycles() << std::endl;
 
-    // Report more results, save another image...
-    printf("[aobench serial]:\t\t[%.3f] million cycles (%d x %d image)\n", minTimeSerial, 
-           width, height);
-    //printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
-           //minTimeSerial / minTimeISPC, minTimeSerial / minTimeISPCTasks);
     savePPM("out.ppm", width, height); 
-        
     return 0;
 }

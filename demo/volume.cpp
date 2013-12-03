@@ -10,6 +10,9 @@
 #include "sierra/timing.h"
 
 #define L LENGTH
+#if (L == 8)
+#define AVX
+#endif
 #include "sierra/math.h"
 #include "sierra/vec3.h"
 
@@ -414,26 +417,15 @@ int main(int argc, char *argv[]) {
     }
 
     float *image = new float[width*height];
-
-#define NUM 1
-
-    // Compute the image using the sierra implementation.
-    double times[NUM];
-    for (int i = 0; i < NUM; ++i) {
-      reset_and_start_timer();
-      render(volume, n, raster2camera, camera2world, width, height, image);
-      times[i] = get_elapsed_mcycles();
-      std::cout << times[i] << std::endl;
-    }
-
-    std::sort(times, times+NUM);
-    std::cout << "median: " << times[NUM/2] << std::endl;
-
-    writePPM(image, width, height, "out.ppm");
-
     // Clear out the buffer
     for (int i = 0; i < width * height; ++i)
       image[i] = 0.;
+
+    reset_and_start_timer();
+    render(volume, n, raster2camera, camera2world, width, height, image);
+    std::cout << get_elapsed_mcycles() << std::endl;
+
+    writePPM(image, width, height, "out.ppm");
 
     return 0;
 }
