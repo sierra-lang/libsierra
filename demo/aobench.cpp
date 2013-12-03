@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <SDL2/SDL.h>
+
 #include "sierra/sierra.h"
 #include "sierra/timing.h"
 
@@ -40,6 +42,9 @@ struct Ray {
     vec3 org;
     vec3 dir;
 };
+
+SDL_Surface* surface;
+SDL_Window* window;
 
 static spmd(L)
 void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane& plane) {
@@ -233,7 +238,13 @@ static void ao(int w, int h, float image[]) {
                     }
                 }
             }
+            uint8_t val = image[3 * (y * w + x) + 0] * 255.f;
+            ((uint8_t*) surface->pixels)[4 * (y * w + x) + 0] = val;
+            ((uint8_t*) surface->pixels)[4 * (y * w + x) + 1] = val;
+            ((uint8_t*) surface->pixels)[4 * (y * w + x) + 2] = val;
+            ((uint8_t*) surface->pixels)[4 * (y * w + x) + 3] = val;
         }
+        SDL_UpdateWindowSurface(window);
     }
 }
 
@@ -274,8 +285,8 @@ static void savePPM(const char *fname, int w, int h) {
 
 int main(int argc, char **argv) {
     int num_iters = 1;
-    int width = 640;
-    int height = 480;
+    int width = 1024;
+    int height = 768;
 
     if (argc == 4) {
         num_iters = atoi(argv[1]);
@@ -287,6 +298,17 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+    SDL_DisplayMode mode;
+    mode.w = width;
+    mode.h = height;
+    mode.refresh_rate = 0;
+    mode.format = SDL_PIXELFORMAT_RGB24;
+    mode.driverdata = 0;
+    SDL_SetWindowDisplayMode(window, &mode);
+    surface = SDL_GetWindowSurface(window);
+
     // Allocate space for output images
     img = new unsigned char[width * height * 3];
     fimg = new float[width * height * 3];
@@ -297,5 +319,9 @@ int main(int argc, char **argv) {
     std::cout << get_elapsed_mcycles() << std::endl;
 
     savePPM("out.ppm", width, height); 
+
+    SDL_Delay(2000);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
