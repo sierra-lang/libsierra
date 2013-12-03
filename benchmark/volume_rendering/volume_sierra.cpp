@@ -348,7 +348,7 @@ transmittance(vec3 varying(LENGTH)& p0, vec3 varying(LENGTH)& p1, vec3 varying(L
       sierra::add_assign( pos, dirStep );
       t += stepT;
     }
-    res = sierra::fast_exp(-tau);
+    res = sierra::exp(-tau);
   }
 
   return res;
@@ -423,7 +423,7 @@ raymarch(float density[], int nVoxels[3], Ray varying(LENGTH)& ray) {
                 float varying(LENGTH) d = Density(pos, pMin, pMax, density, nVoxels);
 
                 // terminate once attenuation is high
-                float varying(LENGTH) atten = sierra::fast_exp(-tau);
+                float varying(LENGTH) atten = sierra::exp(-tau);
                 if (atten < .005f)
                 {
                     attenMask = false;
@@ -445,7 +445,7 @@ raymarch(float density[], int nVoxels[3], Ray varying(LENGTH)& ray) {
                 } // end if atten
             } // end while
             // Gamma correction
-            res = sierra::fast_pow(L, 1.f / 2.2f);
+            res = sierra::pow(L, 1.f / 2.2f);
         } // end if intersectP
         //else
             //res = 1.f;
