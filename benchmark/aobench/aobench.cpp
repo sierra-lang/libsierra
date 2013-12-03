@@ -1,9 +1,8 @@
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <math.h>
 
-// TODO remove
 #include <algorithm>
 #include <iostream>
 
@@ -311,7 +310,7 @@ int main(int argc, char **argv)
            width, height);
     //printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
            //minTimeSerial / minTimeISPC, minTimeSerial / minTimeISPCTasks);
-    savePPM("ao-serial.ppm", width, height); 
+    savePPM("out.ppm", width, height); 
         
     return 0;
 }
