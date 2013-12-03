@@ -5,6 +5,7 @@
 
 // TODO remove
 #include <algorithm>
+#include <iostream>
 
 #include "sierra/sierra.h"
 #include "sierra/timing.h"
@@ -15,25 +16,25 @@
 
 #define NAO_SAMPLES	8
 #define NSUBSAMPLES 16
-
+#define NSUBSAMPLES 16
 
 using namespace sierra;
 
 struct Isect {
-    float      t;
-    vec3       p;
-    vec3       n;
-    int        hit; 
+    float t;
+    vec3  p;
+    vec3  n;
+    int   hit; 
 };
 
 struct Sphere {
-    vec3       center;
-    float      radius;
+    vec3  center;
+    float radius;
 };
 
 struct Plane {
-    vec3    p;
-    vec3    n;
+    vec3 p;
+    vec3 n;
 };
 
 struct Ray {
@@ -42,7 +43,7 @@ struct Ray {
 };
 
 static spmd(L)
-void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane uniform& plane) {
+void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane& plane) {
     float varying(L) d = -uniform_dot(plane.p, plane.n);
     vec3 varying(L) plane_n;
     splat(plane_n, plane.n);
@@ -63,7 +64,7 @@ void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane uni
 }
 
 static spmd(L)
-void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere uniform& sphere) {
+void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere& sphere) {
     vec3 varying(L) sphere_center;
     splat(sphere_center, sphere.center);
 
@@ -119,9 +120,8 @@ void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
 
 
 static spmd(L)
-float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane, Sphere uniform spheres[3], 
-                                   RNGState varying(L)& rngstate) {
-    static float uniform const eps = 0.0001f;
+float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane& plane, Sphere spheres[3], RNGState varying(L)& rngstate) {
+    static float const eps = 0.0001f;
     vec3 varying(L) p;
     vec3 varying(L) n;
     vec3 varying(L) basis[3];
@@ -133,10 +133,10 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
 
     orthoBasis(basis, isect.n);
 
-    static const uniform int ntheta = NAO_SAMPLES;
-    static const uniform int nphi   = NAO_SAMPLES;
-    for (int uniform j = 0; j < ntheta; j++) {
-        for (int uniform i = 0; i < nphi; i++) {
+    static const int ntheta = NAO_SAMPLES;
+    static const int nphi   = NAO_SAMPLES;
+    for (int j = 0; j < ntheta; j++) {
+        for (int i = 0; i < nphi; i++) {
             Ray varying(L) ray;
             Isect varying(L) occIsect;
 
@@ -179,25 +179,17 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane uniform& plane
     return occlusion;
 }
 
-#define NSUBSAMPLES 16
+static void ao(int w, int h, float image[]) {
+    static Plane plane = {{ 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f }};
+    static Sphere spheres[3] = {{{ -2.0f, 0.0f, -3.5f }, 0.5f },
+                                {{ -0.5f, 0.0f, -3.0f }, 0.5f },
+                                {{  1.0f, 0.0f, -2.2f }, 0.5f }};
 
-/* Compute the image for the scanlines from [y0,y1), for an overall image
-   of width w and height h.
- */
-static void ao_scanlines(int uniform y0, int uniform y1, int uniform w, 
-                         int uniform h,  float uniform image[]) {
-    static Plane uniform plane = {{ 0.0f, -0.5f, 0.0f }, { 0.f, 1.f, 0.f }};
-    static Sphere uniform spheres[3] = {{{ -2.0f, 0.0f, -3.5f }, 0.5f },
-                                        {{ -0.5f, 0.0f, -3.0f }, 0.5f },
-                                        {{  1.0f, 0.0f, -2.2f }, 0.5f }};
     RNGState varying(L) rngstate;
-    spmd_mode(L)
-        seed_rng(rngstate, seq<L>() + (y0 << (seq<L>() & 15)));
+    seed_rng(rngstate, seq<L>());
     float invSamples = 1.f / NSUBSAMPLES;
 
-    //foreach_tiled(y = y0 ... y1, x = 0 ... w, 
-                  //u = 0 ... nsubsamples, v = 0 ... nsubsamples)
-    for (int y = y0; y < y1; ++y) {
+    for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             for (int u = 0; u < NSUBSAMPLES; ++u) {
                 for (int vv = 0; vv < NSUBSAMPLES; vv += L) {
@@ -211,33 +203,28 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
                     //float varying(L) ret = 0.f;
                     Ray varying(L) ray;
                     Isect varying(L) isect;
-
-                    spmd_mode(L)
-                        create(ray.org, 0.f, 0.f, 0.f);
+                    create(ray.org, 0.f, 0.f, 0.f);
 
                     // Poor man's perspective projection
                     ray.dir.x = px;
                     ray.dir.y = py;
                     ray.dir.z = -1.0f;
-                    spmd_mode(L)
-                        normalize(ray.dir);
+                    normalize(ray.dir);
 
                     isect.t   = 1.0e+17f;
                     isect.hit = 0;
 
-                    for (int uniform snum = 0; snum < 3; ++snum) {
-                        spmd_mode(L)
-                            ray_sphere_intersect(isect, ray, spheres[snum]);
-                    }
-                    spmd_mode(L)
-                        ray_plane_intersect(isect, ray, plane);
+                    for (int snum = 0; snum < 3; ++snum)
+                        ray_sphere_intersect(isect, ray, spheres[snum]);
+
+                    ray_plane_intersect(isect, ray, plane);
 
                     if (isect.hit) {
                         float varying(L) ret = ambient_occlusion(isect, plane, spheres, rngstate);
                         ret *= invSamples * invSamples;
 
                         float result = 0.f;
-                        for (int uniform i = 0; i < L; ++i)
+                        for (int i = 0; i < L; ++i)
                             result += extract(ret, i);
 
 
@@ -251,18 +238,8 @@ static void ao_scanlines(int uniform y0, int uniform y1, int uniform w,
     }
 }
 
-void ao_sierra(uniform int w, uniform int h, uniform int nsubsamples, 
-                    uniform float image[]) {
-    ao_scanlines(0, h, w, h, image);
-}
-
-void ao_sierra(int w, int h, int nsubsamples, float image[]);
-
-static unsigned int test_iterations;
-static unsigned int width, height;
 static unsigned char *img;
 static float *fimg;
-
 
 static unsigned char
 clamp(float f)
@@ -274,8 +251,6 @@ clamp(float f)
 
     return (unsigned char)i;
 }
-
-
 static void
 savePPM(const char *fname, int w, int h)
 {
@@ -304,16 +279,18 @@ savePPM(const char *fname, int w, int h)
 
 int main(int argc, char **argv)
 {
-    if (argc != 4) {
-        printf ("%s\n", argv[0]);
-        printf ("Usage: ao [num test iterations] [width] [height]\n");
-        getchar();
-        exit(-1);
-    }
-    else {
-        test_iterations = atoi(argv[1]);
-        width = atoi (argv[2]);
-        height = atoi (argv[3]);
+    int num_iters = 1;
+    int width = 256;
+    int height = 256;
+
+    if (argc == 4) {
+        num_iters = atoi(argv[1]);
+        width     = atoi(argv[2]);
+        height    = atoi(argv[3]);
+    } else if (argc != 1) {
+        const char* exe = argc > 0 ? argv[0] : "aobench";
+        std::cout << "Usage: " << exe << " [num test iterations] [width] [height] " << std::endl;
+        return -1;
     }
 
     // Allocate space for output images
@@ -321,10 +298,10 @@ int main(int argc, char **argv)
     fimg = new float[width * height * 3];
 
     double minTimeSerial = 1e30;
-    for (unsigned int i = 0; i < test_iterations; i++) {
+    for (unsigned int i = 0; i < num_iters; i++) {
         memset((void *)fimg, 0, sizeof(float) * width * height * 3);
         reset_and_start_timer();
-        ao_sierra(width, height, NSUBSAMPLES, fimg);
+        ao(width, height, fimg);
         double t = get_elapsed_mcycles();
         minTimeSerial = std::min(minTimeSerial, t);
     }
