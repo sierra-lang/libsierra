@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
 
     savePPM("out.ppm", width, height); 
 
-    SDL_Delay(2000);
+    SDL_Delay(5000);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
