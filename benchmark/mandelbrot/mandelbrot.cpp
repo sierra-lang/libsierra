@@ -26,7 +26,7 @@ static inline int varying(L) mandel(float varying(L) c_re, float uniform c_im, i
 static void mandelbrot(float x0, float y0, 
                        float x1, float y1,
                        int width, int height, 
-                       int maxIterations, int output[])
+                       int max_iter, int output[])
 {
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
@@ -37,7 +37,7 @@ static void mandelbrot(float x0, float y0,
             int varying(L) i = ii + program_index(L);
             float varying(L) x = x0 + i * dx;
             float uniform y = y0 + j * dy;
-            *p++ = mandel(x, y, maxIterations);
+            *p++ = mandel(x, y, max_iter);
         }
     }
 }
@@ -68,7 +68,7 @@ int main() {
     float y0 = -1;
     float y1 = 1;
 
-    int maxIterations = 256;
+    int max_iter = 256;
     //int *buf = new int[width*height];
     int* buf;
     posix_memalign((void**)&buf, 32, sizeof(int)*width*height);
@@ -78,7 +78,7 @@ int main() {
     double times[NUM_ITER];
     for (int i = 0; i < NUM_ITER; ++i) {
         reset_and_start_timer();
-        mandelbrot(x0, y0, x1, y1, width, height, maxIterations, buf);
+        mandelbrot(x0, y0, x1, y1, width, height, max_iter, buf);
         times[i] = get_elapsed_mcycles();
     }
     std::sort(times, times + NUM_ITER);

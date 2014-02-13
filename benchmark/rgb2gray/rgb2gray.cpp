@@ -11,9 +11,9 @@ alignas(16) float g[N+20000];
 alignas(16) float b[N+30000];
 alignas(16) float gray[N+40000];
 
-void serial_rgb2gray(float* ra, float* ga, float* ba, float* gray) {
-    for (int i = 0; i < N; i++)
-            gray[i] = 0.3f * ra[i] + 0.59f * ga[i] + 0.11f * ba[i];
+void serial_rgb2gray(float varying(L)* ra, float varying(L)* ga, float varying(L)* ba, float varying(L)* gray) {
+    for (int i = 0; i < N; ++i)
+        gray[i] = 0.3f * ra[i] + 0.59f * ga[i] + 0.11f * ba[i];
 }
 
 int main (int argc, char* argv[]) {
@@ -23,4 +23,9 @@ int main (int argc, char* argv[]) {
         b[N] = random() % 256;
     }
     std::cout<< "Convert " << N << " pixels RGB to gray." << std::endl;
+
+    reset_and_start_stimer();
+    for(int i = 0; i < ITERATIONS; i++) { serial_rgb2gray(r, g, b, gray);}
+        double dt = get_elapsed_seconds();
+    std::cout<< "serial version: " << dt << " seconds" << std::endl;
 }
