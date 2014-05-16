@@ -104,14 +104,16 @@ struct Tile<16> {
     static int const y = 4;
 };
 
-} // namespace sierra
+}
 
-#if 0
-inline void* operator new     ( size_t size ) { void* p; posix_memalign(&p, 32, size); return p; }
-inline void* operator new[]   ( size_t size ) { void* p; posix_memalign(&p, 32, size); return p; }
-inline void  operator delete  ( void* ptr   ) { free(ptr); }
-inline void  operator delete[]( void* ptr   ) { free(ptr); }
+void* operator new  (std::size_t size) { void* p; posix_memalign(&p, 32, size); return p; }
+void* operator new[](std::size_t size) { void* p; posix_memalign(&p, 32, size); return p; }
+void* operator new  (std::size_t size, const std::nothrow_t& tag) noexcept { void* p; posix_memalign(&p, 32, size); return p; }
+void* operator new[](std::size_t size, const std::nothrow_t& tag) noexcept { void* p; posix_memalign(&p, 32, size); return p; }
+
+void operator delete  (void* ptr) noexcept { free(ptr); }
+void operator delete[](void* ptr) noexcept { free(ptr); }
+void operator delete  (void* ptr, const std::nothrow_t& tag) noexcept { free(ptr); }
+void operator delete[](void* ptr, const std::nothrow_t& tag) noexcept { free(ptr); }
+
 #endif
-
-#endif // SIERRA_H
-
