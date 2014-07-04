@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013-2014, Saarland University
+ */
+
 #include <cstdlib>
 #include <iostream>
 

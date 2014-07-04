@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013-2014, Saarland University
+ */
+
 #ifndef SIERRA_OSTREAM_H
 #define SIERRA_OSTREAM_H
 
@@ -16,5 +20,4 @@ std::ostream& operator << (std::ostream& o, T varying(L) vec) {
     return o;
 }
 
-
-#endif // SIERRA_OSTREAM_H
+#endif

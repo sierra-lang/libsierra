@@ -1,5 +1,10 @@
-#ifndef SIERRA_MATh_H
-#define SIERRA_MATh_H
+/*
+ * Copyright (c) 2010-2012, Intel Corporation
+ * Copyright (c) 2013-2014, Saarland University
+ */
+
+#ifndef SIERRA_MATH_H
+#define SIERRA_MATH_H
 
 #include "defines.h"
 

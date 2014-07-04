@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2010-2012, Intel Corporation
+ * Copyright (c) 2013-2014, Saarland University
+ */
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
