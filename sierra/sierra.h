@@ -5,9 +5,12 @@
 #ifndef SIERRA_H
 #define SIERRA_H
 
-#include <stdint.h>
-//#include <cstdlib>
+#include <cstdlib>
 #include "defines.h"
+
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
 
 namespace sierra {
 
@@ -108,6 +111,22 @@ struct Tile<16> {
     static int const y = 4;
 };
 
+#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)
+
+void* aligned_malloc(size_t size, size_t alignment) {
+    void* p;
+    posix_memalign(&p, alignment, size);
+    return p;
+}
+
+#elif defined _MSC_VER
+
+void* aligned_malloc(size_t size, size_t alignment) { return ::_aligned_malloc(size, alignment); }
+
+#else
+#error "don't know how to retrieve aligned memory"
+#endif
+
 }
 
 /*
@@ -117,17 +136,13 @@ struct Tile<16> {
 // bad_alloc variants
 
 void* operator new  (std::size_t size) throw(std::bad_alloc) {
-    void* p;
-    posix_memalign(&p, 32, size);
-    if (p)
+    if (void* p = sierra::aligned_malloc(size, 32))
         return p;
     throw std::bad_alloc();
 }
 
 void* operator new[](std::size_t size) throw(std::bad_alloc) {
-    void* p;
-    posix_memalign(&p, 32, size);
-    if (p)
+    if (void* p = sierra::aligned_malloc(size, 32))
         return p;
     throw std::bad_alloc();
 }
@@ -137,17 +152,8 @@ void  operator delete[](void* ptr) throw() { free(ptr); }
 
 // nothrow variants
 
-void* operator new  (std::size_t size, const std::nothrow_t&) throw() {
-    void* p;
-    posix_memalign(&p, 32, size);
-    return p;
-}
-
-void* operator new[](std::size_t size, const std::nothrow_t&) throw() {
-    void* p;
-    posix_memalign(&p, 32, size);
-    return p;
-}
+void* operator new  (std::size_t size, const std::nothrow_t&) throw() { return sierra::aligned_malloc(size, 32); }
+void* operator new[](std::size_t size, const std::nothrow_t&) throw() { return sierra::aligned_malloc(size, 32); }
 
 void  operator delete  (void* ptr, const std::nothrow_t&) throw() { free(ptr); }
 void  operator delete[](void* ptr, const std::nothrow_t&) throw() { free(ptr); }
