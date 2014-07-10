@@ -39,8 +39,8 @@ void insert(T varying(L)& vec, int i, T val) {
  */
 
 template<class T>
-T extract(T scalar, int) { 
-    return scalar; 
+T extract(T scalar, int) {
+    return scalar;
 }
 
 template<class T>
@@ -110,14 +110,46 @@ struct Tile<16> {
 
 }
 
-void* operator new  (std::size_t size) { void* p; posix_memalign(&p, 32, size); return p; }
-void* operator new[](std::size_t size) { void* p; posix_memalign(&p, 32, size); return p; }
-void* operator new  (std::size_t size, const std::nothrow_t& tag) noexcept { void* p; posix_memalign(&p, 32, size); return p; }
-void* operator new[](std::size_t size, const std::nothrow_t& tag) noexcept { void* p; posix_memalign(&p, 32, size); return p; }
+/*
+ * global new/delete overloads in order to get aligned memory
+ */
 
-void operator delete  (void* ptr) noexcept { free(ptr); }
-void operator delete[](void* ptr) noexcept { free(ptr); }
-void operator delete  (void* ptr, const std::nothrow_t& tag) noexcept { free(ptr); }
-void operator delete[](void* ptr, const std::nothrow_t& tag) noexcept { free(ptr); }
+// bad_alloc variants
+
+void* operator new  (std::size_t size) throw(std::bad_alloc) {
+    void* p;
+    posix_memalign(&p, 32, size);
+    if (p)
+        return p;
+    throw std::bad_alloc();
+}
+
+void* operator new[](std::size_t size) throw(std::bad_alloc) {
+    void* p;
+    posix_memalign(&p, 32, size);
+    if (p)
+        return p;
+    throw std::bad_alloc();
+}
+
+void  operator delete  (void* ptr) throw();
+void  operator delete[](void* ptr) throw();
+
+// nothrow variants
+
+void* operator new  (std::size_t size, const std::nothrow_t&) throw() {
+    void* p;
+    posix_memalign(&p, 32, size);
+    return p;
+}
+
+void* operator new[](std::size_t size, const std::nothrow_t&) throw() {
+    void* p;
+    posix_memalign(&p, 32, size);
+    return p;
+}
+
+void  operator delete  (void* ptr, const std::nothrow_t&) throw() { free(ptr); }
+void  operator delete[](void* ptr, const std::nothrow_t&) throw() { free(ptr); }
 
 #endif
