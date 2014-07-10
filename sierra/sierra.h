@@ -132,8 +132,8 @@ void* operator new[](std::size_t size) throw(std::bad_alloc) {
     throw std::bad_alloc();
 }
 
-void  operator delete  (void* ptr) throw();
-void  operator delete[](void* ptr) throw();
+void  operator delete  (void* ptr) throw() { free(ptr); }
+void  operator delete[](void* ptr) throw() { free(ptr); }
 
 // nothrow variants
 
