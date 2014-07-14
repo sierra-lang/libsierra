@@ -73,16 +73,15 @@ int main (int argc, char* argv[]) {
         if (fgetc(file) == ' ') {
             height = read_int(file);
             if (fgetc(file) == '\n' && fgetc(file) == '2' && fgetc(file) == '5' && fgetc(file) == '5' && fgetc(file) == '\n') {
-                r = new[width*height];
-                g = new[width*height];
-                b = new[width*height];
-
-                while (true) {
-                    int ri = fgetc(file);
-                    if (ri !=
+                size_t n = width * height;
+                r = new[n];
+                g = new[n];
+                b = new[n];
+                for (size_t i = 0; i != n; ++i) {
+                    r[i] = float(fgetc(file)) / 255.f;
+                    g[i] = float(fgetc(file)) / 255.f;
+                    b[i] = float(fgetc(file)) / 255.f;
                 }
-                i = 0;
-                int ri = fgetc(file)
             }
         }
     }
