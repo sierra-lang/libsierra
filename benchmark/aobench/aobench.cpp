@@ -291,7 +291,7 @@ int main(int argc, char** argv) {
     auto  img = new uint8_t[width * height * 3];
     auto fimg = new float[width * height * 3];
 
-    std::cout << "median: " << benchmark([&] { ao(width, height, fimg); }, num_iters) << std::endl;
+    benchmark([&] { ao(width, height, fimg); }, num_iters);
     writePPM("out.ppm", width, height, img, fimg);
 
     delete[] img;

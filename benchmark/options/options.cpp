@@ -141,8 +141,10 @@ int main(int argc, char *argv[]) {
         v[i] =   5.00f; // volatility
     }
 
-    std::cout << "binomial: "      << benchmark([&] { binomial_put (S, X, T, r, v, result, num); }, num_iters) << std::endl;
-    std::cout << "black scholes: " << benchmark([&] { black_scholes(S, X, T, r, v, result, num); }, num_iters) << std::endl;
+    std::cout << "binomial: " << std::endl;
+    benchmark([&] { binomial_put (S, X, T, r, v, result, num); }, num_iters);
+    std::cout << "black scholes: " << std::endl;
+    benchmark([&] { black_scholes(S, X, T, r, v, result, num); }, num_iters);
 
     delete[] S;
     delete[] X;

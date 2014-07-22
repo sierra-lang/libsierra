@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <vector>
 #include <cstdint>
 
@@ -28,7 +29,7 @@ inline uint64_t rdtsc() {
 
 namespace sierra {
 
-double benchmark(std::function<void()> f, size_t num_iters) {
+void benchmark(std::function<void()> f, size_t num_iters) {
     std::vector<double> times(num_iters);
     for (auto& time : times) {
         auto start = rdtsc();
@@ -39,7 +40,7 @@ double benchmark(std::function<void()> f, size_t num_iters) {
 
     // compute median
     std::sort(times.begin(), times.end());
-    return times[num_iters/2];
+    std::cout << "median of " << num_iters << " runs: " << times[num_iters/2] << "ms" << std::endl;
 }
 
 }

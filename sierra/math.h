@@ -457,7 +457,7 @@ int varying(16) imax2x8(int varying(16), int varying(16)) { return 0; }
 #elif (L == 8)
     inline int varying(L) imin(int varying(L) a, int varying(L) b) { return imin1x8(a, b); }
     inline int varying(L) imax(int varying(L) a, int varying(L) b) { return imax1x8(a, b); }
-#ifdef AVX
+#ifdef __AVX__
     float varying(L) fmin(float varying(L) a, float varying(L) b) { return fmin1x8(a, b); }
     float varying(L) fmax(float varying(L) a, float varying(L) b) { return fmax1x8(a, b); }
 #else

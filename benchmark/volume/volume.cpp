@@ -408,7 +408,7 @@ int main(int argc, char** argv) {
     int n[3];
     const char* exe = argc > 0 ? argv[0] : "volume";
 
-    if (arg != 3 || argc != 4) {
+    if (argc != 3 && argc != 4) {
         std::cout << "usage: " << exe << " [camara.dat] [volume.vol] [number of iterations]" << std::endl;
         return EXIT_FAILURE;
     }
@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
         num_iters = atoi(argv[3]);
     auto image = new float[width*height];
 
-    std::cout << "volume renderer: " << benchmark([&] { render(volume, n, raster2camera, camera2world, width, height, image); }, num_iters) << std::endl;
+    benchmark([&] { render(volume, n, raster2camera, camera2world, width, height, image); }, num_iters);
     writePPM(image, width, height, "out.ppm");
 
     delete[] image;

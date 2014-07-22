@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     float y0 = -1.f, y1 = 1.f;
     auto buf = new int[width*height];
 
-    std::cout << "median: " << benchmark([&] { mandelbrot(x0, y0, x1, y1, width, height, buf); }, num_iters) << std::endl;
+    benchmark([&] { mandelbrot(x0, y0, x1, y1, width, height, buf); }, num_iters);
     writePPM(buf, width, height, "out.ppm");
 
     delete[] buf;
