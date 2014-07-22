@@ -1,6 +1,10 @@
 /*
  * Copyright (c) 2010-2012, Intel Corporation
  * Copyright (c) 2013-2014, Saarland University
+ *
+ * compile with:
+ *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx volume.cpp -I../.. -DLENGTH=1
+ *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx volume.cpp -I../.. -DLENGTH=8
  */
 
 #include <cassert>
@@ -12,7 +16,7 @@
 
 #include "sierra/sierra.h"
 #include "sierra/ostream.h"
-#include "sierra/timing.h"
+#include "sierra/benchmark.h"
 
 #define L LENGTH
 #include "sierra/math.h"
@@ -55,7 +59,7 @@ int varying(L) Inside(vec3 const varying(L)& p, vec3 const varying(L)& pMin, vec
     return res;
 }
 
-static spmd(L) 
+static spmd(L)
 int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varying(L)& pMax, float varying(L)& hit0, float varying(L)& hit1) {
     int varying(L) res = false;
     float varying(L) t0 = -1e30f;
@@ -283,7 +287,7 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
                 attenMask = false;
             else {
                 // direct lighting
-                float varying(L) Li = lightIntensity / distanceSquared(lightPos, pos) * 
+                float varying(L) Li = lightIntensity / distanceSquared(lightPos, pos) *
                     transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
                 result += stepDist * atten * d * sigma_s * (Li + Le);
 
@@ -305,7 +309,7 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
 static void render(float volume[], int nVoxels[3], const float raster2camera[4][4], const float camera2world[4][4], int width, int height, float image[]) {
     static const int xoffsets[16] = { 0, 1, 0, 1, 2, 3, 2, 3,
                                       0, 1, 0, 1, 2, 3, 2, 3 };
-    static const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1, 
+    static const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1,
                                       2, 2, 3, 3, 2, 2, 3, 3 };
 
     int const varying(L) *xOffsetPtr = (int varying(L)*) xoffsets;
@@ -398,47 +402,24 @@ static float* loadVolume(const char *fn, int n[3]) {
     return v;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
     int width, height, num_iters = 1;
     float raster2camera[4][4], camera2world[4][4];
     float* volume;
     int n[3];
     const char* exe = argc > 0 ? argv[0] : "volume";
 
-    if (argc >= 2)
-        loadCamera(argv[1], width, height, raster2camera, camera2world);
-    if (argc >= 3)
-        volume = loadVolume(argv[2], n);
-
-    if (argc >= 4)
-        num_iters = atoi(argv[3]);
-
-    if (argc < 1 || argc >= 5) {
-        std::cout << "Usage: " << exe << " <camara.dat> <volume.vol> [number of test iterations]" << std::endl;
-        return -1;
+    if (argc != 3) {
+        std::cout << "usage: " << exe << " <camara.dat> <volume.vol>" << std::endl;
+        return EXIT_FAILURE;
     }
 
-    float *image = new float[width*height];
+    loadCamera(argv[1], width, height, raster2camera, camera2world);
+    volume = loadVolume(argv[2], n);
+    auto image = new float[width*height];
 
-#define NUM 1
-
-    // Compute the image using the sierra implementation.
-    double times[NUM];
-    for (int i = 0; i < NUM; ++i) {
-      reset_and_start_timer();
-      render(volume, n, raster2camera, camera2world, width, height, image);
-      times[i] = get_elapsed_mcycles();
-      std::cout << times[i] << std::endl;
-    }
-
-    std::sort(times, times+NUM);
-    std::cout << "median: " << times[NUM/2] << std::endl;
-
+    std::cout << "volume renderer: " << benchmark([&] { render(volume, n, raster2camera, camera2world, width, height, image); }) << std::endl;
     writePPM(image, width, height, "out.ppm");
 
-    // Clear out the buffer
-    for (int i = 0; i < width * height; ++i)
-      image[i] = 0.;
-
-    return 0;
+    delete[] image;
 }

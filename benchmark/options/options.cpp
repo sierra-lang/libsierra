@@ -1,188 +1,144 @@
 /*
  * Copyright (c) 2010-2012, Intel Corporation
  * Copyright (c) 2013-2014, Saarland University
+ *
+ * compile with:
+ *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx options.cpp -I../.. -DLENGTH=1
+ *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx options.cpp -I../.. -DLENGTH=8
  */
 
 #define NOMINMAX
 
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <math.h>
-#include <algorithm>
 
-//#include "options_defs.h"
-#include "sierra/timing.h"
+#include "sierra/benchmark.h"
+#include "sierra/sierra.h"
 
-void black_scholes_sierra(float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count);
-void binomial_put_sierra (float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count);
+#define L LENGTH
+#include "sierra/math.h"
 
-static void usage() {
-    printf("usage: options [--count=<num options>]\n");
+#define BINOMIAL_NUM 64
+
+using namespace sierra;
+
+// cumulative normal distribution function
+static float varying(L) CND(float varying(L) X) {
+    float varying(L) w;
+    spmd_mode(L) {
+        auto l  = fabs(X);
+        auto k  = 1.0f / (1.0f + 0.2316419f * l);
+        auto k2 = k*k;
+        auto k3 = k2*k;
+        auto k4 = k2*k2;
+        auto k5 = k3*k2;
+
+        static const float invSqrt2Pi = 0.39894228040f;
+        w = (0.31938153f * k - 0.356563782f * k2 + 1.781477937f * k3 + -1.821255978f * k4 + 1.330274429f * k5);
+        w *= invSqrt2Pi * exp(-l * l * .5f);
+
+        if (X > 0.f)
+            w = 1.0f - w;
+    }
+    return w;
 }
 
+static float varying(L) binomial(float varying(L) S, float varying(L) X, float varying(L) T, float varying(L) r, float varying(L) v) {
+    float varying(L) V[BINOMIAL_NUM];
+
+    float varying(L) dt = T / BINOMIAL_NUM;
+    //float varying(L) u = exp(v * sqrt(dt));
+    float varying(L) u;
+    spmd_mode(L)
+        u = exp(v * sqrt(dt));
+    float varying(L) d = 1. / u;
+    float varying(L) disc;
+    spmd_mode(L)
+        disc = exp(r * dt);
+    float varying(L) Pu = (disc - d) / (u - d);
+
+    for (int j = 0; j < BINOMIAL_NUM; ++j) {
+        float varying(L) upow;
+        spmd_mode(L) {
+            upow= pow(u, (float varying(L))(2*j-BINOMIAL_NUM));
+            V[j] = sierra::fmax(0., X - S * upow);
+        }
+    }
+
+    for (int j = BINOMIAL_NUM-1; j >= 0; --j)
+        for (int k = 0; k < j; ++k)
+            V[k] = ((1 - Pu) * V[k] + Pu * V[k + 1]) / disc;
+    return V[0];
+}
+
+static void binomial_put(float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count) {
+    auto pS = (float varying(L)*) Sa;
+    auto pX = (float varying(L)*) Xa;
+    auto pT = (float varying(L)*) Ta;
+    auto pr = (float varying(L)*) ra;
+    auto pv = (float varying(L)*) va;
+    auto pres = (float varying(L)*) result;
+    for (int ii = 0; ii < count; ii += L) {
+        auto S = *(pS++);
+        auto X = *(pX++);
+        auto T = *(pT++);
+        auto r = *(pr++);
+        auto v = *(pv++);
+        *(pres++) = binomial(S, X, T, r, v);
+    }
+}
+
+static void black_scholes(float Sa[], float Xa[], float Ta[], float ra[], float va[], float result[], int count) {
+    auto pS = (float varying(L)*) Sa;
+    auto pX = (float varying(L)*) Xa;
+    auto pT = (float varying(L)*) Ta;
+    auto pr = (float varying(L)*) ra;
+    auto pv = (float varying(L)*) va;
+    auto pres = (float varying(L)*) result;
+    for (int ii = 0; ii < count; ii += L) {
+        auto S = *(pS++);
+        auto X = *(pX++);
+        auto T = *(pT++);
+        auto r = *(pr++);
+        auto v = *(pv++);
+
+        float varying(L) sqrtT;
+        spmd_mode(L)
+            sqrtT = sqrt(T);
+        auto d1 = ( + (r + v * v * .5f) * T) / (v * sqrtT);
+        auto d2 = d1 - v * sqrtT;
+        float varying(L) e;
+        spmd_mode(L) {
+            auto arg = -r * T;
+            e = exp(arg);
+        }
+        *(pres++) = S * CND(d1) - X * e * CND(d2);
+    }
+}
 
 int main(int argc, char *argv[]) {
-    //int nOptions = 128*1024;
-    int nOptions = 1024*1024;
+    int num = 1024*1024;
+    auto S = new float[num];
+    auto X = new float[num];
+    auto T = new float[num];
+    auto r = new float[num];
+    auto v = new float[num];
+    auto result = new float[num];
 
-    for (int i = 1; i < argc; ++i) {
-        if (strncmp(argv[i], "--count=", 8) == 0) {
-            nOptions = atoi(argv[i] + 8);
-            if (nOptions <= 0) {
-                usage();
-                exit(1);
-            }
-        }
+    for (int i = 0; i < num; ++i) {
+        S[i] = 100.00f; // stock price
+        X[i] =  98.00f; // option strike price
+        T[i] =   2.00f; // time (years)
+        r[i] =   0.02f; // risk-free interest rate
+        v[i] =   5.00f; // volatility
     }
 
-    //float *S = new float[nOptions];
-    //float *X = new float[nOptions];
-    //float *T = new float[nOptions];
-    //float *r = new float[nOptions];
-    //float *v = new float[nOptions];
-    //float *result = new float[nOptions];
+    std::cout << "binomial: "      << benchmark([&] { binomial_put (S, X, T, r, v, result, num); }) << std::endl;
+    std::cout << "black scholes: " << benchmark([&] { black_scholes(S, X, T, r, v, result, num); }) << std::endl;
 
-    float *S;
-    float *X;
-    float *T;
-    float *r;
-    float *v;
-    float *result;
-
-    posix_memalign((void**) &S, 32, sizeof(float)*nOptions);
-    posix_memalign((void**) &X, 32, sizeof(float)*nOptions);
-    posix_memalign((void**) &T, 32, sizeof(float)*nOptions);
-    posix_memalign((void**) &r, 32, sizeof(float)*nOptions);
-    posix_memalign((void**) &v, 32, sizeof(float)*nOptions);
-    posix_memalign((void**) &result, 32, sizeof(float)*nOptions);
-
-    for (int i = 0; i < nOptions; ++i) {
-        S[i] = 100;  // stock price
-        X[i] = 98;   // option strike price
-        T[i] = 2;    // time (years)
-        r[i] = .02;  // risk-free interest rate
-        v[i] = 5;    // volatility
-    }
-
-    double sum;
-
-#if 0
-    //
-    // Binomial options pricing model, ispc implementation
-    //
-    double binomial_sierra = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        binomial_put_sierra(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        binomial_sierra = std::min(binomial_sierra, dt);
-    }
-    printf("[binomial ispc, 1 thread]:\t[%.3f] million cycles (avg %f)\n", 
-           binomial_sierra, sum / nOptions);
-
-    //
-    // Binomial options pricing model, ispc implementation, tasks
-    //
-    double binomial_tasks = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        binomial_put_ispc_tasks(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        binomial_tasks = std::min(binomial_tasks, dt);
-    }
-    printf("[binomial ispc, tasks]:\t\t[%.3f] million cycles (avg %f)\n", 
-           binomial_tasks, sum / nOptions);
-
-    //
-    // Binomial options, serial implementation
-    //
-#endif
-    {
-        double times[7];
-        for (int i = 0; i < 7; ++i) {
-            reset_and_start_timer();
-            binomial_put_sierra(S, X, T, r, v, result, nOptions);
-            times[i] = get_elapsed_mcycles();
-            sum = 0.;
-            for (int i = 0; i < nOptions; ++i)
-                sum += result[i];
-            //binomial_sierra = std::min(binomial_sierra, dt);
-        }
-        //printf("[binomial serial]:\t\t[%.3f] million cycles (avg %f)\n", 
-            //binomial_sierra, sum / nOptions);
-        std::cout << "binomial" << std::endl;
-        std::cout << times[3] << std::endl;
-    }
-
-#if 0
-
-    //
-    // Black-Scholes options pricing model, ispc implementation, 1 thread
-    //
-    double bs_ispc = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        black_scholes_ispc(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        bs_ispc = std::min(bs_ispc, dt);
-    }
-    printf("[black-scholes ispc, 1 thread]:\t[%.3f] million cycles (avg %f)\n", 
-           bs_ispc, sum / nOptions);
-
-    //
-    // Black-Scholes options pricing model, ispc implementation, tasks
-    //
-    double bs_ispc_tasks = 1e30;
-    for (int i = 0; i < 3; ++i) {
-        reset_and_start_timer();
-        black_scholes_ispc_tasks(S, X, T, r, v, result, nOptions);
-        double dt = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        bs_ispc_tasks = std::min(bs_ispc_tasks, dt);
-    }
-    printf("[black-scholes ispc, tasks]:\t[%.3f] million cycles (avg %f)\n", 
-           bs_ispc_tasks, sum / nOptions);
-
-    //
-    // Black-Scholes options pricing model, serial implementation
-    //
-#endif
-    {
-    double times[7];
-    for (int i = 0; i < 7; ++i) {
-        reset_and_start_timer();
-        black_scholes_sierra(S, X, T, r, v, result, nOptions);
-        times[i] = get_elapsed_mcycles();
-        sum = 0.;
-        for (int i = 0; i < nOptions; ++i)
-            sum += result[i];
-        //bs_sierra = std::min(bs_sierra, dt);
-    }
-    std::sort(times, times + 7);
-    //printf("[black-scholes serial]:\t\t[%.3f] million cycles (avg %f)\n", bs_sierra, 
-           //sum / nOptions);
-    std::cout << "black scholes" << std::endl;
-    std::cout << times[3] << std::endl; // median
-    }
-
-#if 0
-    printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
-           bs_serial / bs_ispc, bs_serial / bs_ispc_tasks);
-
-#endif
-    return 0;
+    delete[] S;
+    delete[] X;
+    delete[] T;
+    delete[] r;
+    delete[] v;
+    delete[] result;
 }

@@ -1,6 +1,10 @@
 /*
  * Copyright (c) 2010-2012, Intel Corporation
  * Copyright (c) 2013-2014, Saarland University
+ *
+ * compile with:
+ *  clang++ -fsierra -I ../.. -O2 -mavx -DLENGTH=1 aobench.cpp
+ *  clang++ -fsierra -I ../.. -O2 -mavx -DLENGTH=8 aobench.cpp
  */
 
 #include <cmath>
@@ -8,11 +12,10 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <algorithm>
 #include <iostream>
 
 #include "sierra/sierra.h"
-#include "sierra/timing.h"
+#include "sierra/benchmark.h"
 
 #define L LENGTH
 #include "sierra/vec3.h"
@@ -28,7 +31,7 @@ struct Isect {
     float t;
     vec3  p;
     vec3  n;
-    int   hit; 
+    int   hit;
 };
 
 struct Sphere {
@@ -99,8 +102,8 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere& 
 static spmd(L)
 void orthoBasis(vec3 varying(L) basis[3], vec3 varying(L) n) {
     copy(basis[2], n);
-    basis[1].x = 0.0f; 
-    basis[1].y = 0.0f; 
+    basis[1].x = 0.0f;
+    basis[1].y = 0.0f;
     basis[1].z = 0.0f;
 
     if ((n.x < 0.6f) && (n.x > -0.6f)) {
@@ -170,11 +173,11 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane& plane, Sphere
             occIsect.hit = 0;
 
             for (uniform int snum = 0; snum < 3; ++snum)
-                ray_sphere_intersect(occIsect, ray, spheres[snum]); 
+                ray_sphere_intersect(occIsect, ray, spheres[snum]);
 
-            ray_plane_intersect(occIsect, ray, plane); 
+            ray_plane_intersect(occIsect, ray, plane);
 
-            if (occIsect.hit) 
+            if (occIsect.hit)
                 occlusion += 1.0f;
         }
     }
@@ -242,22 +245,16 @@ static void ao(int w, int h, float image[]) {
     }
 }
 
-static unsigned char *img;
-static float *fimg;
-
-static unsigned char
-clamp(float f)
-{
-    int i = (int)(f * 255.5);
+static uint8_t clamp(float f) {
+    int i = (int)(f * 255.5f);
 
     if (i < 0) i = 0;
     if (i > 255) i = 255;
 
-    return (unsigned char)i;
+    return uint8_t(i);
 }
-static void
-savePPM(const char *fname, int w, int h)
-{
+
+static void writePPM(const char *fname, int w, int h, uint8_t* img, float* fimg) {
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++)  {
             img[3 * (y * w + x) + 0] = clamp(fimg[3 *(y * w + x) + 0]);
@@ -277,15 +274,11 @@ savePPM(const char *fname, int w, int h)
     fprintf(fp, "255\n");
     fwrite(img, w * h * 3, 1, fp);
     fclose(fp);
-    printf("Wrote image file %s\n", fname);
+    printf("wrote image file %s\n", fname);
 }
 
-
-int main(int argc, char **argv)
-{
-    int num_iters = 1;
-    int width = 256;
-    int height = 256;
+int main(int argc, char** argv) {
+    int num_iters = 1, width = 256, height = 256;
 
     if (argc == 4) {
         num_iters = atoi(argv[1]);
@@ -293,29 +286,16 @@ int main(int argc, char **argv)
         height    = atoi(argv[3]);
     } else if (argc != 1) {
         const char* exe = argc > 0 ? argv[0] : "aobench";
-        std::cout << "Usage: " << exe << " [number of test iterations] [width] [height] " << std::endl;
-        return -1;
+        std::cout << "usage: " << exe << " [number of test iterations] [width] [height] " << std::endl;
+        return EXIT_FAILURE;
     }
 
-    // Allocate space for output images
-    img = new unsigned char[width * height * 3];
-    fimg = new float[width * height * 3];
+    auto  img = new uint8_t[width * height * 3];
+    auto fimg = new float[width * height * 3];
 
-    double minTimeSerial = 1e30;
-    for (unsigned int i = 0; i < num_iters; i++) {
-        memset((void *)fimg, 0, sizeof(float) * width * height * 3);
-        reset_and_start_timer();
-        ao(width, height, fimg);
-        double t = get_elapsed_mcycles();
-        minTimeSerial = std::min(minTimeSerial, t);
-    }
+    std::cout << "aobench: " << benchmark([&] { ao(width, height, fimg); }, 1) << std::endl;
+    writePPM("out.ppm", width, height, img, fimg);
 
-    // Report more results, save another image...
-    printf("[aobench serial]:\t\t[%.3f] million cycles (%d x %d image)\n", minTimeSerial, 
-           width, height);
-    //printf("\t\t\t\t(%.2fx speedup from ISPC, %.2fx speedup from ISPC + tasks)\n", 
-           //minTimeSerial / minTimeISPC, minTimeSerial / minTimeISPCTasks);
-    savePPM("out.ppm", width, height); 
-        
-    return 0;
+    delete[] img;
+    delete[] fimg;
 }

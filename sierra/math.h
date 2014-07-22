@@ -14,7 +14,7 @@ namespace sierra {
 #define   intbits(f) *(int   varying(L)*) (&f)
 
 namespace exact {
-    // TODO triger them in the Sierra compiler
+    // TODO trigger them in the Sierra compiler
     static float varying(L) exp(float varying(L)) { /* dummy */ return 0.f; }
     static float varying(L) exp2(float varying(L)) { /* dummy */ return 0.f; }
     static float varying(L) log(float varying(L)) { /* dummy */ return 0.f; }
@@ -392,7 +392,7 @@ inline float varying(L) pow(float varying(L) a, float varying(L) b) {
     return exp(b * log(a));
 }
 
-inline float varying(L) fmin_l(float varying(L) a, float varying(L) b) { 
+inline float varying(L) fmin_l(float varying(L) a, float varying(L) b) {
     float varying(L) res;
     if (a < b)
         res = a;
@@ -401,7 +401,7 @@ inline float varying(L) fmin_l(float varying(L) a, float varying(L) b) {
     return res;
 }
 
-inline float varying(L) fmax_l(float varying(L) a, float varying(L) b) { 
+inline float varying(L) fmax_l(float varying(L) a, float varying(L) b) {
     float varying(L) res;
     if (a > b)
         res = a;
@@ -431,7 +431,7 @@ int varying(8)  imax1x8(int varying(8), int varying(8)) { return 0; }
 int varying(16) imax2x8(int varying(16), int varying(16)) { return 0; }
 
 #if (L == 1)
-    inline int varying(L) imin(int varying(L) a, int varying(L) b) { 
+    inline int varying(L) imin(int varying(L) a, int varying(L) b) {
         int varying(L) res;
         if (a < b)
             res = a;
@@ -439,7 +439,7 @@ int varying(16) imax2x8(int varying(16), int varying(16)) { return 0; }
             res = b;
         return res;
     }
-    inline int varying(L) imax(int varying(L) a, int varying(L) b) { 
+    inline int varying(L) imax(int varying(L) a, int varying(L) b) {
         int varying(L) res;
         if (a > b)
             res = a;
