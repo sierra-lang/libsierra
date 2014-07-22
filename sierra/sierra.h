@@ -6,6 +6,7 @@
 #define SIERRA_H
 
 #include <cstdlib>
+#include <new>
 #include "defines.h"
 
 #ifdef _MSC_VER
@@ -112,17 +113,9 @@ struct Tile<16> {
 };
 
 #if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)
-
-void* aligned_malloc(size_t size, size_t alignment) {
-    void* p;
-    posix_memalign(&p, alignment, size);
-    return p;
-}
-
+void* aligned_malloc(size_t size, size_t alignment) { return ::aligned_alloc(alignment, size); }
 #elif defined _MSC_VER
-
 void* aligned_malloc(size_t size, size_t alignment) { return ::_aligned_malloc(size, alignment); }
-
 #else
 #error "don't know how to retrieve aligned memory"
 #endif
