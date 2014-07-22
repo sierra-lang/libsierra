@@ -51,13 +51,13 @@ struct Ray {
 
 static spmd(L)
 void ray_plane_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Plane& plane) {
-    float varying(L) d = -uniform_dot(plane.p, plane.n);
+    auto d = -uniform_dot(plane.p, plane.n);
     vec3 varying(L) plane_n;
     splat(plane_n, plane.n);
-    float varying(L) v = dot(ray.dir, plane_n);
+    auto v = dot(ray.dir, plane_n);
 
     if (fabs(v) >= 1.0e-17f) {
-        float varying(L) t = -(dot(ray.org, plane_n) + d) / v;
+        auto t = -(dot(ray.org, plane_n) + d) / v;
 
         if ((t > 0.0f) && (t < isect.t)) {
             isect.t = t;
@@ -79,12 +79,12 @@ void ray_sphere_intersect(Isect varying(L)& isect, Ray varying(L)& ray, Sphere& 
     vec3 varying(L) rs;
     sub(rs, ray.org, sphere_center);
 
-    float varying(L) B = dot(rs, ray.dir);
-    float varying(L) C = dot(rs, rs) - sphere.radius * sphere.radius;
-    float varying(L) D = B * B - C;
+    auto B = dot(rs, ray.dir);
+    auto C = dot(rs, rs) - sphere.radius * sphere.radius;
+    auto D = B * B - C;
 
     if (D > 0.f) {
-        float varying(L) t = -B - sqrt(D);
+        auto t = -B - sqrt(D);
 
         if ((t > 0.0f) && (t < isect.t)) {
             isect.t = t;
@@ -147,22 +147,21 @@ float varying(L) ambient_occlusion(Isect varying(L)& isect, Plane& plane, Sphere
             Ray varying(L) ray;
             Isect varying(L) occIsect;
 
-            float varying(L) theta = sqrt(frandom(rngstate));
-            float varying(L) phi   = 2.0f * M_PI * frandom(rngstate);
+            auto theta = sqrt(frandom(rngstate));
+            auto phi   = 2.0f * M_PI * frandom(rngstate);
             //float varying(L) x = fast_cos(phi) * theta;
             //float varying(L) y = fast_sin(phi) * theta;
             float varying(L) sin_phi;
             float varying(L) cos_phi;
             sincos(phi, sin_phi, cos_phi);
-            float varying(L) x = cos_phi * theta;
-            float varying(L) y = sin_phi * theta;
-
-            float varying(L) z = sqrt(1.0f - theta * theta);
+            auto x = cos_phi * theta;
+            auto y = sin_phi * theta;
+            auto z = sqrt(1.0f - theta * theta);
 
             // local . global
-            float varying(L) rx = x * basis[0].x + y * basis[1].x + z * basis[2].x;
-            float varying(L) ry = x * basis[0].y + y * basis[1].y + z * basis[2].y;
-            float varying(L) rz = x * basis[0].z + y * basis[1].z + z * basis[2].z;
+            auto rx = x * basis[0].x + y * basis[1].x + z * basis[2].x;
+            auto ry = x * basis[0].y + y * basis[1].y + z * basis[2].y;
+            auto rz = x * basis[0].z + y * basis[1].z + z * basis[2].z;
 
             copy(ray.org, p);
             ray.dir.x = rx;
@@ -200,13 +199,13 @@ static void ao(int w, int h, float image[]) {
         for (int x = 0; x < w; ++x) {
             for (int u = 0; u < NSUBSAMPLES; ++u) {
                 for (int vv = 0; vv < NSUBSAMPLES; vv += L) {
-                    int varying(L) v = vv + seq<L>();
-                    float du = (float)u * invSamples;
-                    float varying(L) dv = (float varying(L))v * invSamples;
+                    auto v = vv + seq<L>();
+                    auto du = (float)u * invSamples;
+                    auto dv = (float varying(L))v * invSamples;
 
                     // Figure out x,y pixel in NDC
-                    float            px =  (x + du - (w / 2.0f)) / (w / 2.0f);
-                    float varying(L) py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
+                    auto px =  (x + du - (w / 2.0f)) / (w / 2.0f);
+                    auto py = -(y + dv - (h / 2.0f)) / (h / 2.0f);
                     //float varying(L) ret = 0.f;
                     Ray varying(L) ray;
                     Isect varying(L) isect;
@@ -227,13 +226,12 @@ static void ao(int w, int h, float image[]) {
                     ray_plane_intersect(isect, ray, plane);
 
                     if (isect.hit) {
-                        float varying(L) ret = ambient_occlusion(isect, plane, spheres, rngstate);
+                        auto ret = ambient_occlusion(isect, plane, spheres, rngstate);
                         ret *= invSamples * invSamples;
 
                         float result = 0.f;
                         for (int i = 0; i < L; ++i)
                             result += extract(ret, i);
-
 
                         image[3 * (y * w + x) + 0] += result;
                         image[3 * (y * w + x) + 1] += result;
