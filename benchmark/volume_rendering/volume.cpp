@@ -31,10 +31,10 @@ struct Ray {
 
 static void generateRay(const float raster2camera[4][4], const float camera2world[4][4], int const varying(L) x, int const varying(L) y, Ray varying(L)& ray) {
   // transform raster coordinate (x, y, 0) to camera space
-  float varying(L) camx = raster2camera[0][0] * x + raster2camera[0][1] * y + raster2camera[0][3];
-  float varying(L) camy = raster2camera[1][0] * x + raster2camera[1][1] * y + raster2camera[1][3];
-  float varying(L) camz = raster2camera[2][3];
-  float varying(L) camw = raster2camera[3][3];
+  auto camx = raster2camera[0][0] * x + raster2camera[0][1] * y + raster2camera[0][3];
+  auto camy = raster2camera[1][0] * x + raster2camera[1][1] * y + raster2camera[1][3];
+  auto camz = raster2camera[2][3];
+  auto camw = raster2camera[3][3];
   camx /= camw;
   camy /= camw;
   camz /= camw;
@@ -78,7 +78,7 @@ int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varyin
     div_assign( tFar, ray.dir );
 
     if (tNear.x > tFar.x) {
-        float const varying(L) tmp = tNear.x;
+        auto tmp = tNear.x;
         tNear.x = tFar.x;
         tFar.x = tmp;
     }
@@ -88,7 +88,7 @@ int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varyin
     t1 = fmin( tFar.x, t1 );
 
     if (tNear.y > tFar.y) {
-        float const varying(L) tmp = tNear.y;
+        auto tmp = tNear.y;
         tNear.y = tFar.y;
         tFar.y = tmp;
     }
@@ -98,7 +98,7 @@ int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varyin
     t1 = fmin( tFar.y, t1 );
 
     if (tNear.z > tFar.z) {
-        float const varying(L) tmp = tNear.z;
+        auto tmp = tNear.z;
         tNear.z = tFar.z;
         tFar.z = tmp;
     }
@@ -133,7 +133,7 @@ float varying(L) lookup(int varying(L) x, int varying(L) y, int varying(L) z, in
     x = clamp(x, 0, nVoxels[0]-1);
     y = clamp(y, 0, nVoxels[1]-1);
     z = clamp(z, 0, nVoxels[2]-1);
-    int varying(L) pos = z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x;
+    auto pos = z*nVoxels[0]*nVoxels[1] + y*nVoxels[0] + x;
 
     return fgather(volume, pos);
 }
@@ -160,18 +160,18 @@ float varying(L) density(vec3 varying(L)& Pobj, vec3 varying(L)& pMin, vec3 vary
         vox.x = vox.x * nVoxels[0] - .5f;
         vox.y = vox.y * nVoxels[1] - .5f;
         vox.z = vox.z * nVoxels[2] - .5f;
-        int varying(L) vx = (int varying(L))(vox.x);
-        int varying(L) vy = (int varying(L))(vox.y);
-        int varying(L) vz = (int varying(L))(vox.z);
-        float varying(L) dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
+        auto vx = (int varying(L))(vox.x);
+        auto vy = (int varying(L))(vox.y);
+        auto vz = (int varying(L))(vox.z);
+        auto dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
 
         // Trilinearly interpolate volume values to compute local density
-        float varying(L) d00 = lerp(dx, lookup(vx, vy+0, vz+0, nVoxels, volume), lookup(vx+1, vy+0, vz+0, nVoxels, volume));
-        float varying(L) d10 = lerp(dx, lookup(vx, vy+1, vz+0, nVoxels, volume), lookup(vx+1, vy+1, vz+0, nVoxels, volume));
-        float varying(L) d01 = lerp(dx, lookup(vx, vy+0, vz+1, nVoxels, volume), lookup(vx+1, vy+0, vz+1, nVoxels, volume));
-        float varying(L) d11 = lerp(dx, lookup(vx, vy+1, vz+1, nVoxels, volume), lookup(vx+1, vy+1, vz+1, nVoxels, volume));
-        float varying(L) d0 = lerp(dy, d00, d10);
-        float varying(L) d1 = lerp(dy, d01, d11);
+        auto d00 = lerp(dx, lookup(vx, vy+0, vz+0, nVoxels, volume), lookup(vx+1, vy+0, vz+0, nVoxels, volume));
+        auto d10 = lerp(dx, lookup(vx, vy+1, vz+0, nVoxels, volume), lookup(vx+1, vy+1, vz+0, nVoxels, volume));
+        auto d01 = lerp(dx, lookup(vx, vy+0, vz+1, nVoxels, volume), lookup(vx+1, vy+0, vz+1, nVoxels, volume));
+        auto d11 = lerp(dx, lookup(vx, vy+1, vz+1, nVoxels, volume), lookup(vx+1, vy+1, vz+1, nVoxels, volume));
+        auto d0 = lerp(dy, d00, d10);
+        auto d1 = lerp(dy, d01, d11);
         res = lerp(dz, d0, d1);
     }
 
@@ -198,12 +198,11 @@ float varying(L) transmittance(vec3 varying(L)& p0, vec3 varying(L)& p1, vec3 va
 
         // Accumulate beam transmittance in tau
         float varying(L) tau = 0;
-        float varying(L) rayLength = sqrt(ray.dir.x * ray.dir.x
-                + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
+        auto rayLength = sqrt(ray.dir.x * ray.dir.x + ray.dir.y * ray.dir.y + ray.dir.z * ray.dir.z);
         static float const stepDist = 0.2f;
-        float varying(L) stepT = stepDist / rayLength;
+        auto stepT = stepDist / rayLength;
 
-        float varying(L) t = rayT0;
+        auto t = rayT0;
         //float3 pos = ray.origin + ray.dir * rayT0;
         vec3 varying(L) pos;
         copy( pos, ray.dir );
@@ -263,9 +262,9 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
         static float const lightIntensity = 40; // Light source intensity
 
         float varying(L) tau = 0.f;  // accumulated beam transmittance
-        float varying(L) rayLength = sqrt(dot(ray.dir, ray.dir));
-        float varying(L) stepT = stepDist / rayLength;
-        float varying(L) t = rayT0;
+        auto rayLength = sqrt(dot(ray.dir, ray.dir));
+        auto stepT = stepDist / rayLength;
+        auto t = rayT0;
 
         //float3 pos = ray.dir * rayT0 + ray.origin;
         vec3 varying(L) pos;
@@ -279,16 +278,16 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
 
         int varying(L) attenMask = true;
         while (attenMask && t < rayT1) {
-            float varying(L) d = density(pos, pMin, pMax, volume, nVoxels);
+            auto d = density(pos, pMin, pMax, volume, nVoxels);
 
             // terminate once attenuation is high
-            float varying(L) atten = exp(-tau);
+            auto atten = exp(-tau);
             if (atten < .005f)
                 attenMask = false;
             else {
                 // direct lighting
-                float varying(L) Li = lightIntensity / distanceSquared(lightPos, pos) *
-                    transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
+                auto Li = lightIntensity / distanceSquared(lightPos, pos)
+                    * transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
                 result += stepDist * atten * d * sigma_s * (Li + Le);
 
                 // update beam transmittance
@@ -312,20 +311,20 @@ static void render(float volume[], int nVoxels[3], const float raster2camera[4][
     static const int yoffsets[16] = { 0, 0, 1, 1, 0, 0, 1, 1,
                                       2, 2, 3, 3, 2, 2, 3, 3 };
 
-    int const varying(L) *xOffsetPtr = (int varying(L)*) xoffsets;
-    int const varying(L) *yOffsetPtr = (int varying(L)*) yoffsets;
+    auto xOffsetPtr = (int varying(L)*) xoffsets;
+    auto yOffsetPtr = (int varying(L)*) yoffsets;
 
     for (int y = 0; y < height; y += Tile<L>::y) {
         for (int x = 0; x < width; x += Tile<L>::x) {
             Ray varying(L) ray;
 
-            float const varying(L) xo = (float varying(L)) (x + *xOffsetPtr);
-            float const varying(L) yo = (float varying(L)) (y + *yOffsetPtr);
+            auto xo = (float varying(L)) (x + *xOffsetPtr);
+            auto yo = (float varying(L)) (y + *yOffsetPtr);
 
             generateRay(raster2camera, camera2world, xo, yo, ray);
-            float varying(L) res = raymarch(volume, nVoxels, ray);
+            auto res = raymarch(volume, nVoxels, ray);
 
-            for ( int off = 0; off < L; ++off )
+            for (int off = 0; off < L; ++off)
                 image[(y + yoffsets[off]) * width + x + xoffsets[off]] = extract( res, off );
         }
     }
@@ -340,7 +339,7 @@ static void writePPM(float *buf, int width, int height, const char *fn) {
         float v = buf[i] * 255.f;
         if (v < 0.f) v = 0.f;
         else if (v > 255.f) v = 255.f;
-        unsigned char c = (unsigned char)v;
+        auto c = uint8_t(v);
         for (int j = 0; j < 3; ++j)
             fputc(c, fp);
     }
