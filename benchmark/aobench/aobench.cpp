@@ -279,19 +279,19 @@ int main(int argc, char** argv) {
     int num_iters = 1, width = 256, height = 256;
 
     if (argc == 4) {
-        num_iters = atoi(argv[1]);
-        width     = atoi(argv[2]);
-        height    = atoi(argv[3]);
+        width     = atoi(argv[1]);
+        height    = atoi(argv[2]);
+        num_iters = atoi(argv[3]);
     } else if (argc != 1) {
         const char* exe = argc > 0 ? argv[0] : "aobench";
-        std::cout << "usage: " << exe << " [number of test iterations] [width] [height] " << std::endl;
+        std::cout << "usage: " << exe << " [width] [height] [number of iterations]" << std::endl;
         return EXIT_FAILURE;
     }
 
     auto  img = new uint8_t[width * height * 3];
     auto fimg = new float[width * height * 3];
 
-    std::cout << "aobench: " << benchmark([&] { ao(width, height, fimg); }, 1) << std::endl;
+    std::cout << "median: " << benchmark([&] { ao(width, height, fimg); }, num_iters) << std::endl;
     writePPM("out.ppm", width, height, img, fimg);
 
     delete[] img;

@@ -116,6 +116,15 @@ static void black_scholes(float Sa[], float Xa[], float Ta[], float ra[], float 
 }
 
 int main(int argc, char *argv[]) {
+    int num_iters = 1;
+    if (argc == 2) {
+        num_iters = atoi(argv[1]);
+    } else if (argc != 1) {
+        const char* exe = argc > 0 ? argv[0] : "options";
+        std::cout << "usage: " << exe << " [number of iterations]" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     int num = 1024*1024;
     auto S = new float[num];
     auto X = new float[num];
@@ -132,8 +141,8 @@ int main(int argc, char *argv[]) {
         v[i] =   5.00f; // volatility
     }
 
-    std::cout << "binomial: "      << benchmark([&] { binomial_put (S, X, T, r, v, result, num); }) << std::endl;
-    std::cout << "black scholes: " << benchmark([&] { black_scholes(S, X, T, r, v, result, num); }) << std::endl;
+    std::cout << "binomial: "      << benchmark([&] { binomial_put (S, X, T, r, v, result, num); }, num_iters) << std::endl;
+    std::cout << "black scholes: " << benchmark([&] { black_scholes(S, X, T, r, v, result, num); }, num_iters) << std::endl;
 
     delete[] S;
     delete[] X;

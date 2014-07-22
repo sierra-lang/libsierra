@@ -28,8 +28,8 @@ inline uint64_t rdtsc() {
 
 namespace sierra {
 
-double benchmark(std::function<void()> f, size_t num = 11u) {
-    std::vector<double> times(num);
+double benchmark(std::function<void()> f, size_t num_iters) {
+    std::vector<double> times(num_iters);
     for (auto& time : times) {
         auto start = rdtsc();
         f();
@@ -39,7 +39,7 @@ double benchmark(std::function<void()> f, size_t num = 11u) {
 
     // compute median
     std::sort(times.begin(), times.end());
-    return times[times.size()/2];
+    return times[num_iters/2];
 }
 
 }

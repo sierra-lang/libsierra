@@ -63,14 +63,23 @@ static void writePPM(int *buf, int width, int height, const char *fn) {
     printf("wrote image file %s\n", fn);
 }
 
-int main() {
-    int width = 1920, height = 1200;
+int main(int argc, char** argv) {
+    int num_iters = 1, width = 1920, height = 1200;
+
+    if (argc == 2) {
+        num_iters = atoi(argv[1]);
+    } else if (argc != 1) {
+        const char* exe = argc > 0 ? argv[0] : "mandelbrot";
+        std::cout << "usage: " << exe << " [width] [height] [number of iterations]" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     float x0 = -2.f, x1 = 1.f;
     float y0 = -1.f, y1 = 1.f;
     auto buf = new int[width*height];
 
-    std::cout << "mandelbrot: " << benchmark([&] { mandelbrot(x0, y0, x1, y1, width, height, buf); }) << std::endl;
-    writePPM(buf, width, height, "mandelbrot.ppm");
+    std::cout << "median: " << benchmark([&] { mandelbrot(x0, y0, x1, y1, width, height, buf); }, num_iters) << std::endl;
+    writePPM(buf, width, height, "out.ppm");
 
     delete[] buf;
 }
