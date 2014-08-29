@@ -6,7 +6,7 @@ int main() {
   int __attribute__((sierra_vector(4))) b = {true, false, true, false};
   int __attribute__((sierra_vector(4))) c = false;
 
-  if ( a ? b : true ) // {1, 1, 1, 0}
+  if (( a || a ) ? b : true ) // {1, 1, 1, 0}
   {
     c = a;  // {1, 0, 0, 0}
   }
