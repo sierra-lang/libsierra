@@ -25,11 +25,11 @@ RESULT=$(grep --color=never -e '$RESULT:' "${SRC}" | sed -e 's/^.*$RESULT: *//' 
 sh -c "$1"
 ACTUAL=$?
 
-if [ ${ACTUAL} -eq ${RESULT} ];
+if [ ${ACTUAL} -ne ${RESULT} ];
 then
-  echo "PASS:    $1"
-else
   echo "WARNING: $1: expected ${RESULT} but was ${ACTUAL}"
+	exit 1
 fi
 
+echo "PASS:    $1"
 exit 0
