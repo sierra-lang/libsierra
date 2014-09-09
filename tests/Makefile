@@ -32,7 +32,7 @@ CXXFLAGS	+= $(CFLAGS) -std=c++11
 	$(Q)$(CXX) $(CXXFLAGS) -o $@ $@.ll
 
 check: all
-	@for FILE in $(TARGET); do ./test.sh $${FILE}; done
+	@./tests.sh $(TARGET)
 
 clean:
 	@for FILE in $(TARGET); do rm -f $${FILE}; done
