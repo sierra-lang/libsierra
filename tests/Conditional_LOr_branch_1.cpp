@@ -5,8 +5,8 @@ int main()
 {
 	bool varying(4) a = {true, true, false, false};
 	bool varying(4) b = {true, false, true, false};
-	bool varying(4) c = {true, false, true, false};
-	bool varying(4) d = {false, false, true, true};
+	bool varying(4) c = {false, true, false, true};
+	bool varying(4) d = {false, false, true, false};
 
 	int varying(4) x = {0, 1, 2, 3};
 
