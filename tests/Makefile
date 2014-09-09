@@ -35,4 +35,7 @@ check: all
 	@for FILE in $(TARGET); do ./test.sh $${FILE}; done
 
 clean:
+	@for FILE in $(TARGET); do rm -f $${FILE}; done
+
+clean-all:
 	@for FILE in $(TARGET); do rm -f $${FILE} $${FILE}.ll; done
