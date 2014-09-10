@@ -28,7 +28,7 @@ CXXFLAGS	+= $(CFLAGS) -std=c++11
 
 % : %.cpp
 	@echo "===> $(CXX) $<   ->   $@"
-	$(Q)$(CXX) $(CXXFLAGS) -emit-llvm -S -o $@.ll $<
+	$(Q)$(CXX) $(CXXFLAGS) $(INCLUDES) -emit-llvm -S -o $@.ll $<
 	$(Q)$(CXX) $(CXXFLAGS) -o $@ $@.ll
 
 check: all
