@@ -3,8 +3,8 @@
  * Copyright (c) 2013-2014, Saarland University
  *
  * compile with:
- *  clang++ -fsierra -I ../.. -O2 -mavx -DLENGTH=1 aobench.cpp
- *  clang++ -fsierra -I ../.. -O2 -mavx -DLENGTH=8 aobench.cpp
+ *  clang++ -fsierra -std=c++11 -I ../.. -O2 -mavx -DLENGTH=1 aobench.cpp
+ *  clang++ -fsierra -std=c++11 -I ../.. -O2 -mavx -DLENGTH=8 aobench.cpp
  */
 
 #include <cmath>
