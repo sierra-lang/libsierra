@@ -282,6 +282,9 @@ int main(int argc, char** argv) {
         width     = atoi(argv[1]);
         height    = atoi(argv[2]);
         num_iters = atoi(argv[3]);
+    } else if (argc == 2)
+    {
+      num_iters = atoi(argv[1]);
     } else if (argc != 1) {
         const char* exe = argc > 0 ? argv[0] : "aobench";
         std::cout << "usage: " << exe << " [width] [height] [number of iterations]" << std::endl;
