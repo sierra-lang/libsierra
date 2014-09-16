@@ -1,2 +1,5 @@
-mandelbrot
+volume
+volume.sse-*
+volume.avx-*
 *.ppm
+default.cfg
