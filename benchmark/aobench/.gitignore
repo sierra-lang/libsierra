@@ -1,2 +1,5 @@
-ao
+aobench
+aobench.avx-*
+aobench.sse-*
 *.ppm
+default.cfg
