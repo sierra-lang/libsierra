@@ -1,3 +1,5 @@
 mandelbrot
+mandelbrot.sse-*
+mandelbrot.avx-*
 *.ppm
-objs
+default.cfg
