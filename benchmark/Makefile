@@ -1,6 +1,6 @@
 .PHONY: all check clean clean-all
 
-TARGETS=aobench/ mandelbrot/ options/ rgb2gray/ volume/
+TARGETS=aobench/ mandelbrot/ options/ volume/
 
 all:
 	@for TARGET in $(TARGETS); do $(MAKE) $(MFLAGS) -C $${TARGET}; done
