@@ -6,9 +6,9 @@ then
   exit 1
 fi
 
-if [ ! -f $1 ];
+if [ ! -f "bin/$1" ];
 then
-  echo "ERROR:   File '$1' does not exist"
+  echo "ERROR:   File 'bin/$1' does not exist"
   exit 1
 fi
 
@@ -22,7 +22,7 @@ fi
 
 RESULT=$(grep --color=never -e '$RESULT:' "${SRC}" | sed -e 's/^.*$RESULT: *//' - | awk '{print $1}')
 
-sh -c "$1"
+sh -c "bin/$1"
 ACTUAL=$?
 
 if [ ${ACTUAL} -ne ${RESULT} ];
