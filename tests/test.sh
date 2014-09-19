@@ -1,14 +1,16 @@
 #!/bin/bash
 
+BINDIR="bin/"
+
 if [ $# -ne 1 ];
 then
   echo "ERROR:   Illegal number of arguments: $#"
   exit 1
 fi
 
-if [ ! -f "bin/$1" ];
+if [ ! -f "${BINDIR}/$1" ];
 then
-  echo "ERROR:   File 'bin/$1' does not exist"
+  echo "ERROR:   File '$1' does not exist"
   exit 1
 fi
 
@@ -22,7 +24,7 @@ fi
 
 RESULT=$(grep --color=never -e '$RESULT:' "${SRC}" | sed -e 's/^.*$RESULT: *//' - | awk '{print $1}')
 
-sh -c "bin/$1"
+sh -c "${BINDIR}/$1"
 ACTUAL=$?
 
 if [ ${ACTUAL} -ne ${RESULT} ];
