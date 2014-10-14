@@ -1,6 +1,8 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include "sierra/defines.h"
+
 template< typename T >
 int length( T ){ return 1; }
 
