@@ -35,8 +35,8 @@ CXXFLAGS	+= $(CFLAGS) -std=c++11
 
 $(BINDIR)/% : %.cpp
 	@echo "===> $(CXX) $<   ->   $*"
-	$(Q)$(CXX) $(CXXFLAGS) $(INCLUDES) -emit-llvm -S -o $(LLDIR)/$*.ll $<
-	$(Q)$(CXX) $(CXXFLAGS) -o $(BINDIR)/$* $(LLDIR)/$*.ll
+	-$(Q)$(CXX) $(CXXFLAGS) $(INCLUDES) -emit-llvm -S -o $(LLDIR)/$*.ll $<
+	-$(Q)$(CXX) $(CXXFLAGS) -o $(BINDIR)/$* $(LLDIR)/$*.ll
 
 check: all
 	@./tests.sh $(TARGET)
