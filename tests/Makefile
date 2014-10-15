@@ -23,7 +23,7 @@ TARGET2			:= $(SRC:%.cpp=$(BINDIR)/%)
 
 all: $(TARGET2)
 
--include $(CFG).cfg
+-include ../$(CFG).cfg
 
 
 ifeq ($(VERBOSE), 1)

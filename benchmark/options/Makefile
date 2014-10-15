@@ -1,5 +1,7 @@
 .PHONY: all check clean clean-all
 
+CFG ?= default
+
 TARGET=options
 SOURCE=$(TARGET).cpp
 
@@ -8,7 +10,7 @@ CXXFLAGS=$(CFLAGS) -std=c++11
 
 all: $(TARGET).sse-scalar $(TARGET).sse-4x $(TARGET).sse-8x $(TARGET).avx-scalar $(TARGET).avx-8x $(TARGET).avx-16x
 
--include default.cfg
+-include ../../$(CFG).cfg
 
 $(TARGET).sse-scalar:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
