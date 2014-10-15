@@ -1,4 +1,3 @@
-#include "sierra/defines.h"
 #include "test.h"
 
 int main()
