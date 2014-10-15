@@ -5,12 +5,12 @@ CFG ?= default
 TARGET=options
 SOURCE=$(TARGET).cpp
 
-CFLAGS=$(INCLUDES) -O2 -ffast-math
-CXXFLAGS=$(CFLAGS) -std=c++11
-
 all: $(TARGET).sse-scalar $(TARGET).sse-4x $(TARGET).sse-8x $(TARGET).avx-scalar $(TARGET).avx-8x $(TARGET).avx-16x
 
 -include ../../$(CFG).cfg
+
+CFLAGS+=$(INCLUDES)
+CXXFLAGS+=$(CFLAGS) -std=c++11
 
 $(TARGET).sse-scalar:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
