@@ -9,8 +9,8 @@ all: $(TARGET).sse-scalar $(TARGET).sse-4x $(TARGET).sse-8x $(TARGET).avx-scalar
 
 -include ../../$(CFG).cfg
 
-CFLAGS+=$(INCLUDES)
-CXXFLAGS+=$(CFLAGS) -std=c++11
+CFLAGS			+= $(INCLUDES)
+CXXFLAGS		+= $(CFLAGS) -std=c++11
 
 $(TARGET).sse-scalar:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
