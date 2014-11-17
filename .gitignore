@@ -1,8 +1,9 @@
-*.o
-a.out
+*.bc
+*.cfg
 *.ll
 *.ll-*
-*.bc
-*.s
+*.o
 *.ppm
+*.s
 .*.swp
+a.out
