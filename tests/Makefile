@@ -27,11 +27,11 @@ all: $(TARGET2)
 
 
 ifeq ($(VERBOSE), 1)
-	CXXFLAGS	+= -v
+	CFLAGS		+= -v
 endif
 
-CFLAGS		+= -Wall -W -pedantic
-CXXFLAGS	+= $(CFLAGS) -std=c++11
+CFLAGS			+= -Wall -W -pedantic -O2
+CXXFLAGS		+= $(CFLAGS) -std=c++11
 
 $(BINDIR)/% : %.cpp
 	@echo "===> $(CXX) $<   ->   $*"
