@@ -5,6 +5,8 @@
 	%:: %,v
 	%:: s.%
 
+Q						?= @
+
 LLDIR				:= llvm/
 BINDIR			:= bin/
 
