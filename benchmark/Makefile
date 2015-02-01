@@ -1,4 +1,4 @@
-.PHONY: all check clean clean-all
+.PHONY: all check clean cleanall
 
 TARGETS=aobench/ mandelbrot/ options/ volume/
 
@@ -11,5 +11,5 @@ check:
 clean:
 	@for TARGET in $(TARGETS); do $(MAKE) $(MFLAGS) -C $${TARGET} clean; done
 
-clean-all:
-	@for TARGET in $(TARGETS); do $(MAKE) $(MFLAGS) -C $${TARGET} clean-all; done
+cleanall:
+	@for TARGET in $(TARGETS); do $(MAKE) $(MFLAGS) -C $${TARGET} cleanall; done

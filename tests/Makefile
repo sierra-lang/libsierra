@@ -10,7 +10,7 @@ Q						?= @
 LLDIR				:= llvm/
 BINDIR			:= bin/
 
-CFG					?= default
+CFG					?= ../default
 
 DUMMY				:= $(shell mkdir -p $(BINDIR))
 DUMMY				:= $(shell mkdir -p $(LLDIR))
@@ -21,18 +21,17 @@ TARGET			:= $(SRC:%.cpp=%)
 TARGET2			:= $(SRC:%.cpp=$(BINDIR)/%)
 
 
-.PHONY: all check clean
+.PHONY: all check clean cleanall
 
 all: $(TARGET2)
 
--include ../$(CFG).cfg
-
+-include $(CFG).cfg
 
 ifeq ($(VERBOSE), 1)
 	CFLAGS		+= -v
 endif
 
-CFLAGS			+= -Wall -W -pedantic -O2
+CFLAGS			+= -Wall -W -pedantic -O2 $(INCLUDES)
 CXXFLAGS		+= $(CFLAGS) -std=c++11
 
 $(BINDIR)/% : %.cpp
@@ -42,6 +41,8 @@ $(BINDIR)/% : %.cpp
 
 check: all
 	@./tests.sh $(TARGET)
+
+cleanall: clean
 
 clean:
 	@rm -fr $(BINDIR) $(LLDIR)
