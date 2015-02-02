@@ -44,11 +44,6 @@ do
 	let "i++"
 done
 
-if [ ${ERR} -ne 0 ];
-then
-  exit 1;
-fi
-
 
 # high-res
 echo
