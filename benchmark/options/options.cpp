@@ -1,10 +1,6 @@
 /*
  * Copyright (c) 2010-2012, Intel Corporation
  * Copyright (c) 2013-2014, Saarland University
- *
- * compile with:
- *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx options.cpp -I../.. -DLENGTH=1
- *  clang++ -std=c++11 -fsierra -O2 -ffast-math -mavx options.cpp -I../.. -DLENGTH=8
  */
 
 #define NOMINMAX
