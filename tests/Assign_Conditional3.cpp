@@ -9,7 +9,7 @@ int main()
 
   auto x = a ? b : c;
 
-  return unify( x, 0, 1, 5, 3 );
+  return unify( x, 0, 1, 5, 5 );
 }
 
 // $RESULT: 15
