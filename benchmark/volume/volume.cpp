@@ -272,27 +272,24 @@ static float varying(L) raymarch(float volume[], int nVoxels[3], Ray varying(L)&
         copy( dirStep, ray.dir );
         mul_assign( dirStep, stepT );
 
-        int varying(L) attenMask = true;
-        while (attenMask && t < rayT1) {
+        while (t < rayT1) {
             auto d = density(pos, pMin, pMax, volume, nVoxels);
 
             // terminate once attenuation is high
             auto atten = exp(-tau);
             if (atten < .005f)
-                attenMask = false;
-            else {
-                // direct lighting
-                auto Li = lightIntensity / distanceSquared(lightPos, pos)
-                    * transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
-                result += stepDist * atten * d * sigma_s * (Li + Le);
+                break;
+            // direct lighting
+            auto Li = lightIntensity / distanceSquared(lightPos, pos)
+                * transmittance(lightPos, pos, pMin, pMax, sigma_a + sigma_s, volume, nVoxels);
+            result += stepDist * atten * d * sigma_s * (Li + Le);
 
-                // update beam transmittance
-                tau += stepDist * (sigma_a + sigma_s) * d;
+            // update beam transmittance
+            tau += stepDist * (sigma_a + sigma_s) * d;
 
-                //pos = pos + dirStep;
-                add_assign( pos, dirStep );
-                t += stepT;
-            }
+            //pos = pos + dirStep;
+            add_assign( pos, dirStep );
+            t += stepT;
         }
         // Gamma correction
         result = pow(result, 1.f / 2.2f);
