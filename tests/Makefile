@@ -31,7 +31,7 @@ ifeq ($(VERBOSE), 1)
 	CFLAGS		+= -v
 endif
 
-CFLAGS			+= -Wall -W -pedantic -O2 $(INCLUDES)
+CFLAGS			+= -Wall -W -pedantic -O2
 CXXFLAGS		+= $(CFLAGS) -std=c++11
 
 $(BINDIR)/% : %.cpp
