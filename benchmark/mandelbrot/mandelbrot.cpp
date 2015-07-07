@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         num_iters = atoi(argv[1]);
     } else if (argc != 1) {
         const char* exe = argc > 0 ? argv[0] : "mandelbrot";
-        std::cout << "usage: " << exe << " [width] [height] [number of iterations]" << std::endl;
+        std::cout << "usage: " << exe << " [number of iterations]" << std::endl;
         return EXIT_FAILURE;
     }
 
