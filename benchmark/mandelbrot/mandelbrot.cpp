@@ -45,7 +45,7 @@ static void mandelbrot(float x0, float y0, float x1, float y1, int width, int he
 }
 
 static void writePPM(int *buf, int width, int height, const char *fn) {
-    FILE *fp = fopen(fn, "wb");
+    FILE* fp = fopen(fn, "wb");
     fprintf(fp, "P6\n");
     fprintf(fp, "%d %d\n", width, height);
     fprintf(fp, "255\n");
