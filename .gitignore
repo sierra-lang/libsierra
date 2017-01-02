@@ -7,3 +7,4 @@
 *.s
 .*.swp
 a.out
+setupenv.sh
