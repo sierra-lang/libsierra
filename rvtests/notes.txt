@@ -1,0 +1,284 @@
+  /* XXX
+   * the spmd clang::function attribute is now added as llvm::function
+   * attribute
+   * FIXME the spmd attribute should only be set if we speak of one!
+   */
+  //Fn->addFnAttr("spmd", std::to_string(SierraSpmd));
+
+
+
+
+
+
+
+- seems like i have to modify the constructor of a sierratype
+    . it should create a scalar type (elementtype)
+    . it should save the sierra information as well
+    . maybe it would be therefore a good idea to store it directly in the
+      sierravectype information...
+    . see Type.h:2682 and Type.h:2828
+    . this will however change the whole class declaration. in the current case
+      a sierravector is a child of the vector and accordingly it uses its
+      functionality...
+    . i should try to change it during codegen. the question hereby is whether
+      it is better or not.
+- dependentsized sierravectors:
+    . code:
+      template<typename T, int Size>
+      class vector {
+        typedef T __attribute__((sierra_vector_type(Size))) type;
+      }
+    . typegeneration should be handled as it is in templates
+    . the size of the vector may be also unknown
+    . as far as i got it, the size must be known for RV
+    . but somewhere IR is generated. how exactly is a template handled then?
+    . for unused stuff no code is generated
+    . used stuff is somewhere initialized
+- spmd attribute
+
+
+- idea:
+    . remove everything of sierra codegen
+      (--> git diff rvcodegen clang38/release_38)
+    . change sierravectortype class declaration. make a scalar type generation
+      here
+    . handle declarations with initializer. idea:
+        * generate it as vector
+        * generate a scalar copy which should be vectorized with RV
+        * after RV let the vectorized scalar copy alias with the initial
+          declaration
+    . handle dependentsized sierravectors. idea: none by now.
+        * these occur in templates when either the type or the vector size or
+          both are parameters
+        * it seems to be independent from the vectortype
+    . handle spmd attribute. idea: none by now.
+    . there is a 'llvm.annotation.*' intrinsic. maybe it can be used to store
+      the vectorsize. then i need an analysis-/transform regionpass that
+      searches for these intrinsics and calls RV with the needed infos
+
+
+- take care of
+    . include/clang/AST/RecursiveASTVisitor.h
+    . include/clang/AST/Type.h --> class definitions
+    . include/clang/AST/TypeLoc.h
+    . include/clang/AST/TypeNodes.def --> 78
+    . lib/AST/ASTContext.cpp
+    . lib/AST/ASTImporter.cpp
+    . lib/AST/ItaniumMangle.cpp --> 2484
+    . lib/AST/MicrosoftMangle.cpp
+    . lib/AST/TypePrinter.cpp --> 1271
+    . lib/CodeGen/CGDebugInfo.cpp --> 2245 handle sierravector extra
+
+
+lib/CodeGen/CGCall.cpp
+21:#include "CGSierra.h"
+35:// Sierra TODO
+592:  FI->SierraSpmd = info.getSierraSpmd();
+1406:  unsigned SierraSpmd = FI.getSierraSpmd();
+1407:  assert(SierraSpmd != 0 && "TODO");
+1408:  if (SierraSpmd != 1)
+1409:    ArgTypes.push_back(llvm::VectorType::get(llvm::IntegerType::getInt1Ty(getLLVMContext()), SierraSpmd));
+2160:  unsigned SierraSpmd = FI.getSierraSpmd();
+2161:  assert(SierraSpmd != 0);
+2162:  if (SierraSpmd != 1) {
+2163:    setSierraMask(
+2164:        SierraMask(*AI, CreateAllZerosVector(getLLVMContext(), SierraSpmd))
+                 );
+3453:  unsigned SierraSpmd = CallInfo.getSierraSpmd();
+3454:  if (SierraSpmd != 1) {
+3456:    llvm::Constant** undefs = new llvm::Constant*[SierraSpmd];
+3457:    for (size_t i = 0; i < SierraSpmd; ++i)
+3460:    llvm::ArrayRef<llvm::Constant*> values(undefs, SierraSpmd);
+3466:    if (auto mask = getSierraMask())
+3492:  // HACK for sierra built-in math functions
+3496:        //if (ND->getNameAsString() == "sierra") {
+
+
+lib/CodeGen/CGDebugInfo.cpp
+2245:  case Type::SierraVector:
+
+
+lib/CodeGen/CGDecl.cpp
+666:    auto OldMask = getSierraMask();
+667:    setSierraMask(SierraMask());
+671:    setSierraMask(OldMask);
+
+
+lib/CodeGen/CGDecl.cpp
+666:    auto OldMask = getSierraMask();
+667:    setSierraMask(SierraMask());
+671:    setSierraMask(OldMask);
+
+
+lib/CodeGen/CGExpr.cpp
+19:#include "CGSierra.h"
+120:  if ( E->getType()->isSierraVectorType()  )
+122:    QualType SierraTy = getContext().getSierraVectorType( BoolTy,
+123:                                        E->getType()->getSierraVectorLength() );
+124:    return CodeGen::EmitSierraConversion( *this,
+127:                                          SierraTy );
+1393:  if (Value->getType()->isVectorTy() && SierraMask_ ) {
+1394:    EmitMaskedStore(Builder, SierraMask_.CurrentMask, Value, Addr, Volatile);
+
+
+lib/CodeGen/CGExprScalar.cpp
+19:#include "CGSierra.h"
+754:  if (SrcType->isSierraVectorType())
+755:    return EmitSierraConversion(this->CGF, Src, SrcType, DstType);
+2945:    //if (LHSTy->isSierraVectorType())
+3057:  if (E->getType()->isVectorType() && ! E->getType()->isSierraVectorType()) {
+3094:  if (E->getType()->isSierraVectorType()) {
+3095:    auto OldMask = CGF.getSierraMask();
+3098:      unsigned NumElems = E->getType()->getSierraVectorLength();
+3099:      OldMask = SierraMask(Builder.getContext(), NumElems);
+3100:      CGF.setSierraMask(OldMask);
+3104:    llvm::BasicBlock *TrueBlock  = CGF.createBasicBlock("sierra-land.some-true");
+3105:    llvm::BasicBlock *FalseBlock = CGF.createBasicBlock("sierra-land.some-false");
+3106:    llvm::BasicBlock *EndBlock   = CGF.createBasicBlock("sierra-land.end");
+3110:    llvm::PHINode *EndPhi   = llvm::PHINode::Create(MaskTy, 0, "sierra-land.phi-end");
+3131:    CGF.setSierraMask(OldMask);
+3178:  if (E->getType()->isVectorType() && ! E->getType()->isSierraVectorType()) {
+3215:  if (E->getType()->isSierraVectorType()) {
+3216:    auto OldMask = CGF.getSierraMask();
+3219:      unsigned NumElems = E->getType()->getSierraVectorLength();
+3220:      OldMask = SierraMask(Builder.getContext(), NumElems);
+3221:      CGF.setSierraMask(OldMask );
+3225:    llvm::BasicBlock *TrueBlock  = CGF.createBasicBlock("sierra-lor.some-true");
+3226:    llvm::BasicBlock *FalseBlock = CGF.createBasicBlock("sierra-lor.some-false");
+3227:    llvm::BasicBlock *EndBlock   = CGF.createBasicBlock("sierra-lor.end");
+3231:    llvm::PHINode *EndPhi   = llvm::PHINode::Create(MaskTy, 0, "sierra-lor.phi-end");
+3252:    CGF.setSierraMask(OldMask);
+3404:  if (condExpr->getType()->isSierraVectorType()) {
+3405:    auto OldMask = CGF.getSierraMask();
+3410:      unsigned NumElems = E->getType()->getSierraVectorLength();
+3411:      //unsigned NumElems = condExpr->getType()->getSierraVectorLength();
+3412:      OldMask = SierraMask(Builder.getContext(), NumElems);
+3413:      CGF.setSierraMask(OldMask);
+3417:        CGF.createBasicBlock("sierra-conditional.some-true");
+3419:        CGF.createBasicBlock("sierra-conditional.some-false");
+3420:    llvm::BasicBlock *EndBlock = CGF.createBasicBlock("sierra-conditional.end");
+3426:        llvm::PHINode::Create(ValueType, 0, "sierra-conditional.phi-end");
+3428:        llvm::PHINode::Create(ValueType, 0, "sierra-conditional.phi-value");
+3451:        Builder.CreateSelect(FalsePhi, vPhi, RHS, "sierra-conditional.merged");
+3458:    CGF.setSierraMask(OldMask); // TODO: resetToScalar ?
+
+
+lib/CodeGen/CGSierra.cpp
+
+
+lib/CodeGen/CGSierra.h
+1://===--- CGSierra.h - Code Generation for Sierra ---------------*- C++ -*-===//
+10:// This file provides the interface for Sierra-related code generation.
+14:#ifndef LLVM_CLANG_CODEGEN_CGSIERRA_H
+15:#define LLVM_CLANG_CODEGEN_CGSIERRA_H
+49:llvm::Value *EmitSierraConversion(CodeGenFunction &CGF, llvm::Value *Src, QualType SrcType, QualType DstType);
+61:void EmitSierraIfStmt(CodeGenFunction &CGF, const IfStmt &S);
+62:void EmitSierraWhileStmt(CodeGenFunction &CGF, const WhileStmt &S);
+63:void EmitSierraDoStmt(CodeGenFunction &CGF, const DoStmt &S);
+64:void EmitSierraForStmt(CodeGenFunction &CGF, const ForStmt &S);
+65:void EmitSierraBreakStmt(CodeGenFunction &CGF, const BreakStmt &S);
+66:void EmitSierraContinueStmt(CodeGenFunction &CGF, const ContinueStmt &S);
+67:void EmitSierraReturnStmt(CodeGenFunction &CGF, const ReturnStmt &S);
+72:/// \brief Holds masks used by the Sierra code generation.
+73:struct SierraMask {
+74:  SierraMask()
+79:  SierraMask(llvm::Value *CurrentMask, llvm::Value *ContinueMask)
+87:  SierraMask(llvm::LLVMContext &Context, unsigned NumElems) {
+104:class SierraInfo {
+114:    SierraInfo(void)
+117:    SierraInfo(unsigned VecWidth)
+149:// width of 2. i propose by now to track various sierrainfo objects for each
+151:using SierraInfoObjects = std::map<unsigned, SierraInfo &>;
+
+
+lib/CodeGen/CGStmt.cpp
+16:#include "CGSierra.h"
+550:  if (S.getCond()->getType()->isSierraVectorType())
+551:    return EmitSierraIfStmt(*this, S);
+554:  auto oldMask = getSierraMask();
+575:      setSierraMask(oldMask);
+620:  setSierraMask(oldMask);
+626:  if (S.getCond()->getType()->isSierraVectorType())
+627:    return EmitSierraWhileStmt(*this, S);
+630:  auto oldMask = getSierraMask();
+714:  setSierraMask(oldMask);
+722:  if (S.getCond()->getType()->isSierraVectorType())
+723:    return EmitSierraDoStmt(*this, S);
+726:  auto oldMask = getSierraMask();
+784:  setSierraMask(oldMask);
+790:  if (S.getCond() && S.getCond()->getType()->isSierraVectorType())
+791:    return EmitSierraForStmt( *this, S  );
+794:  auto oldMask = getSierraMask();
+887:  setSierraMask(oldMask);
+989:  if ( getSierraMask() && RV && RV->getType()->isSierraVectorType() )
+990:    return EmitSierraReturnStmt(*this, S);
+1079:  /* If the BreakStmt is inside a vectorial Sierra loop, trigger Sierra's code
+1085:  if ( getSierraMask()  )
+1086:    return EmitSierraBreakStmt( *this, S  );
+1104:  /* If the BreakStmt is inside a vectorial Sierra loop, trigger Sierra's code
+1110:  if ( getSierraMask()  )
+1111:    return EmitSierraContinueStmt( *this, S  );
+
+
+lib/CodeGen/CodeGenFunction.cpp
+37://#include "CGSierra.h"
+194:    case Type::SierraVector:
+1149:  if (not Cond->getType()->isSierraVectorType()) {
+1157:  unsigned NumElems = Cond->getType()->getSierraVectorLength();
+1216:    Builder.CreateICmpEQ(EmitVecToInt(Builder, Result), EmitVecToInt(Builder, getSierraMask().CurrentMask))
+1225:/// with support for Sierra Vectors
+1248:      /* Check whether the type of the condition is a Sierra Vector Type. */
+1249:      if (Cond->getType()->isSierraVectorType()) {
+1251:        unsigned NumElems = Cond->getType()->getSierraVectorLength();
+1259:        llvm::BasicBlock *LHSSomeTrue = createBasicBlock("sierra-land.lhs.some-true");
+1263:                                                       "sierra-land.lhs.some-true.phi",
+1298:        return Builder.CreateAnd(LHSPhi, RHSValue, "sierra-land");
+1350:      /* Check whether the type of the condition is a Sierra Vector Type. */
+1351:      if (Cond->getType()->isSierraVectorType()) {
+1353:        unsigned NumElems = Cond->getType()->getSierraVectorLength();
+1359:        llvm::BasicBlock *LHSSomeFalse = createBasicBlock("sierra-lor.lhs.some-false");
+1363:                                                      "sierra-lor.lhs.some-false.phi",
+1383:                                 EmitVecToInt(Builder, getSierraMask().CurrentMask)),
+1400:        return Builder.CreateOr(LHSPhi, RHSValue, "sierra-lor");
+1459:      if (Cond->getType()->isSierraVectorType()) {
+1485:    if (CondOp->getCond()->getType()->isSierraVectorType()) {
+1486:      llvm::BasicBlock *LHSBlock = createBasicBlock("sierra-cond.some-true");
+1487:      llvm::BasicBlock *RHSBlock = createBasicBlock("sierra-cond.some-false");
+1488:      llvm::BasicBlock *EndBlock = createBasicBlock("sierra-cond.end");
+1490:      unsigned NumElems = Cond->getType()->getSierraVectorLength();
+1494:      llvm::PHINode *LHSPhi      = llvm::PHINode::Create(MaskTy, 0, "sierra-cond.some-true.phi");
+1495:      llvm::PHINode *RHSPhi      = llvm::PHINode::Create(MaskTy, 0, "sierra-cond.some-false.phi");
+1496:      llvm::PHINode *RHSPhiValue = llvm::PHINode::Create(MaskTy, 0, "sierra-cond.some-false.LHS-value");
+1497:      llvm::PHINode *EndPhi      = llvm::PHINode::Create(MaskTy, 0, "sierra-cond.end.phi");
+1514:                                                 EvaluateExprAsBool(CondOp->getLHS()), "sierra-cond.lhs-value");
+1522:                                                EmitVecToInt(Builder, getSierraMask().CurrentMask)),
+1531:                                                 EvaluateExprAsBool(CondOp->getRHS()), "sierra-cond.rhs-value");
+1585:  if (Cond->getType()->isSierraVectorType())
+1595:  /* If we have a Sierra Vector Type, make the evaluation depend on the current
+1597:  if (Cond->getType()->isSierraVectorType()) {
+1600:    return Builder.CreateAnd(Res, getSierraMask().CurrentMask);
+1954:    case Type::SierraVector:
+
+
+lib/CodeGen/CodeGenFunction.h
+20:#include "CGSierra.h"
+89:class SierraMask;
+110:  /* Declare Sierra code gen functions as friend. */
+111:  friend void EmitSierraIfStmt(CodeGenFunction &CGF, const IfStmt &S);
+112:  friend void EmitSierraForStmt(CodeGenFunction &CGF, const ForStmt &S);
+113:  friend void EmitSierraWhileStmt(CodeGenFunction &CGF, const WhileStmt &S);
+114:  friend void EmitSierraDoStmt(CodeGenFunction &CGF, const DoStmt &S);
+115:  friend void EmitSierraBreakStmt(CodeGenFunction &CGF, const BreakStmt &S);
+116:  friend void EmitSierraContinueStmt(CodeGenFunction &CGF, const ContinueStmt &S);
+117:  friend void EmitSierraReturnStmt(CodeGenFunction &CGF, const ReturnStmt &S);
+956:  SmallVector<llvm::PHINode *, 8> SierraContinuePhiStack;
+959:  SmallVector<llvm::PHINode *, 8> SierraLoopMaskStack;
+1028:  /// When generating Sierra code this will hold the current mask
+1029:  SierraMask SierraMask_;
+1148:  SierraMask getSierraMask() const { return SierraMask_;  }
+1149:  void setSierraMask(SierraMask NewMask) { SierraMask_ = NewMask;  }
+3021:  // allow short-circuit evaluation for Sierra Vector Expressions
+
+
+lib/CodeGen/CodeGenTypes.cpp
+551:  case Type::SierraVector: {
