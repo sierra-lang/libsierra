@@ -1,10 +1,12 @@
 #include "test.h"
 
-int varying(4) foo;
+int varying(4) foo() {
+    return 0;
+}
 //void bar(int varying(4) a);
 
 int main() {
-    foo;
+    foo();
     return 0;
 }
 
