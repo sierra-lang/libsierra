@@ -1,0 +1,4 @@
+options
+options.sse-*
+options.avx-*
+default.cfg
