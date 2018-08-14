@@ -3,7 +3,8 @@
 spmd(4)
 int foo()
 {
-  bool varying(4) b = { true, true, false, false };
+  //bool varying(4) b = { true, true, false, false };
+  bool b = true;
 
   if ( b )
     return 42;
