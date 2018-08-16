@@ -25,7 +25,7 @@ struct Ray {
     vec3 dir;
 };
 
-static void generateRay(const float raster2camera[4][4], const float camera2world[4][4], int const varying(L) x, int const varying(L) y, Ray varying(L)& ray) {
+static void generateRay(const float raster2camera[4][4], const float camera2world[4][4], int const x, int const y, Ray& ray) {
   // transform raster coordinate (x, y, 0) to camera space
   auto camx = raster2camera[0][0] * x + raster2camera[0][1] * y + raster2camera[0][3];
   auto camy = raster2camera[1][0] * x + raster2camera[1][1] * y + raster2camera[1][3];
@@ -46,8 +46,8 @@ static void generateRay(const float raster2camera[4][4], const float camera2worl
 }
 
 static spmd(L)
-int varying(L) Inside(vec3 const varying(L)& p, vec3 const varying(L)& pMin, vec3 const varying(L)& pMax) {
-    int varying(L) res = false;
+int Inside(vec3 const& p, vec3 const& pMin, vec3 const & pMax) {
+    int res = false;
 
     if (p.x >= pMin.x && p.x <= pMax.x && p.y >= pMin.y && p.y <= pMax.y && p.z >= pMin.z && p.z <= pMax.z)
         res = true;
@@ -114,7 +114,7 @@ int varying(L) intersect(Ray varying(L)& ray, vec3 varying(L)& pMin, vec3 varyin
 }
 
 static spmd(L)
-float varying(L) lerp(float varying(L) t, float varying(L) a, float varying(L) b) {
+float lerp(float t, float a, float b) {
     return (1.f - t) * a + t * b;
 }
 

@@ -22,8 +22,10 @@ ifeq ($(VERBOSE), 1)
 	CFLAGS		+= -v
 endif
 
-CFLAGS			+= -O2 $(INCLUDES)
-CXXFLAGS		+= $(CFLAGS) -std=c++11
+OWNFLAGS        += -fsierra -Xclang -load -Xclang ${INSTALL_DIR}/lib/libRVCodeGen.so -mllvm -debug-only=rvcodegen
+CFLAGS                  += -O1 $(INCLUDES)
+CXXFLAGS                += $(CFLAGS) -std=c++11 $(OWNFLAGS)
+
 
 $(TARGET).sse-scalar:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"

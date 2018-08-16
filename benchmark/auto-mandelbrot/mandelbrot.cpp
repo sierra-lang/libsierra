@@ -21,11 +21,13 @@ static inline int mandel(float c_re, float c_im) {
     auto z_im = c_im;
     //int varying(L) i = 0;
     int i = 0;
-    for (; (i < MAX_ITER) && (z_re * z_re + z_im * z_im < 4.f); ++i) {
+    auto b = z_re * z_re + z_im * z_im;
+    for (; (i < MAX_ITER) && (b < 4.f); ++i) {
         auto new_re = z_re*z_re - z_im*z_im;
         auto new_im = 2.f * z_re * z_im;
         z_re = c_re + new_re;
         z_im = c_im + new_im;
+        b = z_re * z_re + z_im * z_im;
     }
 
     return i;
