@@ -1,0 +1,86 @@
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[w, h, p_2] -> {  : w <= 0 or (w > 0 and h <= 0) or (w > 0 and h > 0 and p_2 >= h) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+:: isl ast :: kernel_deriche :: for.cond66.preheader => for.end163
+[w, h, p_2] -> {  : -2147483648 <= w <= 2147483647 and -2147483648 <= h <= 2147483647 and 0 <= p_2 <= 4294967295 }
+[w, h, p_2] -> { Stmt_for_body138[i0, i1] -> [2, i0, 1, i1] : 0 <= i0 < h and 0 <= i1 < w; Stmt_for_body72_lr_ph[i0] -> [0, i0, 0, 0] : w > 0 and h > 0 and 0 <= i0 < w; Stmt_for_body102_lr_ph[i0] -> [1, i0, 0, 0] : w > 0 and h > 0 and 0 <= i0 < h; Stmt_for_body72[i0, i1] -> [0, i0, 1, i1] : 0 <= i0 < w and 0 <= i1 < h; Stmt_for_body138_lr_ph[i0] -> [2, i0, 0, 0] : w > 0 and h > 0 and 0 <= i0 < h; Stmt_for_body102[i0, i1] -> [1, i0, 1, i1] : 0 <= i0 < h and 0 <= i1 < w }
+if (p_2 >= h && (&MemRef_y2[w - 1][h] <= &MemRef_y1[0][0] || &MemRef_y1[w - 1][h] <= &MemRef_y2[0][0]) && (&MemRef_imgIn[w - 1][h] <= &MemRef_y1[0][0] || &MemRef_y1[w - 1][h] <= &MemRef_imgIn[0][0]) && (&MemRef_imgOut[w - 1][h] <= &MemRef_y1[0][0] || &MemRef_y1[w - 1][h] <= &MemRef_imgOut[0][0]) && (&MemRef_imgIn[w - 1][h] <= &MemRef_y2[0][0] || &MemRef_y2[w - 1][h] <= &MemRef_imgIn[0][0]) && (&MemRef_imgOut[w - 1][h] <= &MemRef_y2[0][0] || &MemRef_y2[w - 1][h] <= &MemRef_imgOut[0][0]))
+
+    {
+      if (h >= 1)
+        for (int c0 = 0; c0 < w; c0 += 1) {
+          Stmt_for_body72_lr_ph(c0);
+          for (int c1 = 0; c1 < h; c1 += 1)
+            Stmt_for_body72(c0, c1);
+        }
+      if (w >= 1) {
+        for (int c0 = 0; c0 < h; c0 += 1) {
+          Stmt_for_body102_lr_ph(c0);
+          for (int c1 = 0; c1 < w; c1 += 1)
+            Stmt_for_body102(c0, c1);
+        }
+        for (int c0 = 0; c0 < h; c0 += 1) {
+          Stmt_for_body138_lr_ph(c0);
+          for (int c1 = 0; c1 < w; c1 += 1)
+            Stmt_for_body138(c0, c1);
+        }
+      }
+    }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[w, h, p_2] -> {  : w <= 0 or (w > 0 and h <= 0) or (w > 0 and h > 0 and p_2 >= h) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Finite loop assumption:	[h, w] -> {  : w > 0 }
+remark: <unknown>:0:0: Inbounds assumption:	[h, w, p_2] -> {  : h <= 0 or (h > 0 and w <= 0) or (h > 0 and w > 0 and p_2 >= h) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+:: isl ast :: kernel_deriche :: for.cond39.preheader => for.cond66.preheader.region_entering
+[h, w, p_2] -> {  : -2147483648 <= h <= 2147483647 and -2147483648 <= w <= 2147483647 and 0 <= p_2 <= 4294967295 }
+[h, w, p_2] -> { Stmt_for_body41_lr_ph[i0] -> [i0, 0, 0] : h > 0 and 0 <= i0 < w; Stmt_for_body41[i0, i1] -> [i0, 1, i1] : 0 <= i0 < w and 0 <= i1 < h }
+if (p_2 >= h && (&MemRef_imgIn[w - 1][h] <= &MemRef_y1[0][0] || &MemRef_y1[w - 1][h] <= &MemRef_imgIn[0][0]))
+
+    if (h >= 1)
+      for (int c0 = 0; c0 < w; c0 += 1) {
+        Stmt_for_body41_lr_ph(c0);
+        for (int c1 = 0; c1 < h; c1 += 1)
+          Stmt_for_body41(c0, c1);
+      }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Finite loop assumption:	[h, w] -> {  : w > 0 }
+remark: <unknown>:0:0: Inbounds assumption:	[h, w, p_2] -> {  : h <= 0 or (h > 0 and w <= 0) or (h > 0 and w > 0 and p_2 >= h) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.

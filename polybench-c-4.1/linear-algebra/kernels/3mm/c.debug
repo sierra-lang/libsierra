@@ -1,0 +1,216 @@
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, p_5] -> {  : ni <= 0 or (ni > 0 and nj <= 0) or (ni > 0 and nj > 0 and p_5 >= nj) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, p_6] -> {  : ni <= 0 or (ni > 0 and nj <= 0) or (ni > 0 and nj > 0 and nk <= 0) or (ni > 0 and nj > 0 and nk > 0 and p_6 >= nk) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, nl, nm, p_7] -> {  : nj <= 0 or (nj > 0 and nl <= 0) or (nj > 0 and nl > 0 and p_7 >= nl) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, nl, nm, p_8] -> {  : nj <= 0 or (nj > 0 and nl <= 0) or (nj > 0 and nl > 0 and nm <= 0) or (nj > 0 and nl > 0 and nm > 0 and p_8 >= nm) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+domain: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body21[i0, i1, i2] : 0 <= i0 < ni and 0 <= i1 < nj and 0 <= i2 < nk; Stmt_for_body46[i0, i1] : 0 <= i0 < nj and 0 <= i1 < nl; Stmt_for_body53[i0, i1, i2] : 0 <= i0 < nj and 0 <= i1 < nl and 0 <= i2 < nm; Stmt_for_body16[i0, i1] : 0 <= i0 < ni and 0 <= i1 < nj }"
+child:
+  sequence:
+  - filter: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body16[i0, i1] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body16[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body16[i0, i1] -> [(floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body16[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body16[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1 ]
+  - filter: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body46[i0, i1] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body46[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body46[i0, i1] -> [(floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body46[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body46[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1 ]
+  - filter: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body53[i0, i1, i2] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body53[i0, i1, i2] -> [(floor((i0)/32))] }, { Stmt_for_body53[i0, i1, i2] -> [(floor((i1)/32))] }, { Stmt_for_body53[i0, i1, i2] -> [(floor((i2)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1, 0 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body53[i0, i1, i2] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body53[i0, i1, i2] -> [(i1 - 32*floor((i1)/32))] }, { Stmt_for_body53[i0, i1, i2] -> [(i2 - 32*floor((i2)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1, 0 ]
+  - filter: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body21[i0, i1, i2] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body21[i0, i1, i2] -> [(floor((i0)/32))] }, { Stmt_for_body21[i0, i1, i2] -> [(floor((i1)/32))] }, { Stmt_for_body21[i0, i1, i2] -> [(floor((i2)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1, 0 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> [{ Stmt_for_body21[i0, i1, i2] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body21[i0, i1, i2] -> [(i1 - 32*floor((i1)/32))] }, { Stmt_for_body21[i0, i1, i2] -> [(i2 - 32*floor((i2)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1, 0 ]
+:: isl ast :: kernel_3mm :: entry.split => for.end76
+[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> {  : -2147483648 <= ni <= 2147483647 and -2147483648 <= nj <= 2147483647 and -2147483648 <= nk <= 2147483647 and -2147483648 <= nl <= 2147483647 and -2147483648 <= nm <= 2147483647 and 0 <= p_5 <= 4294967295 and 0 <= p_6 <= 4294967295 and 0 <= p_7 <= 4294967295 and 0 <= p_8 <= 4294967295 }
+[ni, nj, nk, nl, nm, p_5, p_6, p_7, p_8] -> { Stmt_for_body46[i0, i1] -> [1, o1, o2, o3, o4, 0, 0] : 32*floor((-i0 + o3)/32) = -i0 + o3 and 32*floor((-i1 + o4)/32) = -i1 + o4 and 0 <= i0 < nj and 0 <= i1 < nl and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and 0 <= o3 <= 31 and 0 <= o4 <= 31; Stmt_for_body21[i0, i1, i2] -> [3, o1, o2, o3, o4, o5, o6] : 32*floor((-i0 + o4)/32) = -i0 + o4 and 32*floor((-i1 + o5)/32) = -i1 + o5 and 32*floor((-i2 + o6)/32) = -i2 + o6 and 0 <= i0 < ni and 0 <= i1 < nj and 0 <= i2 < nk and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and -31 + i2 <= 32o3 <= i2 and 0 <= o4 <= 31 and 0 <= o5 <= 31 and 0 <= o6 <= 31; Stmt_for_body53[i0, i1, i2] -> [2, o1, o2, o3, o4, o5, o6] : 32*floor((-i0 + o4)/32) = -i0 + o4 and 32*floor((-i1 + o5)/32) = -i1 + o5 and 32*floor((-i2 + o6)/32) = -i2 + o6 and 0 <= i0 < nj and 0 <= i1 < nl and 0 <= i2 < nm and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and -31 + i2 <= 32o3 <= i2 and 0 <= o4 <= 31 and 0 <= o5 <= 31 and 0 <= o6 <= 31; Stmt_for_body16[i0, i1] -> [0, o1, o2, o3, o4, 0, 0] : 32*floor((-i0 + o3)/32) = -i0 + o3 and 32*floor((-i1 + o4)/32) = -i1 + o4 and 0 <= i0 < ni and 0 <= i1 < nj and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and 0 <= o3 <= 31 and 0 <= o4 <= 31 }
+if (((ni <= 0 && nl <= 0) || (ni >= 1 && nk <= 0 && nl <= 0 && p_5 >= nj) || (ni <= 0 && nl >= 1 && nm <= 0 && p_7 >= nl) || (ni >= 1 && nk >= 1 && nl <= 0 && p_5 >= nj && p_6 >= nk) || (ni <= 0 && nl >= 1 && nm >= 1 && p_7 >= nl && p_8 >= nm) || (ni >= 1 && nk <= 0 && nl >= 1 && nm <= 0 && p_5 >= nj && p_7 >= nl) || (ni >= 1 && nk >= 1 && nl >= 1 && nm <= 0 && p_5 >= nj && p_6 >= nk && p_7 >= nl) || (ni >= 1 && nk <= 0 && nl >= 1 && nm >= 1 && p_5 >= nj && p_7 >= nl && p_8 >= nm) || (ni >= 1 && nk >= 1 && nl >= 1 && nm >= 1 && p_5 >= nj && p_6 >= nk && p_7 >= nl && p_8 >= nm)) && (&MemRef_F[nj - 1][nl] <= &MemRef_E[0][0] || &MemRef_E[ni - 1][nj] <= &MemRef_F[0][0]) && (&MemRef_D[nm - 1][nl] <= &MemRef_E[0][0] || &MemRef_E[ni - 1][nj] <= &MemRef_D[0][0]) && (&MemRef_A[ni - 1][nk] <= &MemRef_E[0][0] || &MemRef_E[ni - 1][nj] <= &MemRef_A[0][0]) && (&MemRef_C[nj - 1][nm] <= &MemRef_E[0][0] || &MemRef_E[ni - 1][nj] <= &MemRef_C[0][0]) && (&MemRef_B[nk - 1][nj] <= &MemRef_E[0][0] || &MemRef_E[ni - 1][nj] <= &MemRef_B[0][0]) && (&MemRef_D[nm - 1][nl] <= &MemRef_F[0][0] || &MemRef_F[nj - 1][nl] <= &MemRef_D[0][0]) && (&MemRef_A[ni - 1][nk] <= &MemRef_F[0][0] || &MemRef_F[nj - 1][nl] <= &MemRef_A[0][0]) && (&MemRef_C[nj - 1][nm] <= &MemRef_F[0][0] || &MemRef_F[nj - 1][nl] <= &MemRef_C[0][0]) && (&MemRef_B[nk - 1][nj] <= &MemRef_F[0][0] || &MemRef_F[nj - 1][nl] <= &MemRef_B[0][0]))
+
+    {
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(ni - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nj - 1, 32); c1 += 1) {
+          // 1st level tiling - Points
+          for (int c2 = 0; c2 <= min(31, ni - 32 * c0 - 1); c2 += 1)
+            #pragma simd
+            for (int c3 = 0; c3 <= min(31, nj - 32 * c1 - 1); c3 += 1)
+              Stmt_for_body16(32 * c0 + c2, 32 * c1 + c3);
+        }
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(nj - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nl - 1, 32); c1 += 1) {
+          // 1st level tiling - Points
+          for (int c2 = 0; c2 <= min(31, nj - 32 * c0 - 1); c2 += 1)
+            #pragma simd
+            for (int c3 = 0; c3 <= min(31, nl - 32 * c1 - 1); c3 += 1)
+              Stmt_for_body46(32 * c0 + c2, 32 * c1 + c3);
+        }
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(nj - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nl - 1, 32); c1 += 1)
+          for (int c2 = 0; c2 <= floord(nm - 1, 32); c2 += 1) {
+            // 1st level tiling - Points
+            for (int c3 = 0; c3 <= min(31, nj - 32 * c0 - 1); c3 += 1)
+              for (int c4 = 0; c4 <= min(31, nl - 32 * c1 - 1); c4 += 1)
+                #pragma minimal dependence distance: 1
+                for (int c5 = 0; c5 <= min(31, nm - 32 * c2 - 1); c5 += 1)
+                  Stmt_for_body53(32 * c0 + c3, 32 * c1 + c4, 32 * c2 + c5);
+          }
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(ni - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nj - 1, 32); c1 += 1)
+          for (int c2 = 0; c2 <= floord(nk - 1, 32); c2 += 1) {
+            // 1st level tiling - Points
+            for (int c3 = 0; c3 <= min(31, ni - 32 * c0 - 1); c3 += 1)
+              for (int c4 = 0; c4 <= min(31, nj - 32 * c1 - 1); c4 += 1)
+                #pragma minimal dependence distance: 1
+                for (int c5 = 0; c5 <= min(31, nk - 32 * c2 - 1); c5 += 1)
+                  Stmt_for_body21(32 * c0 + c3, 32 * c1 + c4, 32 * c2 + c5);
+          }
+    }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, p_5] -> {  : ni <= 0 or (ni > 0 and nj <= 0) or (ni > 0 and nj > 0 and p_5 >= nj) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, p_6] -> {  : ni <= 0 or (ni > 0 and nj <= 0) or (ni > 0 and nj > 0 and nk <= 0) or (ni > 0 and nj > 0 and nk > 0 and p_6 >= nk) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, nl, nm, p_7] -> {  : nj <= 0 or (nj > 0 and nl <= 0) or (nj > 0 and nl > 0 and p_7 >= nl) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nj, nk, nl, nm, p_8] -> {  : nj <= 0 or (nj > 0 and nl <= 0) or (nj > 0 and nl > 0 and nm <= 0) or (nj > 0 and nl > 0 and nm > 0 and p_8 >= nm) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nl, nj, p_3] -> {  : ni <= 0 or (ni > 0 and nl <= 0) or (ni > 0 and nl > 0 and p_3 >= nl) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nl, nj, p_4] -> {  : ni <= 0 or (ni > 0 and nl <= 0) or (ni > 0 and nl > 0 and nj <= 0) or (ni > 0 and nl > 0 and nj > 0 and p_4 >= nj) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+domain: "[ni, nl, nj, p_3, p_4] -> { Stmt_for_body8[i0, i1] : 0 <= i0 < ni and 0 <= i1 < nl; Stmt_for_body13[i0, i1, i2] : 0 <= i0 < ni and 0 <= i1 < nl and 0 <= i2 < nj }"
+child:
+  sequence:
+  - filter: "[ni, nl, nj, p_3, p_4] -> { Stmt_for_body8[i0, i1] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nl, nj, p_3, p_4] -> [{ Stmt_for_body8[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body8[i0, i1] -> [(floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nl, nj, p_3, p_4] -> [{ Stmt_for_body8[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body8[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1 ]
+  - filter: "[ni, nl, nj, p_3, p_4] -> { Stmt_for_body13[i0, i1, i2] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[ni, nl, nj, p_3, p_4] -> [{ Stmt_for_body13[i0, i1, i2] -> [(floor((i0)/32))] }, { Stmt_for_body13[i0, i1, i2] -> [(floor((i1)/32))] }, { Stmt_for_body13[i0, i1, i2] -> [(floor((i2)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1, 0 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[ni, nl, nj, p_3, p_4] -> [{ Stmt_for_body13[i0, i1, i2] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body13[i0, i1, i2] -> [(i1 - 32*floor((i1)/32))] }, { Stmt_for_body13[i0, i1, i2] -> [(i2 - 32*floor((i2)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1, 0 ]
+:: isl ast :: kernel_cont :: entry.split => for.end32
+[ni, nl, nj, p_3, p_4] -> {  : -2147483648 <= ni <= 2147483647 and -2147483648 <= nl <= 2147483647 and -2147483648 <= nj <= 2147483647 and 0 <= p_3 <= 4294967295 and 0 <= p_4 <= 4294967295 }
+[ni, nl, nj, p_3, p_4] -> { Stmt_for_body13[i0, i1, i2] -> [1, o1, o2, o3, o4, o5, o6] : 32*floor((-i0 + o4)/32) = -i0 + o4 and 32*floor((-i1 + o5)/32) = -i1 + o5 and 32*floor((-i2 + o6)/32) = -i2 + o6 and 0 <= i0 < ni and 0 <= i1 < nl and 0 <= i2 < nj and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and -31 + i2 <= 32o3 <= i2 and 0 <= o4 <= 31 and 0 <= o5 <= 31 and 0 <= o6 <= 31; Stmt_for_body8[i0, i1] -> [0, o1, o2, o3, o4, 0, 0] : 32*floor((-i0 + o3)/32) = -i0 + o3 and 32*floor((-i1 + o4)/32) = -i1 + o4 and 0 <= i0 < ni and 0 <= i1 < nl and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and 0 <= o3 <= 31 and 0 <= o4 <= 31 }
+if (((nj <= 0 && p_3 >= nl) || (nj >= 1 && p_3 >= nl && p_4 >= nj)) && (&MemRef_F[nj - 1][nl] <= &MemRef_G[0][0] || &MemRef_G[ni - 1][nl] <= &MemRef_F[0][0]) && (&MemRef_E[ni - 1][nj] <= &MemRef_G[0][0] || &MemRef_G[ni - 1][nl] <= &MemRef_E[0][0]))
+
+    {
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(ni - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nl - 1, 32); c1 += 1) {
+          // 1st level tiling - Points
+          for (int c2 = 0; c2 <= min(31, ni - 32 * c0 - 1); c2 += 1)
+            #pragma simd
+            for (int c3 = 0; c3 <= min(31, nl - 32 * c1 - 1); c3 += 1)
+              Stmt_for_body8(32 * c0 + c2, 32 * c1 + c3);
+        }
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(ni - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(nl - 1, 32); c1 += 1)
+          for (int c2 = 0; c2 <= floord(nj - 1, 32); c2 += 1) {
+            // 1st level tiling - Points
+            for (int c3 = 0; c3 <= min(31, ni - 32 * c0 - 1); c3 += 1)
+              for (int c4 = 0; c4 <= min(31, nl - 32 * c1 - 1); c4 += 1)
+                #pragma minimal dependence distance: 1
+                for (int c5 = 0; c5 <= min(31, nj - 32 * c2 - 1); c5 += 1)
+                  Stmt_for_body13(32 * c0 + c3, 32 * c1 + c4, 32 * c2 + c5);
+          }
+    }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nl, nj, p_3] -> {  : ni <= 0 or (ni > 0 and nl <= 0) or (ni > 0 and nl > 0 and p_3 >= nl) }
+remark: <unknown>:0:0: Inbounds assumption:	[ni, nl, nj, p_4] -> {  : ni <= 0 or (ni > 0 and nl <= 0) or (ni > 0 and nl > 0 and nj <= 0) or (ni > 0 and nl > 0 and nj > 0 and p_4 >= nj) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.

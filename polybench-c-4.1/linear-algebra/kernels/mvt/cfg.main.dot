@@ -1,0 +1,7 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0x7f8339d0f420 [shape=record,label="{entry:\l  br label %entry.split\l}"];
+	Node0x7f8339d0f420 -> Node0x7f8339d0f490;
+	Node0x7f8339d0f490 [shape=record,label="{entry.split:                                      \l  %call = tail call i8* @polybench_alloc_data(i64 1600, i32 8) #4\l  %0 = bitcast i8* %call to double*\l  %call10 = tail call i8* @polybench_alloc_data(i64 40, i32 8) #4\l  %1 = bitcast i8* %call10 to double*\l  %call15 = tail call i8* @polybench_alloc_data(i64 40, i32 8) #4\l  %2 = bitcast i8* %call15 to double*\l  %call20 = tail call i8* @polybench_alloc_data(i64 40, i32 8) #4\l  %3 = bitcast i8* %call20 to double*\l  %call25 = tail call i8* @polybench_alloc_data(i64 40, i32 8) #4\l  %4 = bitcast i8* %call25 to double*\l  tail call void @init_array(i32 40, double* %1, double* %2, double* %3,\l... double* %4, double* %0)\l  tail call void (...) @polybench_timer_start() #4\l  tail call void @kernel_mvt(i32 40, double* %1, double* %2, double* %3,\l... double* %4, double* %0)\l  tail call void (...) @polybench_timer_stop() #4\l  tail call void (...) @polybench_timer_print() #4\l  tail call void @print_array(i32 40, double* %1, double* %2)\l  tail call void @free(i8* %call) #4\l  tail call void @free(i8* %call10) #4\l  tail call void @free(i8* %call15) #4\l  tail call void @free(i8* %call20) #4\l  tail call void @free(i8* %call25) #4\l  ret i32 0\l}"];
+}
