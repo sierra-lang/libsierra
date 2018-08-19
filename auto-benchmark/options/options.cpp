@@ -44,25 +44,17 @@ static float binomial(float S, float X, float T, float r, float v) {
 
     float dt = T / BINOMIAL_NUM;
     //float varying(L) u = exp(v * sqrt(dt));
-    float u;
-    spmd_mode(L)
-        u = exp(v * sqrt(dt));
+    float u = exp(v * sqrt(dt));
     float d = 1. / u;
-    float disc;
-    spmd_mode(L)
-        disc = exp(r * dt);
+    float disc = exp(r * dt);
     float Pu = (disc - d) / (u - d);
 
     for (int j = 0; j < BINOMIAL_NUM; ++j) {
-        float upow;
-        spmd_mode(L) {
-            upow= pow(u, (float )(2*j-BINOMIAL_NUM));
+        float upow= pow(u, (float )(2*j-BINOMIAL_NUM));
 
-            float tmp1 = 0.0f;
-            float tmp2 = X - S * upow;
-            V[j] = (tmp1 > tmp2 ? tmp1 : tmp2);
-            //V[j] = sierra::fmax(0., X - S * upow);
-        }
+        float tmp1 = 0.0f;
+        float tmp2 = X - S * upow;
+        V[j] = (tmp1 > tmp2 ? tmp1 : tmp2);
     }
 
     for (int j = BINOMIAL_NUM-1; j >= 0; --j)

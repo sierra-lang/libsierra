@@ -7,7 +7,9 @@ BINARIES=(\
 	"mandelbrot.sse-scalar" \
 	"mandelbrot.sse-4x" \
 	"mandelbrot.sse-8x" \
+	"mandelbrot.sse-16x" \
 	"mandelbrot.avx-scalar" \
+	"mandelbrot.avx-4x" \
 	"mandelbrot.avx-8x" \
 	"mandelbrot.avx-16x" \
 	);
