@@ -1,0 +1,80 @@
+.SUFFIXES:
+	%:: SCCS/s.%
+	%:: RCS/%
+	%:: RCS/%,v
+	%:: %,v
+	%:: s.%
+
+Q		?= @
+CFG	?= ../../default
+
+TARGET	:= mandelbrot
+SOURCE	:= $(TARGET).cpp
+
+
+.PHONY: all check clean cleanall
+
+all: $(TARGET).sse $(TARGET).sse-auto $(TARGET).sse-autoslp $(TARGET).sse-auto-both $(TARGET).avx $(TARGET).avx-auto $(TARGET).avx-autoslp $(TARGET).avx-auto-both
+
+
+-include $(CFG).cfg
+
+ifeq ($(VERBOSE), 1)
+	CFLAGS		+= -v
+endif
+
+ARCHAVX		+= -march=skylake-avx512
+OWNFLAGS        += -fsierra -Xclang -load -Xclang ${INSTALL_DIR}/lib/libRVCodeGen.so #-mllvm -debug-only=rvcodegen
+AUTOVEC		+= -fvectorize
+AUTOVECSLP	+= -fslp-vectorize
+AUTOVECSLPAGG	+= -fslp-vectorize-aggressive
+
+
+
+
+CFLAGS                  += -O3 $(INCLUDES)
+#CXXFLAGS                += -S $(CFLAGS) -std=c++11 $(OWNFLAGS)
+CXXFLAGS                += $(CFLAGS) -std=c++11
+
+
+$(TARGET).sse:			$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(SSE) #-DLENGTH=1
+
+$(TARGET).sse-auto:		$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVEC) -o $@ $< $(SSE) #-DLENGTH=1
+
+$(TARGET).sse-autoslp:		$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVECSLP) -o $@ $< $(SSE) #-DLENGTH=4
+
+$(TARGET).sse-auto-both:	$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVEC) $(AUTOVECSLP) -o $@ $< $(SSE) #-DLENGTH=8
+
+$(TARGET).avx:			$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(AVX) #-DLENGTH=1
+
+$(TARGET).avx-auto:		$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVEC) -o $@ $< $(AVX) #-DLENGTH=1
+
+$(TARGET).avx-autoslp:		$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVECSLP) -o $@ $< $(AVX) #-DLENGTH=4
+
+$(TARGET).avx-auto-both:	$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) $(AUTOVEC) $(AUTOVECSLP) -o $@ $< $(AVX) #-DLENGTH=8
+
+
+check: all
+	@-./test.sh
+
+clean:
+	@rm -f *.ppm
+
+cleanall: clean
+	@rm -f $(TARGET).sse* $(TARGET).avx*

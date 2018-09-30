@@ -1,0 +1,138 @@
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Finite loop assumption:	[ny, nx] -> {  : nx >= 2 }
+remark: <unknown>:0:0: Inbounds assumption:	[ny, nx, p_2] -> {  : ny <= 1 or (ny >= 2 and nx <= 1) or (ny >= 2 and nx >= 2 and p_2 >= -1 + ny) }
+remark: <unknown>:0:0: Inbounds assumption:	[ny, nx, p_2] -> {  : ny <= 1 or (ny >= 2 and nx <= 1) or (ny >= 2 and nx >= 2 and p_2 >= ny) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+domain: "[ny, nx, p_2] -> { Stmt_for_body13[i0, i1] : 0 <= i0 <= -2 + nx and 0 <= i1 <= -2 + ny }"
+child:
+  mark: "1st level tiling - Tiles"
+  child:
+    schedule: "[ny, nx, p_2] -> [{ Stmt_for_body13[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body13[i0, i1] -> [(floor((i1)/32))] }]"
+    permutable: 1
+    coincident: [ 1, 1 ]
+    child:
+      mark: "1st level tiling - Points"
+      child:
+        schedule: "[ny, nx, p_2] -> [{ Stmt_for_body13[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body13[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+:: isl ast :: kernel_fdtd_2d :: for.cond10.preheader => for.inc45
+[ny, nx, p_2] -> {  : -2147483648 <= ny <= 2147483647 and -2147483648 <= nx <= 2147483647 and 0 <= p_2 <= 4294967295 }
+[ny, nx, p_2] -> { Stmt_for_body13[i0, i1] -> [o0, o1, o2, o3] : 32*floor((-i0 + o2)/32) = -i0 + o2 and 32*floor((-i1 + o3)/32) = -i1 + o3 and 0 <= i0 <= -2 + nx and 0 <= i1 <= -2 + ny and -31 + i0 <= 32o0 <= i0 and -31 + i1 <= 32o1 <= i1 and 0 <= o2 <= 31 and 0 <= o3 <= 31 }
+if (p_2 >= ny && (&MemRef_ey[nx - 1][ny - 1] <= &MemRef_hz[0][0] || &MemRef_hz[nx - 2][ny - 1] <= &MemRef_ey[0][0]) && (&MemRef_ex[nx - 2][ny] <= &MemRef_hz[0][0] || &MemRef_hz[nx - 2][ny - 1] <= &MemRef_ex[0][0]))
+
+    // 1st level tiling - Tiles
+    #pragma omp parallel for
+    for (int c0 = 0; c0 <= floord(nx - 2, 32); c0 += 1)
+      for (int c1 = 0; c1 <= floord(ny - 2, 32); c1 += 1) {
+        // 1st level tiling - Points
+        for (int c2 = 0; c2 <= min(31, nx - 32 * c0 - 2); c2 += 1)
+          #pragma simd
+          for (int c3 = 0; c3 <= min(31, ny - 32 * c1 - 2); c3 += 1)
+            Stmt_for_body13(32 * c0 + c2, 32 * c1 + c3);
+      }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Finite loop assumption:	[ny, nx] -> {  : nx >= 2 }
+remark: <unknown>:0:0: Inbounds assumption:	[ny, nx, p_2] -> {  : ny <= 1 or (ny >= 2 and nx <= 1) or (ny >= 2 and nx >= 2 and p_2 >= -1 + ny) }
+remark: <unknown>:0:0: Inbounds assumption:	[ny, nx, p_2] -> {  : ny <= 1 or (ny >= 2 and nx <= 1) or (ny >= 2 and nx >= 2 and p_2 >= ny) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[nx, ny, p_2] -> {  : nx <= 1 or (nx >= 2 and ny <= 0) or (nx >= 2 and ny > 0 and p_2 >= ny) }
+remark: <unknown>:0:0: Inbounds assumption:	[nx, ny, p_2] -> {  : nx <= 0 or (nx > 0 and ny <= 1) or (nx > 0 and ny >= 2 and p_2 >= ny) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.
+domain: "[nx, ny, p_2] -> { Stmt_for_body15[i0, i1] : 0 <= i0 <= -2 + nx and 0 <= i1 < ny; Stmt_for_body45[i0, i1] : 0 <= i0 < nx and 0 <= i1 <= -2 + ny }"
+child:
+  sequence:
+  - filter: "[nx, ny, p_2] -> { Stmt_for_body45[i0, i1] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[nx, ny, p_2] -> [{ Stmt_for_body45[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body45[i0, i1] -> [(floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[nx, ny, p_2] -> [{ Stmt_for_body45[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body45[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1 ]
+  - filter: "[nx, ny, p_2] -> { Stmt_for_body15[i0, i1] }"
+    child:
+      mark: "1st level tiling - Tiles"
+      child:
+        schedule: "[nx, ny, p_2] -> [{ Stmt_for_body15[i0, i1] -> [(floor((i0)/32))] }, { Stmt_for_body15[i0, i1] -> [(floor((i1)/32))] }]"
+        permutable: 1
+        coincident: [ 1, 1 ]
+        child:
+          mark: "1st level tiling - Points"
+          child:
+            schedule: "[nx, ny, p_2] -> [{ Stmt_for_body15[i0, i1] -> [(i0 - 32*floor((i0)/32))] }, { Stmt_for_body15[i0, i1] -> [(i1 - 32*floor((i1)/32))] }]"
+            permutable: 1
+            coincident: [ 1, 1 ]
+:: isl ast :: kernel_task :: for.cond10.preheader => for.end71
+[nx, ny, p_2] -> {  : -2147483648 <= nx <= 2147483647 and -2147483648 <= ny <= 2147483647 and 0 <= p_2 <= 4294967295 }
+[nx, ny, p_2] -> { Stmt_for_body15[i0, i1] -> [1, o1, o2, o3, o4] : 32*floor((-i0 + o3)/32) = -i0 + o3 and 32*floor((-i1 + o4)/32) = -i1 + o4 and 0 <= i0 <= -2 + nx and 0 <= i1 < ny and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and 0 <= o3 <= 31 and 0 <= o4 <= 31; Stmt_for_body45[i0, i1] -> [0, o1, o2, o3, o4] : 32*floor((-i0 + o3)/32) = -i0 + o3 and 32*floor((-i1 + o4)/32) = -i1 + o4 and 0 <= i0 < nx and 0 <= i1 <= -2 + ny and -31 + i0 <= 32o1 <= i0 and -31 + i1 <= 32o2 <= i1 and 0 <= o3 <= 31 and 0 <= o4 <= 31 }
+if (p_2 >= ny && (&MemRef_ey[nx - 1][ny] <= &MemRef_ex[0][1] || &MemRef_ex[nx - 1][ny] <= &MemRef_ey[1][0]) && (&MemRef_hz[nx - 1][ny] <= &MemRef_ex[0][1] || &MemRef_ex[nx - 1][ny] <= &MemRef_hz[0][0]) && (&MemRef_hz[nx - 1][ny] <= &MemRef_ey[1][0] || &MemRef_ey[nx - 1][ny] <= &MemRef_hz[0][0]))
+
+    {
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(nx - 1, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(ny - 2, 32); c1 += 1) {
+          // 1st level tiling - Points
+          for (int c2 = 0; c2 <= min(31, nx - 32 * c0 - 1); c2 += 1)
+            #pragma simd
+            for (int c3 = 0; c3 <= min(31, ny - 32 * c1 - 2); c3 += 1)
+              Stmt_for_body45(32 * c0 + c2, 32 * c1 + c3);
+        }
+      // 1st level tiling - Tiles
+      #pragma omp parallel for
+      for (int c0 = 0; c0 <= floord(nx - 2, 32); c0 += 1)
+        for (int c1 = 0; c1 <= floord(ny - 1, 32); c1 += 1) {
+          // 1st level tiling - Points
+          for (int c2 = 0; c2 <= min(31, nx - 32 * c0 - 2); c2 += 1)
+            #pragma simd
+            for (int c3 = 0; c3 <= min(31, ny - 32 * c1 - 1); c3 += 1)
+              Stmt_for_body15(32 * c0 + c2, 32 * c1 + c3);
+        }
+    }
+
+else
+    {  /* original code */ }
+
+remark: <unknown>:0:0: SCoP begins here.
+remark: <unknown>:0:0: Inbounds assumption:	[nx, ny, p_2] -> {  : nx <= 1 or (nx >= 2 and ny <= 0) or (nx >= 2 and ny > 0 and p_2 >= ny) }
+remark: <unknown>:0:0: Inbounds assumption:	[nx, ny, p_2] -> {  : nx <= 0 or (nx > 0 and ny <= 1) or (nx > 0 and ny >= 2 and p_2 >= ny) }
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: Possibly aliasing pointer, use restrict keyword.
+remark: <unknown>:0:0: SCoP ends here.

@@ -1,0 +1,15 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0x7f8d5140c630 [shape=record,label="{entry:\l  %alpha = alloca float, align 4\l  br label %entry.split\l}"];
+	Node0x7f8d5140c630 -> Node0x7f8d5140c6a0;
+	Node0x7f8d5140c6a0 [shape=record,label="{entry.split:                                      \l  %call = tail call i8* @polybench_alloc_data(i64 33177600, i32 4) #4\l  %0 = bitcast i8* %call to float*\l  %call14 = tail call i8* @polybench_alloc_data(i64 33177600, i32 4) #4\l  %1 = bitcast i8* %call14 to float*\l  %call23 = tail call i8* @polybench_alloc_data(i64 33177600, i32 4) #4\l  %2 = bitcast i8* %call23 to float*\l  %call32 = tail call i8* @polybench_alloc_data(i64 33177600, i32 4) #4\l  %3 = bitcast i8* %call32 to float*\l  call void @init_array(i32 7680, i32 4320, float* nonnull %alpha, float* %0,\l... float* %1)\l  call void (...) @polybench_timer_start() #4\l  %4 = load float, float* %alpha, align 4\l  call void @kernel_deriche(i32 7680, i32 4320, float %4, float* %0, float*\l... %1, float* %2, float* %3)\l  call void (...) @polybench_timer_stop() #4\l  call void (...) @polybench_timer_print() #4\l  %cmp = icmp sgt i32 %argc, 42\l  br i1 %cmp, label %land.lhs.true, label %if.end\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140c6a0:s0 -> Node0x7f8d5140de30;
+	Node0x7f8d5140c6a0:s1 -> Node0x7f8d5140def0;
+	Node0x7f8d5140de30 [shape=record,label="{land.lhs.true:                                    \l  %5 = load i8*, i8** %argv, align 8\l  %strcmpload = load i8, i8* %5, align 1\l  %tobool = icmp eq i8 %strcmpload, 0\l  br i1 %tobool, label %if.then, label %if.end\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140de30:s0 -> Node0x7f8d5140e320;
+	Node0x7f8d5140de30:s1 -> Node0x7f8d5140def0;
+	Node0x7f8d5140e320 [shape=record,label="{if.then:                                          \l  call void @print_array(i32 7680, i32 4320, float* %1)\l  br label %if.end\l}"];
+	Node0x7f8d5140e320 -> Node0x7f8d5140def0;
+	Node0x7f8d5140def0 [shape=record,label="{if.end:                                           \l  call void @free(i8* %call) #4\l  call void @free(i8* %call14) #4\l  call void @free(i8* %call23) #4\l  call void @free(i8* %call32) #4\l  ret i32 0\l}"];
+}

@@ -1,0 +1,27 @@
+digraph "CFG for 'init_array' function" {
+	label="CFG for 'init_array' function";
+
+	Node0x7f8d5140d1d0 [shape=record,label="{entry:\l  br label %entry.split\l}"];
+	Node0x7f8d5140d1d0 -> Node0x7f8d5140ee70;
+	Node0x7f8d5140ee70 [shape=record,label="{entry.split:                                      \l  %0 = zext i32 %h to i64\l  store float 2.500000e-01, float* %alpha, align 4\l  %cmp3 = icmp sgt i32 %w, 0\l  br i1 %cmp3, label %for.cond4.preheader.lr.ph, label %for.end13\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140ee70:s0 -> Node0x7f8d5140eec0;
+	Node0x7f8d5140ee70:s1 -> Node0x7f8d5140f1e0;
+	Node0x7f8d5140eec0 [shape=record,label="{for.cond4.preheader.lr.ph:                        \l  br label %for.cond4.preheader\l}"];
+	Node0x7f8d5140eec0 -> Node0x7f8d5140f170;
+	Node0x7f8d5140f170 [shape=record,label="{for.cond4.preheader:                              \l  %indvars.iv8 = phi i64 [ 0, %for.cond4.preheader.lr.ph ], [\l... %indvars.iv.next9, %for.inc11 ]\l  %cmp51 = icmp sgt i32 %h, 0\l  br i1 %cmp51, label %for.body6.lr.ph, label %for.inc11\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140f170:s0 -> Node0x7f8d5140f810;
+	Node0x7f8d5140f170:s1 -> Node0x7f8d5140f490;
+	Node0x7f8d5140f810 [shape=record,label="{for.body6.lr.ph:                                  \l  br label %for.body6\l}"];
+	Node0x7f8d5140f810 -> Node0x7f8d5140f880;
+	Node0x7f8d5140f880 [shape=record,label="{for.body6:                                        \l  %indvars.iv = phi i64 [ 0, %for.body6.lr.ph ], [ %indvars.iv.next,\l... %for.body6 ]\l  %1 = mul nuw nsw i64 %indvars.iv8, 313\l  %2 = mul nuw nsw i64 %indvars.iv, 991\l  %3 = add nuw nsw i64 %2, %1\l  %4 = trunc i64 %3 to i32\l  %rem = srem i32 %4, 65536\l  %conv = sitofp i32 %rem to float\l  %div = fdiv float %conv, 6.553500e+04\l  %5 = mul nsw i64 %indvars.iv8, %0\l  %arrayidx = getelementptr inbounds float, float* %imgIn, i64 %5\l  %arrayidx10 = getelementptr inbounds float, float* %arrayidx, i64 %indvars.iv\l  store float %div, float* %arrayidx10, align 4\l  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1\l  %lftr.wideiv = trunc i64 %indvars.iv.next to i32\l  %exitcond = icmp ne i32 %lftr.wideiv, %h\l  br i1 %exitcond, label %for.body6, label %for.cond4.for.inc11_crit_edge\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140f880:s0 -> Node0x7f8d5140f880;
+	Node0x7f8d5140f880:s1 -> Node0x7f8d5140ed20;
+	Node0x7f8d5140ed20 [shape=record,label="{for.cond4.for.inc11_crit_edge:                    \l  br label %for.inc11\l}"];
+	Node0x7f8d5140ed20 -> Node0x7f8d5140f490;
+	Node0x7f8d5140f490 [shape=record,label="{for.inc11:                                        \l  %indvars.iv.next9 = add nuw nsw i64 %indvars.iv8, 1\l  %lftr.wideiv11 = trunc i64 %indvars.iv.next9 to i32\l  %exitcond12 = icmp ne i32 %lftr.wideiv11, %w\l  br i1 %exitcond12, label %for.cond4.preheader, label\l... %for.cond.for.end13_crit_edge\l|{<s0>T|<s1>F}}"];
+	Node0x7f8d5140f490:s0 -> Node0x7f8d5140f170;
+	Node0x7f8d5140f490:s1 -> Node0x7f8d5140f440;
+	Node0x7f8d5140f440 [shape=record,label="{for.cond.for.end13_crit_edge:                     \l  br label %for.end13\l}"];
+	Node0x7f8d5140f440 -> Node0x7f8d5140f1e0;
+	Node0x7f8d5140f1e0 [shape=record,label="{for.end13:                                        \l  ret void\l}"];
+}

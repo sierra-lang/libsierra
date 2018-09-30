@@ -1,0 +1,37 @@
+digraph "CFG for 'print_array' function" {
+	label="CFG for 'print_array' function";
+
+	Node0x7f8339d10b30 [shape=record,label="{entry:\l  br label %entry.split\l}"];
+	Node0x7f8339d10b30 -> Node0x7f8339d16700;
+	Node0x7f8339d16700 [shape=record,label="{entry.split:                                      \l  %0 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %1 = tail call i64 @fwrite(i8* getelementptr inbounds ([23 x i8], [23 x i8]*\l... @.str, i64 0, i64 0), i64 22, i64 1, %struct._IO_FILE* %0) #6\l  %2 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %call2 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %2, i8* getelementptr inbounds ([15 x i8], [15 x\l... i8]* @.str.1, i64 0, i64 0), i8* getelementptr inbounds ([3 x i8], [3 x i8]*\l... @.str.2, i64 0, i64 0)) #7\l  %cmp6 = icmp sgt i32 %n, 0\l  br i1 %cmp6, label %for.body.lr.ph, label %for.end\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d16700:s0 -> Node0x7f8339d1c170;
+	Node0x7f8339d16700:s1 -> Node0x7f8339d1c230;
+	Node0x7f8339d1c170 [shape=record,label="{for.body.lr.ph:                                   \l  br label %for.body\l}"];
+	Node0x7f8339d1c170 -> Node0x7f8339d1c1e0;
+	Node0x7f8339d1c1e0 [shape=record,label="{for.body:                                         \l  %indvars.iv8 = phi i64 [ 0, %for.body.lr.ph ], [ %indvars.iv.next9, %if.end ]\l  %3 = trunc i64 %indvars.iv8 to i32\l  %rem = srem i32 %3, 20\l  %cmp3 = icmp eq i32 %rem, 0\l  br i1 %cmp3, label %if.then, label %if.end\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d1c1e0:s0 -> Node0x7f8339d1c980;
+	Node0x7f8339d1c1e0:s1 -> Node0x7f8339d1c4c0;
+	Node0x7f8339d1c980 [shape=record,label="{if.then:                                          \l  %4 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %fputc3 = tail call i32 @fputc(i32 10, %struct._IO_FILE* %4) #6\l  br label %if.end\l}"];
+	Node0x7f8339d1c980 -> Node0x7f8339d1c4c0;
+	Node0x7f8339d1c4c0 [shape=record,label="{if.end:                                           \l  %5 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %arrayidx = getelementptr inbounds double, double* %x1, i64 %indvars.iv8\l  %6 = load double, double* %arrayidx, align 8\l  %call5 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %5, i8* getelementptr inbounds ([8 x i8], [8 x\l... i8]* @.str.4, i64 0, i64 0), double %6) #7\l  %indvars.iv.next9 = add nuw nsw i64 %indvars.iv8, 1\l  %lftr.wideiv10 = trunc i64 %indvars.iv.next9 to i32\l  %exitcond11 = icmp ne i32 %lftr.wideiv10, %n\l  br i1 %exitcond11, label %for.body, label %for.cond.for.end_crit_edge\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d1c4c0:s0 -> Node0x7f8339d1c1e0;
+	Node0x7f8339d1c4c0:s1 -> Node0x7f8339d1c3a0;
+	Node0x7f8339d1c3a0 [shape=record,label="{for.cond.for.end_crit_edge:                       \l  br label %for.end\l}"];
+	Node0x7f8339d1c3a0 -> Node0x7f8339d1c230;
+	Node0x7f8339d1c230 [shape=record,label="{for.end:                                          \l  %7 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %call6 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %7, i8* getelementptr inbounds ([17 x i8], [17 x\l... i8]* @.str.5, i64 0, i64 0), i8* getelementptr inbounds ([3 x i8], [3 x i8]*\l... @.str.2, i64 0, i64 0)) #7\l  %8 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %call7 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %8, i8* getelementptr inbounds ([15 x i8], [15 x\l... i8]* @.str.1, i64 0, i64 0), i8* getelementptr inbounds ([3 x i8], [3 x i8]*\l... @.str.6, i64 0, i64 0)) #7\l  %cmp94 = icmp sgt i32 %n, 0\l  br i1 %cmp94, label %for.body10.lr.ph, label %for.end21\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d1c230:s0 -> Node0x7f8339d1c760;
+	Node0x7f8339d1c230:s1 -> Node0x7f8339d1c830;
+	Node0x7f8339d1c760 [shape=record,label="{for.body10.lr.ph:                                 \l  br label %for.body10\l}"];
+	Node0x7f8339d1c760 -> Node0x7f8339d1c7e0;
+	Node0x7f8339d1c7e0 [shape=record,label="{for.body10:                                       \l  %indvars.iv = phi i64 [ 0, %for.body10.lr.ph ], [ %indvars.iv.next,\l... %if.end15 ]\l  %9 = trunc i64 %indvars.iv to i32\l  %rem11 = srem i32 %9, 20\l  %cmp12 = icmp eq i32 %rem11, 0\l  br i1 %cmp12, label %if.then13, label %if.end15\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d1c7e0:s0 -> Node0x7f8339d1dfe0;
+	Node0x7f8339d1c7e0:s1 -> Node0x7f8339d1dce0;
+	Node0x7f8339d1dfe0 [shape=record,label="{if.then13:                                        \l  %10 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %fputc = tail call i32 @fputc(i32 10, %struct._IO_FILE* %10) #6\l  br label %if.end15\l}"];
+	Node0x7f8339d1dfe0 -> Node0x7f8339d1dce0;
+	Node0x7f8339d1dce0 [shape=record,label="{if.end15:                                         \l  %11 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %arrayidx17 = getelementptr inbounds double, double* %x2, i64 %indvars.iv\l  %12 = load double, double* %arrayidx17, align 8\l  %call18 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %11, i8* getelementptr inbounds ([8 x i8], [8 x\l... i8]* @.str.4, i64 0, i64 0), double %12) #7\l  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1\l  %lftr.wideiv = trunc i64 %indvars.iv.next to i32\l  %exitcond = icmp ne i32 %lftr.wideiv, %n\l  br i1 %exitcond, label %for.body10, label %for.cond8.for.end21_crit_edge\l|{<s0>T|<s1>F}}"];
+	Node0x7f8339d1dce0:s0 -> Node0x7f8339d1c7e0;
+	Node0x7f8339d1dce0:s1 -> Node0x7f8339d1dbd0;
+	Node0x7f8339d1dbd0 [shape=record,label="{for.cond8.for.end21_crit_edge:                    \l  br label %for.end21\l}"];
+	Node0x7f8339d1dbd0 -> Node0x7f8339d1c830;
+	Node0x7f8339d1c830 [shape=record,label="{for.end21:                                        \l  %13 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %call22 = tail call i32 (%struct._IO_FILE*, i8*, ...)\l... @fprintf(%struct._IO_FILE* %13, i8* getelementptr inbounds ([17 x i8], [17 x\l... i8]* @.str.5, i64 0, i64 0), i8* getelementptr inbounds ([3 x i8], [3 x i8]*\l... @.str.6, i64 0, i64 0)) #7\l  %14 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %15 = tail call i64 @fwrite(i8* getelementptr inbounds ([23 x i8], [23 x\l... i8]* @.str.7, i64 0, i64 0), i64 22, i64 1, %struct._IO_FILE* %14) #6\l  ret void\l}"];
+}

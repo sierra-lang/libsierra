@@ -1,0 +1,48 @@
+digraph "CFG for 'polly_task_polly_subfn' function" {
+	label="CFG for 'polly_task_polly_subfn' function";
+
+	Node0x7fc3b070e130 [shape=record,label="{polly.par.setup:\l  %polly.par.LBPtr = alloca i64\l  %polly.par.UBPtr = alloca i64\l  %polly.par.userContext1 = bitcast i8* %polly.par.userContext to \{ i64, i32,\l... i64, double*, double*, double* \}*\l  %0 = getelementptr inbounds \{ i64, i32, i64, double*, double*, double* \}, \{\l... i64, i32, i64, double*, double*, double* \}* %polly.par.userContext1, i32 0,\l... i32 1\l  %polly.subfunc.arg.n = load i32, i32* %0\l  %1 = getelementptr inbounds \{ i64, i32, i64, double*, double*, double* \}, \{\l... i64, i32, i64, double*, double*, double* \}* %polly.par.userContext1, i32 0,\l... i32 2\l  %polly.subfunc.arg. = load i64, i64* %1\l  %2 = getelementptr inbounds \{ i64, i32, i64, double*, double*, double* \}, \{\l... i64, i32, i64, double*, double*, double* \}* %polly.par.userContext1, i32 0,\l... i32 3\l  %polly.subfunc.arg.x1 = load double*, double** %2\l  %3 = getelementptr inbounds \{ i64, i32, i64, double*, double*, double* \}, \{\l... i64, i32, i64, double*, double*, double* \}* %polly.par.userContext1, i32 0,\l... i32 4\l  %polly.subfunc.arg.A = load double*, double** %3\l  %4 = getelementptr inbounds \{ i64, i32, i64, double*, double*, double* \}, \{\l... i64, i32, i64, double*, double*, double* \}* %polly.par.userContext1, i32 0,\l... i32 5\l  %polly.subfunc.arg.y_1 = load double*, double** %4\l  br label %polly.par.checkNext\l}"];
+	Node0x7fc3b070e130 -> Node0x7fc3b070f0e0;
+	Node0x7fc3b070f210 [shape=record,label="{polly.par.exit:                                   \l  call void @GOMP_loop_end_nowait()\l  ret void\l}"];
+	Node0x7fc3b070f0e0 [shape=record,label="{polly.par.checkNext:                              \l  %5 = call i8 @GOMP_loop_runtime_next(i64* %polly.par.LBPtr, i64*\l... %polly.par.UBPtr)\l  %6 = icmp ne i8 %5, 0\l  br i1 %6, label %polly.par.loadIVBounds, label %polly.par.exit\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b070f0e0:s0 -> Node0x7fc3b070f780;
+	Node0x7fc3b070f0e0:s1 -> Node0x7fc3b070f210;
+	Node0x7fc3b070f780 [shape=record,label="{polly.par.loadIVBounds:                           \l  %polly.par.LB = load i64, i64* %polly.par.LBPtr\l  %polly.par.UB = load i64, i64* %polly.par.UBPtr\l  %polly.par.UBAdjusted = sub i64 %polly.par.UB, 1\l  br label %polly.loop_preheader\l}"];
+	Node0x7fc3b070f780 -> Node0x7fc3b070f990;
+	Node0x7fc3b070fc10 [shape=record,label="{polly.loop_exit:                                  \l  br label %polly.par.checkNext\l}"];
+	Node0x7fc3b070fc10 -> Node0x7fc3b070f0e0;
+	Node0x7fc3b070fc80 [shape=record,label="{polly.loop_header:                                \l  %polly.indvar = phi i64 [ %polly.par.LB, %polly.loop_preheader ], [\l... %polly.indvar_next, %polly.loop_exit4 ]\l  br label %polly.loop_preheader3\l}"];
+	Node0x7fc3b070fc80 -> Node0x7fc3b070ffb0;
+	Node0x7fc3b070fe20 [shape=record,label="{polly.loop_exit4:                                 \l  %polly.indvar_next = add nsw i64 %polly.indvar, 1\l  %polly.adjust_ub = sub i64 %polly.par.UBAdjusted, 1\l  %polly.loop_cond = icmp sle i64 %polly.indvar, %polly.adjust_ub\l  br i1 %polly.loop_cond, label %polly.loop_header, label %polly.loop_exit\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b070fe20:s0 -> Node0x7fc3b070fc80;
+	Node0x7fc3b070fe20:s1 -> Node0x7fc3b070fc10;
+	Node0x7fc3b070f990 [shape=record,label="{polly.loop_preheader:                             \l  %7 = zext i32 %polly.subfunc.arg.n to i64\l  br label %polly.loop_header\l}"];
+	Node0x7fc3b070f990 -> Node0x7fc3b070fc80;
+	Node0x7fc3b070fb60 [shape=record,label="{polly.loop_header2:                               \l  %polly.indvar5 = phi i64 [ 0, %polly.loop_preheader3 ], [\l... %polly.indvar_next6, %polly.loop_exit10 ]\l  %8 = mul nsw i64 32, %polly.indvar\l  %9 = sub nsw i64 undef, %8\l  %10 = sub nsw i64 %9, 1\l  %11 = icmp slt i64 31, %10\l  %12 = select i1 %11, i64 31, i64 %10\l  br label %polly.loop_if\l}"];
+	Node0x7fc3b070fb60 -> Node0x7fc3b0710a40;
+	Node0x7fc3b0710560 [shape=record,label="{polly.loop_exit10:                                \l  %polly.indvar_next6 = add nsw i64 %polly.indvar5, 1\l  %polly.loop_cond7 = icmp sle i64 %polly.indvar5, -1\l  br i1 %polly.loop_cond7, label %polly.loop_header2, label %polly.loop_exit4\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b0710560:s0 -> Node0x7fc3b070fb60;
+	Node0x7fc3b0710560:s1 -> Node0x7fc3b070fe20;
+	Node0x7fc3b070ffb0 [shape=record,label="{polly.loop_preheader3:                            \l  br label %polly.loop_header2\l}"];
+	Node0x7fc3b070ffb0 -> Node0x7fc3b070fb60;
+	Node0x7fc3b0710a40 [shape=record,label="{polly.loop_if:                                    \l  %polly.loop_guard = icmp sle i64 0, %12\l  br i1 %polly.loop_guard, label %polly.loop_preheader9, label\l... %polly.loop_exit10\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b0710a40:s0 -> Node0x7fc3b0710ab0;
+	Node0x7fc3b0710a40:s1 -> Node0x7fc3b0710560;
+	Node0x7fc3b0710e40 [shape=record,label="{polly.loop_header8:                               \l  %polly.indvar11 = phi i64 [ 0, %polly.loop_preheader9 ], [\l... %polly.indvar_next12, %polly.loop_exit18 ]\l  %13 = mul nsw i64 32, %polly.indvar5\l  %14 = sub nsw i64 undef, %13\l  %15 = sub nsw i64 %14, 1\l  %16 = icmp slt i64 31, %15\l  %17 = select i1 %16, i64 31, i64 %15\l  br label %polly.loop_if15\l}"];
+	Node0x7fc3b0710e40 -> Node0x7fc3b0711440;
+	Node0x7fc3b0710f80 [shape=record,label="{polly.loop_exit18:                                \l  %polly.indvar_next12 = add nsw i64 %polly.indvar11, 1\l  %polly.adjust_ub13 = sub i64 %12, 1\l  %polly.loop_cond14 = icmp sle i64 %polly.indvar11, %polly.adjust_ub13\l  br i1 %polly.loop_cond14, label %polly.loop_header8, label %polly.loop_exit10\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b0710f80:s0 -> Node0x7fc3b0710e40;
+	Node0x7fc3b0710f80:s1 -> Node0x7fc3b0710560;
+	Node0x7fc3b0710ab0 [shape=record,label="{polly.loop_preheader9:                            \l  br label %polly.loop_header8\l}"];
+	Node0x7fc3b0710ab0 -> Node0x7fc3b0710e40;
+	Node0x7fc3b0711440 [shape=record,label="{polly.loop_if15:                                  \l  %polly.loop_guard19 = icmp sle i64 0, %17\l  br i1 %polly.loop_guard19, label %polly.loop_preheader17, label\l... %polly.loop_exit18\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b0711440:s0 -> Node0x7fc3b0711490;
+	Node0x7fc3b0711440:s1 -> Node0x7fc3b0710f80;
+	Node0x7fc3b0711850 [shape=record,label="{polly.loop_header16:                              \l  %polly.indvar20 = phi i64 [ 0, %polly.loop_preheader17 ], [\l... %polly.indvar_next21, %polly.stmt.for.body8 ]\l  %18 = mul nsw i64 32, %polly.indvar\l  %19 = add nsw i64 %18, %polly.indvar11\l  %20 = mul nsw i64 32, %polly.indvar5\l  %21 = add nsw i64 %20, %polly.indvar20\l  br label %polly.stmt.for.body8\l}"];
+	Node0x7fc3b0711850 -> Node0x7fc3b0711990;
+	Node0x7fc3b0711990 [shape=record,label="{polly.stmt.for.body8:                             \l  %scevgep = getelementptr double, double* %polly.subfunc.arg.x1, i64 %19\l  %_p_scalar_ = load double, double* %scevgep, align 8, !alias.scope !1,\l... !noalias !3\l  %22 = mul i64 %7, %19\l  %23 = add i64 %21, %22\l  %scevgep24 = getelementptr double, double* %polly.subfunc.arg.A, i64 %23\l  %_p_scalar_25 = load double, double* %scevgep24, align 8, !alias.scope !7,\l... !noalias !8\l  %scevgep26 = getelementptr double, double* %polly.subfunc.arg.y_1, i64 %21\l  %_p_scalar_27 = load double, double* %scevgep26, align 8, !alias.scope !4,\l... !noalias !9\l  %p_mul = fmul double %_p_scalar_25, %_p_scalar_27\l  %p_add15 = fadd double %_p_scalar_, %p_mul\l  %scevgep28 = getelementptr double, double* %polly.subfunc.arg.x1, i64 %19\l  store double %p_add15, double* %scevgep28, align 8, !alias.scope !1,\l... !noalias !3\l  %24 = trunc i64 %21 to i32\l  %25 = add i32 %24, 1\l  %p_exitcond17 = icmp ne i32 %25, %polly.subfunc.arg.n\l  %polly.indvar_next21 = add nsw i64 %polly.indvar20, 1\l  %polly.adjust_ub22 = sub i64 %17, 1\l  %polly.loop_cond23 = icmp sle i64 %polly.indvar20, %polly.adjust_ub22\l  br i1 %polly.loop_cond23, label %polly.loop_header16, label\l... %polly.loop_exit18\l|{<s0>T|<s1>F}}"];
+	Node0x7fc3b0711990:s0 -> Node0x7fc3b0711850;
+	Node0x7fc3b0711990:s1 -> Node0x7fc3b0710f80;
+	Node0x7fc3b0711490 [shape=record,label="{polly.loop_preheader17:                           \l  br label %polly.loop_header16\l}"];
+	Node0x7fc3b0711490 -> Node0x7fc3b0711850;
+}
