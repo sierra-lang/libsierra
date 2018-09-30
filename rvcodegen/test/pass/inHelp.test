@@ -1,0 +1,2 @@
+RUN: %opt -load %passlib -help | grep '\brvcodegen\b'
+
