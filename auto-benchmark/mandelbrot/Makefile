@@ -14,7 +14,7 @@ SOURCE	:= $(TARGET).cpp
 
 .PHONY: all check clean cleanall
 
-all: $(TARGET).sse-scalar $(TARGET).sse-4x $(TARGET).sse-8x $(TARGET).avx-scalar $(TARGET).avx-8x $(TARGET).avx-16x
+all: $(TARGET).sse-scalar $(TARGET).sse-4x $(TARGET).sse-8x $(TARGET).sse-16x $(TARGET).avx-scalar $(TARGET).avx-4x $(TARGET).avx-8x $(TARGET).avx-16x
 
 -include $(CFG).cfg
 
@@ -39,9 +39,17 @@ $(TARGET).sse-8x:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
 	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(SSE) -DLENGTH=8
 
+$(TARGET).sse-16x:	$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(SSE) -DLENGTH=16
+
 $(TARGET).avx-scalar:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
 	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(AVX) -DLENGTH=1
+
+$(TARGET).avx-4x:	$(SOURCE)
+	@echo "$(CXX) $<    ====>    $@"
+	$(Q)$(CXX) $(CXXFLAGS) -o $@ $< $(AVX) -DLENGTH=4
 
 $(TARGET).avx-8x:	$(SOURCE)
 	@echo "$(CXX) $<    ====>    $@"
